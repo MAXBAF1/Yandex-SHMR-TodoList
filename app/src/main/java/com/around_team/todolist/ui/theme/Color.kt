@@ -6,7 +6,7 @@ internal val baseLightPalette = JetTodoListColors(
     support = JetTodoListColors.Support(
         separator = Color(0.0F, 0.0F, 0.0F, 0.2F),
         overlay = Color(0.0F, 0.0F, 0.0F, 0.06F),
-        navbarBlur = Color(0.98F, 0.98F, 0.98F, 0.8F),
+        navbarBlur = Color(0.98F, 0.98F, 0.98F, 1F),
     ),
     label = JetTodoListColors.Label(
         primary = Color(0.0F, 0.0F, 0.0F, 1.0F),
@@ -34,7 +34,7 @@ internal val baseDarkPalette = JetTodoListColors(
     support = JetTodoListColors.Support(
         separator = Color(1.0F, 1.0F, 1.0F, 0.2F),
         overlay = Color(0.0F, 0.0F, 0.0F, 0.32F),
-        navbarBlur = Color(0.1F, 0.1F, 0.1F, 0.9F),
+        navbarBlur = Color(0.1F, 0.1F, 0.1F, 1F),
     ),
     label = JetTodoListColors.Label(
         primary = Color(1.0F, 1.0F, 1.0F, 1.0F),

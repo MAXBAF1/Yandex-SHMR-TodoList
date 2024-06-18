@@ -4,37 +4,39 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.around_team.todolist.ui.theme.JetTodoListTheme
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
+import androidx.navigation.compose.rememberNavController
+import com.around_team.todolist.ui.common.views.custom_toolbar.CustomToolbar
+import com.around_team.todolist.ui.common.views.custom_toolbar.rememberToolbarScrollBehavior
 import com.around_team.todolist.ui.theme.TodoListTheme
+import com.around_team.todolist.ui.navigation.NavGraph
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             TodoListTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android", modifier = Modifier.padding(innerPadding)
-                    )
+                val scrollBehavior = rememberToolbarScrollBehavior()
+                val navController = rememberNavController()
+
+                Scaffold(
+                    modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+                    topBar = {
+                        CustomToolbar(
+                            collapsingTitle = stringResource(id = R.string.title),
+                            scrollBehavior = scrollBehavior
+                        )
+                    },
+                ) { contentPadding ->
+                    NavGraph(navController = navController, innerPaddings = contentPadding).Create()
                 }
             }
         }
     }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier,
-        style = JetTodoListTheme.typography.largeTitle,
-        color = JetTodoListTheme.colors.label.disable
-    )
 }

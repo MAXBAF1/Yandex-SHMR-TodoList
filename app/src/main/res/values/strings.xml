@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">TodoList</string>
+
+    <string name="title">Мои дела</string>
+    <string name="complete">Выполнено —</string>
+    <string name="show">Показать</string>
 </resources>
