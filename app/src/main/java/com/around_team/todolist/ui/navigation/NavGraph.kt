@@ -9,6 +9,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.around_team.todolist.ui.screens.edit.EditScreen
 import com.around_team.todolist.ui.screens.todos.TodosScreen
 import com.around_team.todolist.ui.screens.todos.TodosViewModel
 
@@ -21,16 +22,22 @@ class NavGraph(
         val todosViewModel = hiltViewModel<TodosViewModel>()
         NavHost(
             navController = navController,
-            startDestination = Screens.MainScreen.name,
+            startDestination = Screens.TodosScreen.name,
             modifier = Modifier.padding(top = innerPaddings.calculateTopPadding()),
             contentAlignment = Alignment.TopStart
         ) {
-            composable(Screens.MainScreen.name) { CreateTodosScreen(todosViewModel) }
+            composable(Screens.TodosScreen.name) { CreateTodosScreen(todosViewModel) }
+            composable(Screens.EditScreen.name) { CreateEditScreen() }
         }
     }
 
     @Composable
     private fun CreateTodosScreen(viewModel: TodosViewModel) {
         TodosScreen(viewModel).Create()
+    }
+
+    @Composable
+    private fun CreateEditScreen() {
+        EditScreen().Create()
     }
 }

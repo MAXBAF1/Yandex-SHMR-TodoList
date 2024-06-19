@@ -1,6 +1,5 @@
 package com.around_team.todolist.ui.screens.todos
 
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -39,7 +38,8 @@ class TodosScreen(private val viewModel: TodosViewModel) {
         val viewState by viewModel.getViewState().collectAsStateWithLifecycle()
 
         Surface(
-            modifier = Modifier.fillMaxSize(), color = JetTodoListTheme.colors.back.primary
+            modifier = Modifier.fillMaxSize(),
+            color = JetTodoListTheme.colors.back.primary,
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth()
@@ -49,7 +49,7 @@ class TodosScreen(private val viewModel: TodosViewModel) {
                     todos = viewState.todos,
                     completeCnt = viewState.completeCnt,
                     onShowClick = {
-                        viewModel.obtainEvent(TodosEvent.ShowCompletedTodos(!viewState.completedShowed))
+                        viewModel.obtainEvent(TodosEvent.ClickShowCompletedTodos)
                     },
                     onCompleteClick = { viewModel.obtainEvent(TodosEvent.CompleteTodo(it)) },
                     modifier = Modifier.padding(horizontal = 12.dp)
@@ -86,7 +86,7 @@ class TodosScreen(private val viewModel: TodosViewModel) {
                     0 -> Modifier.clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
                     todos.size - 1 -> {
                         Modifier
-                            .padding(bottom = 12.dp)
+                            .padding(bottom = 100.dp)
                             .clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
 
                     }

@@ -34,13 +34,13 @@ class TodosViewModel @Inject constructor(
     override fun obtainEvent(viewEvent: TodosEvent) {
         when (viewEvent) {
             is TodosEvent.CompleteTodo -> completeTodo(viewEvent.id)
-            is TodosEvent.ShowCompletedTodos -> showCompletedTodos(viewEvent.show)
+            TodosEvent.ClickShowCompletedTodos -> clickShowCompletedTodos()
         }
     }
 
-    private fun showCompletedTodos(show: Boolean) {
-        completedShowed = show
-        showedTodos = if (show) todos.toList() else todos.filter { !it.completed }
+    private fun clickShowCompletedTodos() {
+        completedShowed = !completedShowed
+        showedTodos = if (completedShowed) todos.toList() else todos.filter { !it.completed }
         viewState.update { it.copy(todos = showedTodos, completedShowed = completedShowed) }
     }
 

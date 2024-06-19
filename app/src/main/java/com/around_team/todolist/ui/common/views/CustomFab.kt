@@ -1,4 +1,4 @@
-package com.around_team.todolist.ui.screens.todos.views
+package com.around_team.todolist.ui.common.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,44 +13,31 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.around_team.todolist.R
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 
 @Composable
-fun CircleCheckbox(
-    checked: Boolean,
-    onChecked: () -> Unit,
-    modifier: Modifier = Modifier,
-    highPriority: Boolean = false
-) {
-    val colors = JetTodoListTheme.colors
-    val iconId = if (checked) R.drawable.ic_complete else R.drawable.ic_circle
-    val tint = when {
-        checked -> colors.colors.green
-        highPriority -> colors.colors.red
-        else -> colors.support.separator
-    }
-    val bgColor = if (highPriority && !checked) colors.colors.red.copy(0.1F) else Color.Transparent
-
+fun CustomFab(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
+            .shadow(4.dp, CircleShape)
+            .size(44.dp)
             .clip(CircleShape)
-            .background(bgColor)
+            .background(JetTodoListTheme.colors.colors.blue)
             .clickable(
-                onClick = onChecked,
-                indication = null,
+                onClick = onClick,
                 interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple()
             ),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Icon(
-            modifier = Modifier.size(24.dp),
-            painter = painterResource(id = iconId),
-            contentDescription = "complete icon",
-            tint = tint
+            painter = painterResource(id = R.drawable.ic_add),
+            contentDescription = "add icon",
+            tint = JetTodoListTheme.colors.colors.white
         )
     }
 }
