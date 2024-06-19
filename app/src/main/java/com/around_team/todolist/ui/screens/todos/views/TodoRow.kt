@@ -2,6 +2,7 @@ package com.around_team.todolist.ui.screens.todos.views
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.around_team.todolist.R
 import com.around_team.todolist.ui.common.enums.TodoPriority
+import com.around_team.todolist.ui.common.enums.getIconColor
 import com.around_team.todolist.ui.common.enums.getIconId
 import com.around_team.todolist.ui.common.models.TodoItem
 import com.around_team.todolist.ui.theme.JetTodoListTheme
@@ -28,6 +30,7 @@ import com.around_team.todolist.ui.theme.JetTodoListTheme
 fun TodoRow(
     todo: TodoItem,
     onClick: () -> Unit,
+    onCompleteClick: (id: String) -> Unit,
     modifier: Modifier = Modifier,
     showDivider: Boolean = true,
 ) {
@@ -46,7 +49,8 @@ fun TodoRow(
             CircleCheckbox(
                 modifier = Modifier.padding(end = 12.dp),
                 checked = todo.completed,
-                onChecked = {},
+                onChecked = { onCompleteClick(todo.id) },
+                highPriority = todo.priority == TodoPriority.High,
             )
 
             NameAndDateColumn(
@@ -75,6 +79,7 @@ private fun NameAndDateColumn(todo: TodoItem, modifier: Modifier = Modifier) {
                     modifier = Modifier.padding(end = 2.dp),
                     painter = painterResource(id = todo.priority.getIconId()!!),
                     contentDescription = "priority icon",
+                    tint = todo.priority.getIconColor()!!
                 )
             }
             Text(
@@ -88,7 +93,7 @@ private fun NameAndDateColumn(todo: TodoItem, modifier: Modifier = Modifier) {
         }
 
         if (todo.deadline != null) {
-            Row {
+            Row(horizontalArrangement = Arrangement.Center) {
                 Icon(
                     modifier = Modifier.padding(end = 2.dp),
                     painter = painterResource(id = R.drawable.ic_calendar),
