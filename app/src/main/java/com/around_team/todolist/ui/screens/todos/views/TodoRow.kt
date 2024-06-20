@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,8 +21,8 @@ import androidx.compose.ui.unit.dp
 import com.around_team.todolist.R
 import com.around_team.todolist.ui.common.enums.TodoPriority
 import com.around_team.todolist.ui.common.enums.getIconColor
-import com.around_team.todolist.ui.common.enums.getIconId
 import com.around_team.todolist.ui.common.models.TodoItem
+import com.around_team.todolist.ui.common.views.MyDivider
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 
 @Composable
@@ -56,7 +55,8 @@ fun TodoRow(
             NameAndDateColumn(
                 modifier = Modifier
                     .padding(end = 16.dp)
-                    .weight(1F), todo = todo
+                    .weight(1F),
+                todo = todo,
             )
             Icon(
                 painter = painterResource(id = R.drawable.ic_arrow),
@@ -64,9 +64,7 @@ fun TodoRow(
                 tint = JetTodoListTheme.colors.colors.gray
             )
         }
-        if (showDivider) {
-            Divider(thickness = 0.5.dp, color = JetTodoListTheme.colors.support.separator)
-        }
+        if (showDivider) MyDivider()
     }
 }
 
@@ -77,7 +75,7 @@ private fun NameAndDateColumn(todo: TodoItem, modifier: Modifier = Modifier) {
             if (todo.priority != TodoPriority.Medium) {
                 Icon(
                     modifier = Modifier.padding(end = 2.dp),
-                    painter = painterResource(id = todo.priority.getIconId()!!),
+                    painter = painterResource(id = todo.priority.iconId!!),
                     contentDescription = "priority icon",
                     tint = todo.priority.getIconColor()!!
                 )

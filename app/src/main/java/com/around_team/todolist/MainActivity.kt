@@ -43,7 +43,8 @@ class MainActivity : ComponentActivity() {
                 val currentRoute = navBackStackEntry?.destination?.route
                 val showBars = currentRoute == Screens.TodosScreen.name
 
-                Scaffold(modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+                Scaffold(
+                    modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
                     topBar = {
                         AnimatedVisibility(
                             visible = showBars,
@@ -72,7 +73,8 @@ class MainActivity : ComponentActivity() {
                                 onClick = { navController.navigate(Screens.EditScreen.name) },
                             )
                         }
-                    }) { contentPadding ->
+                    },
+                ) { contentPadding ->
                     NavGraph(navController = navController, innerPaddings = contentPadding).Create()
                 }
             }

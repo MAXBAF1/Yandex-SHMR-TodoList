@@ -5,17 +5,23 @@ import androidx.compose.ui.graphics.Color
 import com.around_team.todolist.R
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 
-enum class TodoPriority {
-    Low, Medium, High;
-}
+enum class TodoPriority(val text: Int? = null, val iconId: Int? = null) {
+    Low(iconId = R.drawable.ic_low_priority),
+    Medium(text = R.string.no),
+    High(iconId = R.drawable.ic_high_priority);
 
-fun TodoPriority.getIconId(): Int? {
-    return when (this) {
-        TodoPriority.Low -> R.drawable.ic_low_priority
-        TodoPriority.Medium -> null
-        TodoPriority.High -> R.drawable.ic_high_priority
+    companion object {
+        fun getFromOrdinal(ordinal: Int): TodoPriority {
+            return when (ordinal) {
+                0 -> Low
+                1 -> Medium
+                2 -> High
+                else -> throw IllegalArgumentException(ordinal.toString())
+            }
+        }
     }
 }
+
 
 @Composable
 fun TodoPriority.getIconColor(): Color? {
