@@ -1,7 +1,6 @@
 package com.around_team.todolist.ui.screens.edit
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,8 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -35,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.around_team.todolist.R
 import com.around_team.todolist.ui.common.enums.TodoPriority
+import com.around_team.todolist.ui.common.models.TodoItem
 import com.around_team.todolist.ui.common.views.CustomButton
 import com.around_team.todolist.ui.common.views.MyDivider
 import com.around_team.todolist.ui.common.views.custom_toolbar.CustomToolbar
@@ -50,12 +48,17 @@ import com.around_team.todolist.utils.formatTimeInMillis
 class EditScreen(
     private val viewModel: EditViewModel,
     private val onCancelClick: () -> Unit,
-    private val onSaveClick: () -> Unit,
+    private val onSaveClick: (editedTodo: TodoItem, delete: Boolean) -> Unit,
+    private val editedTodo: TodoItem? = null,
 ) {
     @Composable
     fun Create() {
         val viewState by viewModel.getViewState().collectAsStateWithLifecycle()
         val scrollBehavior = rememberToolbarScrollBehavior()
+
+        LaunchedEffect(key1 = editedTodo) {
+            viewModel.obtainEvent(EditEvent.SetEditedTodo(editedTodo))
+        }
 
         Scaffold(
             modifier = Modifier
@@ -72,9 +75,11 @@ class EditScreen(
                     actions = {
                         CustomClickableText(
                             text = stringResource(id = R.string.save),
-                            onClick = onSaveClick,
-                            fontWeight = FontWeight.Bold,
-                            enable = viewState.saveEnable
+                            onClick = {
+                                onSaveClick(viewState.editedTodo, false)
+                                viewModel.obtainEvent(EditEvent.ClearViewState)
+                            },
+                            fontWeight = FontWeight.Bold, enable = viewState.saveEnable,
                         )
                     },
                     expandedTitleStyle = JetTodoListTheme.typography.headline,
@@ -84,10 +89,10 @@ class EditScreen(
                 )
             },
             containerColor = JetTodoListTheme.colors.back.primary,
-        ) {
+        ) { paddingValues ->
             Column(
                 modifier = Modifier
-                    .padding(it)
+                    .padding(paddingValues)
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
             ) {
@@ -98,7 +103,8 @@ class EditScreen(
                 )
 
                 PriorityAndDatePicker(
-                    initialPriority = viewState.editedTodo.priority,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                    selectedPriority = viewState.editedTodo.priority,
                     onPriorityChanged = { viewModel.obtainEvent(EditEvent.ChangePriority(it)) },
                     checked = viewState.deadlineChecked,
                     onCheckedChange = { viewModel.obtainEvent(EditEvent.CheckDeadline) },
@@ -106,14 +112,15 @@ class EditScreen(
                     onDateChange = { viewModel.obtainEvent(EditEvent.ChangeDeadline(it)) },
                     showCalendar = viewState.showCalendar,
                     setCalendarState = { viewModel.obtainEvent(EditEvent.SetCalendarShowState(it)) },
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
                 )
-                CustomButton(
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
-                    text = stringResource(id = R.string.delete),
-                    onClick = { },
-                    textColor = JetTodoListTheme.colors.colors.red,
-                )
+                if (editedTodo != null) {
+                    CustomButton(
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                        text = stringResource(id = R.string.delete),
+                        onClick = { onSaveClick(editedTodo, true) },
+                        textColor = JetTodoListTheme.colors.colors.red,
+                    )
+                }
             }
         }
     }
@@ -121,7 +128,7 @@ class EditScreen(
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun PriorityAndDatePicker(
-        initialPriority: TodoPriority,
+        selectedPriority: TodoPriority,
         onPriorityChanged: (TodoPriority) -> Unit,
         checked: Boolean,
         onCheckedChange: () -> Unit,
@@ -136,9 +143,9 @@ class EditScreen(
             state.setSelection(selectedDate)
         }
 
-        if (state.selectedDateMillis != null && state.selectedDateMillis != selectedDate) {
+        if (checked && state.selectedDateMillis != null && state.selectedDateMillis != selectedDate) {
             LaunchedEffect(key1 = state.selectedDateMillis) {
-                setCalendarState(!showCalendar)
+                //setCalendarState(false)
                 onDateChange(state.selectedDateMillis!!)
             }
         }
@@ -150,7 +157,7 @@ class EditScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             PriorityRow(
-                initialPriority = initialPriority,
+                selectedPriority = selectedPriority,
                 modifier = Modifier.padding(
                     start = 16.dp, top = 16.dp, end = 16.dp, bottom = 10.dp
                 ),
@@ -161,7 +168,7 @@ class EditScreen(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                 checked = checked,
                 onCheckedChange = {
-                    if (checked) setCalendarState(true)
+                    if (!checked) setCalendarState(true)
                     onCheckedChange()
                 },
                 selectedDate = selectedDate,
@@ -178,15 +185,13 @@ class EditScreen(
         }
     }
 
-    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     private fun PriorityRow(
-        initialPriority: TodoPriority,
+        selectedPriority: TodoPriority,
         onPriorityChanged: (TodoPriority) -> Unit,
         modifier: Modifier = Modifier,
     ) {
         val tabList = TodoPriority.entries.toTypedArray()
-        val pagerState = rememberPagerState(initialPriority.ordinal) { tabList.size }
 
         Row(
             modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
@@ -199,12 +204,11 @@ class EditScreen(
             )
             CustomTabRow(
                 modifier = Modifier.weight(1F),
-                pagerState = pagerState,
+                selectedTab = selectedPriority.ordinal,
                 tabList = tabList,
                 onTabChanged = { onPriorityChanged(TodoPriority.getFromOrdinal(it)) },
             ).Create()
         }
-        HorizontalPager(modifier = Modifier.background(Color.Blue), state = pagerState) { }
     }
 
     @Composable

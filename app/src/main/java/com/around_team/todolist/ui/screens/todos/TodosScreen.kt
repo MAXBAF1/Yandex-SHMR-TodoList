@@ -17,6 +17,7 @@ import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -36,12 +37,23 @@ import com.around_team.todolist.ui.screens.todos.models.TodosEvent
 import com.around_team.todolist.ui.screens.todos.views.TodoRow
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 
-class TodosScreen(private val viewModel: TodosViewModel, private val toEditScreen: () -> Unit) {
+class TodosScreen(
+    private val viewModel: TodosViewModel,
+    private val toEditScreen: (TodoItem?) -> Unit,
+    private val newTodo: TodoItem?,
+    private val deleteTodo: Boolean
+) {
 
     @Composable
     fun Create() {
         val viewState by viewModel.getViewState().collectAsStateWithLifecycle()
         val scrollBehavior = rememberToolbarScrollBehavior()
+
+        if (newTodo != null) {
+            LaunchedEffect(key1 = newTodo) {
+                viewModel.obtainEvent(TodosEvent.AddNewTodo(newTodo, deleteTodo))
+            }
+        }
 
         Scaffold(
             topBar = {
@@ -54,20 +66,21 @@ class TodosScreen(private val viewModel: TodosViewModel, private val toEditScree
             floatingActionButton = {
                 CustomFab(
                     modifier = Modifier.padding(bottom = 20.dp),
-                    onClick = toEditScreen,
+                    onClick = { toEditScreen(null) },
                 )
             },
             modifier = Modifier
                 .fillMaxSize()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
             containerColor = JetTodoListTheme.colors.back.primary,
-        ) {
+        ) { paddingValues ->
             Column(
                 modifier = Modifier
-                    .padding(it)
+                    .padding(paddingValues)
                     .fillMaxWidth()
             ) {
                 TodoList(
+                    modifier = Modifier.padding(horizontal = 12.dp),
                     completedTodosShowed = viewState.completedShowed,
                     todos = viewState.todos,
                     completeCnt = viewState.completeCnt,
@@ -75,7 +88,7 @@ class TodosScreen(private val viewModel: TodosViewModel, private val toEditScree
                         viewModel.obtainEvent(TodosEvent.ClickShowCompletedTodos)
                     },
                     onCompleteClick = { viewModel.obtainEvent(TodosEvent.CompleteTodo(it)) },
-                    modifier = Modifier.padding(horizontal = 12.dp)
+                    onTodoClick = { toEditScreen(it) },
                 )
             }
         }
@@ -89,6 +102,7 @@ class TodosScreen(private val viewModel: TodosViewModel, private val toEditScree
         completeCnt: Int,
         onShowClick: () -> Unit,
         onCompleteClick: (String) -> Unit,
+        onTodoClick: (todo: TodoItem) -> Unit,
         modifier: Modifier = Modifier,
     ) {
         LazyColumn(
@@ -121,7 +135,7 @@ class TodosScreen(private val viewModel: TodosViewModel, private val toEditScree
                         .animateItemPlacement()
                         .background(JetTodoListTheme.colors.back.secondary),
                     todo = todo,
-                    onClick = {},
+                    onClick = { onTodoClick(todo) },
                     onCompleteClick = onCompleteClick,
                     showDivider = i != todos.size - 1
                 )

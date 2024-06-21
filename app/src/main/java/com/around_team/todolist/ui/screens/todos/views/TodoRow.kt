@@ -72,7 +72,7 @@ fun TodoRow(
 @Composable
 private fun NameAndDateColumn(todo: TodoItem, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
-        Row {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             if (todo.priority != TodoPriority.Medium) {
                 Icon(
                     modifier = Modifier.padding(end = 2.dp),

@@ -6,6 +6,7 @@ import com.around_team.todolist.ui.common.models.BaseViewModel
 import com.around_team.todolist.ui.common.models.TodoItem
 import com.around_team.todolist.ui.screens.todos.models.TodosEvent
 import com.around_team.todolist.ui.screens.todos.models.TodosViewState
+import com.around_team.todolist.utils.find
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -17,7 +18,7 @@ class TodosViewModel @Inject constructor(
 ) : BaseViewModel<TodosViewState, TodosEvent>(initialState = TodosViewState()) {
     private var todos: MutableList<TodoItem> = mutableListOf()
     private var showedTodos: List<TodoItem> = listOf()
-    private var completeCtn = 0
+    private var completeCnt = 0
     private var completedShowed = false
 
     init {
@@ -25,9 +26,9 @@ class TodosViewModel @Inject constructor(
             todos = repository.getAllTodos().toMutableList()
 
             showedTodos = todos.filter { !it.completed }
-            completeCtn = todos.size - showedTodos.size
+            completeCnt = todos.size - showedTodos.size
 
-            viewState.update { it.copy(todos = showedTodos, completeCnt = completeCtn) }
+            viewState.update { it.copy(todos = showedTodos, completeCnt = completeCnt) }
         }
     }
 
@@ -35,32 +36,42 @@ class TodosViewModel @Inject constructor(
         when (viewEvent) {
             is TodosEvent.CompleteTodo -> completeTodo(viewEvent.id)
             TodosEvent.ClickShowCompletedTodos -> clickShowCompletedTodos()
+            is TodosEvent.AddNewTodo -> addNewTodo(viewEvent.todo, viewEvent.delete)
         }
+    }
+
+    private fun addNewTodo(newTodo: TodoItem, delete: Boolean) {
+        val index = todos.find(newTodo.id).first
+
+        when {
+            index == -1 -> todos.add(newTodo)
+            delete -> todos.removeAt(index)
+            else -> todos[index] = newTodo
+        }
+        showedTodos = getShowedTodos()
+        completeCnt = todos.count { it.completed }
+        viewState.update { it.copy(todos = showedTodos, completeCnt = completeCnt) }
     }
 
     private fun clickShowCompletedTodos() {
         completedShowed = !completedShowed
-        showedTodos = if (completedShowed) todos.toList() else todos.filter { !it.completed }
+        showedTodos = getShowedTodos()
         viewState.update { it.copy(todos = showedTodos, completedShowed = completedShowed) }
     }
 
     private fun completeTodo(id: String) {
-        var index = -1
-        var foundTodo: TodoItem? = null
-        todos.forEachIndexed { i, todo ->
-            if (todo.id == id) {
-                index = i
-                foundTodo = todo
-                return@forEachIndexed
-            }
-        }
+        val (index: Int, foundTodo: TodoItem?) = todos.find(id)
 
         if (foundTodo != null) {
-            todos[index] = foundTodo!!.copy(completed = !foundTodo!!.completed)
+            todos[index] = foundTodo.copy(completed = !foundTodo.completed)
         }
 
-        showedTodos = if (completedShowed) todos.toList() else todos.filter { !it.completed }
-        completeCtn = todos.count { it.completed }
-        viewState.update { it.copy(todos = showedTodos, completeCnt = completeCtn) }
+        showedTodos = getShowedTodos()
+        completeCnt = todos.count { it.completed }
+        viewState.update { it.copy(todos = showedTodos, completeCnt = completeCnt) }
+    }
+
+    private fun getShowedTodos(): List<TodoItem> {
+        return if (completedShowed) todos.toList() else todos.filter { !it.completed }
     }
 }

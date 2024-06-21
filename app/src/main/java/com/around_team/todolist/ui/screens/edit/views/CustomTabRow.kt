@@ -3,7 +3,6 @@ package com.around_team.todolist.ui.screens.edit.views
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -14,17 +13,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.TabPosition
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,11 +32,9 @@ import androidx.compose.ui.zIndex
 import com.around_team.todolist.ui.common.enums.TodoPriority
 import com.around_team.todolist.ui.common.enums.getIconColor
 import com.around_team.todolist.ui.theme.JetTodoListTheme
-import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalFoundationApi::class)
 class CustomTabRow(
-    private val pagerState: PagerState,
+    private val selectedTab: Int,
     private val tabList: Array<TodoPriority>,
     private val onTabChanged: (Int) -> Unit,
     private val modifier: Modifier = Modifier,
@@ -48,10 +42,8 @@ class CustomTabRow(
 
     @Composable
     fun Create() {
-        val coroutineScope = rememberCoroutineScope()
-        val tabIndex by remember { derivedStateOf { pagerState.currentPage } }
         val indicator = @Composable { tabPositions: List<TabPosition> ->
-            CustomIndicator(tabPositions, pagerState)
+            CustomIndicator(tabPositions, selectedTab)
         }
         Box(
             modifier = modifier
@@ -61,7 +53,7 @@ class CustomTabRow(
             TabRow(
                 modifier = Modifier.padding(2.dp),
                 containerColor = Color.Transparent,
-                selectedTabIndex = tabIndex,
+                selectedTabIndex = selectedTab,
                 indicator = indicator,
                 divider = {},
             ) {
@@ -70,7 +62,7 @@ class CustomTabRow(
                         tab = themeTab,
                         onClick = {
                             onTabChanged(index)
-                            coroutineScope.launch { pagerState.animateScrollToPage(index) }
+
                         },
                     )
                 }
@@ -79,8 +71,8 @@ class CustomTabRow(
     }
 
     @Composable
-    private fun CustomIndicator(tabPositions: List<TabPosition>, pagerState: PagerState) {
-        val transition = updateTransition(pagerState.currentPage, label = "")
+    private fun CustomIndicator(tabPositions: List<TabPosition>, selectedTab: Int) {
+        val transition = updateTransition(selectedTab, label = "")
         val indicatorStart by transition.animateDp(
             transitionSpec = {
                 if (initialState < targetState) {
