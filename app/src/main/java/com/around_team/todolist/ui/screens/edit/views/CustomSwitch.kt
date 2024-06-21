@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun CustomSwitch(
     checked: Boolean,
+    modifier: Modifier = Modifier,
     onCheckedChange: () -> Unit,
     width: Dp = 51.dp,
     height: Dp = 31.dp,
@@ -39,7 +40,7 @@ fun CustomSwitch(
     )
 
     Canvas(
-        modifier = Modifier
+        modifier = modifier
             .size(width = width, height = height)
             .clickable(
                 onClick = onCheckedChange,

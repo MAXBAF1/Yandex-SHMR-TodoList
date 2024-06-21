@@ -2,6 +2,7 @@ package com.around_team.todolist.data.db
 
 import com.around_team.todolist.ui.common.enums.TodoPriority
 import com.around_team.todolist.ui.common.models.TodoItem
+import java.util.Date
 import javax.inject.Inject
 
 class TodoItemsRepository @Inject constructor() {
@@ -13,7 +14,7 @@ class TodoItemsRepository @Inject constructor() {
             TodoItem("4", "Купить что-то", TodoPriority.Low, false, ""),
             TodoItem("5", "Купить что-то", TodoPriority.High, false, ""),
             TodoItem("6", "Купить что-то", TodoPriority.Medium, true, ""),
-            TodoItem("7", "Купить что-то", TodoPriority.Medium, false, "", deadline = "14 июня"),
+            TodoItem("7", "Купить что-то", TodoPriority.Medium, false, "", deadline = Date().time),
             TodoItem("8", "Купить что-то", TodoPriority.Medium, false, ""),
             TodoItem("9", "Купить что-то", TodoPriority.Medium, false, ""),
             TodoItem("10", "Купить что-то", TodoPriority.Medium, false, ""),

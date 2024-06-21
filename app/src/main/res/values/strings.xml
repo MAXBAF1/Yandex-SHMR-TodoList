@@ -15,4 +15,5 @@
     <string name="priority">Важность</string>
     <string name="deadline">Сделать до</string>
     <string name="no">нет</string>
+    <string name="delete">Удалить</string>
 </resources>

@@ -24,6 +24,7 @@ import com.around_team.todolist.ui.common.enums.getIconColor
 import com.around_team.todolist.ui.common.models.TodoItem
 import com.around_team.todolist.ui.common.views.MyDivider
 import com.around_team.todolist.ui.theme.JetTodoListTheme
+import com.around_team.todolist.utils.formatTimeInMillis
 
 @Composable
 fun TodoRow(
@@ -99,7 +100,7 @@ private fun NameAndDateColumn(todo: TodoItem, modifier: Modifier = Modifier) {
                     tint = JetTodoListTheme.colors.label.tertiary
                 )
                 Text(
-                    text = todo.deadline,
+                    text = formatTimeInMillis(todo.deadline, "d MMMM"),
                     style = JetTodoListTheme.typography.subhead,
                     color = JetTodoListTheme.colors.label.tertiary
                 )

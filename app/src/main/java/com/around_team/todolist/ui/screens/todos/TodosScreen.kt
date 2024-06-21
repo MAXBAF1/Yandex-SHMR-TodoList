@@ -13,7 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Surface
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,28 +22,50 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.around_team.todolist.R
 import com.around_team.todolist.ui.common.models.TodoItem
+import com.around_team.todolist.ui.common.views.CustomFab
+import com.around_team.todolist.ui.common.views.custom_toolbar.CustomToolbar
+import com.around_team.todolist.ui.common.views.custom_toolbar.rememberToolbarScrollBehavior
 import com.around_team.todolist.ui.screens.todos.models.TodosEvent
 import com.around_team.todolist.ui.screens.todos.views.TodoRow
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 
-class TodosScreen(private val viewModel: TodosViewModel) {
+class TodosScreen(private val viewModel: TodosViewModel, private val toEditScreen: () -> Unit) {
 
     @Composable
     fun Create() {
         val viewState by viewModel.getViewState().collectAsStateWithLifecycle()
+        val scrollBehavior = rememberToolbarScrollBehavior()
 
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = JetTodoListTheme.colors.back.primary,
+        Scaffold(
+            topBar = {
+                CustomToolbar(
+                    collapsingTitle = stringResource(id = R.string.title),
+                    scrollBehavior = scrollBehavior
+                )
+            },
+            floatingActionButtonPosition = FabPosition.Center,
+            floatingActionButton = {
+                CustomFab(
+                    modifier = Modifier.padding(bottom = 20.dp),
+                    onClick = toEditScreen,
+                )
+            },
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            containerColor = JetTodoListTheme.colors.back.primary,
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .padding(it)
+                    .fillMaxWidth()
             ) {
                 TodoList(
                     completedTodosShowed = viewState.completedShowed,
@@ -81,7 +104,7 @@ class TodosScreen(private val viewModel: TodosViewModel) {
                         .background(JetTodoListTheme.colors.back.primary),
                 )
             }
-            itemsIndexed(items = todos, key = { i, todo -> i }) { i, todo ->
+            itemsIndexed(items = todos, key = { _, todo -> todo.id }) { i, todo ->
                 val indexModifier = when (i) {
                     0 -> Modifier.clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
                     todos.size - 1 -> {

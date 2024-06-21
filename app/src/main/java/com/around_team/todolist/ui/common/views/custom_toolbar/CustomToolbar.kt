@@ -1,7 +1,6 @@
 package com.around_team.todolist.ui.common.views.custom_toolbar
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +25,7 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,11 +40,12 @@ fun CustomToolbar(
     navigationIcon: (@Composable () -> Unit)? = null,
     actions: (@Composable RowScope.() -> Unit)? = null,
     collapsingTitle: String? = null,
+    expandedTitleStyle: TextStyle = JetTodoListTheme.typography.largeTitle,
+    collapsedTitleStyle: TextStyle = JetTodoListTheme.typography.collapsedLargeTitle,
+    changeTitlePosition: Boolean = true,
     scrollBehavior: CustomToolbarScrollBehavior? = null,
 ) {
     val collapsedFraction = scrollBehavior?.state?.collapsedFraction ?: 1f
-    val expandedTitleStyle = JetTodoListTheme.typography.largeTitle
-    val collapsedTitleStyle = JetTodoListTheme.typography.collapsedLargeTitle
 
     val fullyCollapsedTitleScale = when {
         collapsingTitle != null -> collapsedTitleStyle.lineHeight.value / expandedTitleStyle.lineHeight.value
@@ -59,7 +60,7 @@ fun CustomToolbar(
         else -> false
     }
 
-    val borderState = animateDpAsState(if (showBorder) 0.5.dp else 0.dp, label = "")
+    val borderState = if (showBorder) 0.5.dp else 0.dp
 
     val bgColor = animateColorAsState(
         targetValue = lerp(
@@ -210,7 +211,7 @@ fun CustomToolbar(
 
                     // Coordinates of fully collapsed title
                     val fullyCollapsedTitleX =
-                        constraints.maxWidth / 2 - expandedTitlePlaceable.width / 4F
+                        constraints.maxWidth / 2F - collapsedTitlePlaceable.width
                     val fullyCollapsedTitleY =
                         collapsedHeightPx / 2 - CollapsedTitleLineHeight.toPx().roundToInt() / 2
 
@@ -220,10 +221,14 @@ fun CustomToolbar(
 
                     // Current coordinates of collapsing title
                     collapsingTitleX = lerp(
-                        fullyExpandedTitleX, fullyCollapsedTitleX, collapsedFraction
+                        fullyExpandedTitleX,
+                        fullyCollapsedTitleX,
+                        if (changeTitlePosition) collapsedFraction else 1F
                     ).roundToInt()
                     collapsingTitleY = lerp(
-                        fullyExpandedTitleY, fullyCollapsedTitleY, collapsedFraction
+                        fullyExpandedTitleY,
+                        fullyCollapsedTitleY,
+                        if (changeTitlePosition) collapsedFraction else 1F
                     ).roundToInt()
                 } else {
                     scrollBehavior?.state?.heightOffsetLimit = -1f
@@ -257,7 +262,7 @@ fun CustomToolbar(
             }
             if (showBorder) {
                 Divider(
-                    thickness = borderState.value, color = JetTodoListTheme.colors.support.separator
+                    thickness = borderState, color = JetTodoListTheme.colors.support.separator
                 )
             }
         }
