@@ -1,5 +1,6 @@
 package com.around_team.todolist.ui.screens.todos.views
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -22,52 +23,44 @@ import com.around_team.todolist.R
 import com.around_team.todolist.ui.common.enums.TodoPriority
 import com.around_team.todolist.ui.common.enums.getIconColor
 import com.around_team.todolist.ui.common.models.TodoItem
-import com.around_team.todolist.ui.common.views.MyDivider
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.utils.formatTimeInMillis
 
 @Composable
-fun TodoRow(
-    todo: TodoItem,
-    onClick: () -> Unit,
-    onCompleteClick: (id: String) -> Unit,
-    modifier: Modifier = Modifier,
-    showDivider: Boolean = true,
-) {
-    Column {
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .clickable(
-                    onClick = onClick,
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = rememberRipple(),
-                )
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            CircleCheckbox(
-                modifier = Modifier.padding(end = 12.dp),
-                checked = todo.completed,
-                onChecked = { onCompleteClick(todo.id) },
-                highPriority = todo.priority == TodoPriority.High,
+fun TodoCard(todo: TodoItem, onClick: () -> Unit, onCompleteClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                onClick = onClick,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple(),
             )
+            .background(JetTodoListTheme.colors.back.secondary)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        CircleCheckbox(
+            modifier = Modifier.padding(end = 12.dp),
+            checked = todo.completed,
+            onChecked = onCompleteClick,
+            highPriority = todo.priority == TodoPriority.High,
+        )
 
-            NameAndDateColumn(
-                modifier = Modifier
-                    .padding(end = 16.dp)
-                    .weight(1F),
-                todo = todo,
-            )
-            Icon(
-                painter = painterResource(id = R.drawable.ic_arrow),
-                contentDescription = "arrow icon",
-                tint = JetTodoListTheme.colors.colors.gray
-            )
-        }
-        if (showDivider) MyDivider()
+        NameAndDateColumn(
+            modifier = Modifier
+                .padding(end = 16.dp)
+                .weight(1F),
+            todo = todo,
+        )
+        Icon(
+            painter = painterResource(id = R.drawable.ic_arrow),
+            contentDescription = "arrow icon",
+            tint = JetTodoListTheme.colors.colors.gray
+        )
     }
 }
+
 
 @Composable
 private fun NameAndDateColumn(todo: TodoItem, modifier: Modifier = Modifier) {

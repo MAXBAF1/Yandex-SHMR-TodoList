@@ -6,6 +6,7 @@
     <string name="complete">Выполнено —</string>
     <string name="show">Показать</string>
     <string name="hide">Скрыть</string>
+    <string name="new_todo">Новое</string>
 
     <!--EditScreen-->
     <string name="cancel">Отменить</string>

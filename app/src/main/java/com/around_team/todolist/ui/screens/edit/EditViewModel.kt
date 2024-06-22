@@ -35,7 +35,8 @@ class EditViewModel @Inject constructor() :
 
     private fun setEditedTodo(todo: TodoItem?) {
         if (todo == null) {
-            clearViewState()
+            if (oldTodo != null)
+                clearViewState()
         } else {
             oldTodo = todo
             editedTodo = todo.copy()
@@ -51,6 +52,7 @@ class EditViewModel @Inject constructor() :
     }
 
     private fun clearViewState() {
+        oldTodo = null
         saveEnable = false
         editedTodo = TodoItem(UUID.randomUUID().toString(), "", TodoPriority.Medium, false, "")
         deadlineChecked = false
@@ -67,7 +69,7 @@ class EditViewModel @Inject constructor() :
     }
 
     private fun changeDeadline(date: Long) {
-        //showCalendar = false
+        showCalendar = false
         editedTodo = editedTodo.copy(deadline = date)
         viewState.update {
             it.copy(

@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,6 +71,13 @@ fun CustomToolbar(
         ), label = ""
     )
 
+    val textSize = collapsingTitle?.let {
+        rememberTextMeasurer().measure(
+            text = it, style = JetTodoListTheme.typography.headline
+        ).size
+    }
+
+
     Surface(
         modifier = Modifier.background { bgColor.value },
         color = Color.Transparent,
@@ -98,8 +106,7 @@ fun CustomToolbar(
                                     scaleX = collapsingTitleScale,
                                     scaleY = collapsingTitleScale,
                                     transformOrigin = TransformOrigin(0f, 0f)
-                                )
-                                .wrapContentHeight(align = Alignment.Bottom),
+                                ),
                             text = collapsingTitle,
                             style = collapsedTitleStyle,
                             maxLines = 1,
@@ -209,9 +216,10 @@ fun CustomToolbar(
                     val fullyExpandedTitleX = horizontalPaddingPx
                     val fullyExpandedTitleY = fullyExpandedHeightPx - expandedTitlePlaceable.height
 
+
                     // Coordinates of fully collapsed title
                     val fullyCollapsedTitleX =
-                        constraints.maxWidth / 2F - collapsedTitlePlaceable.width
+                        constraints.maxWidth / 2F - (textSize?.width ?: 0) / 2
                     val fullyCollapsedTitleY =
                         collapsedHeightPx / 2 - CollapsedTitleLineHeight.toPx().roundToInt() / 2
 
@@ -261,7 +269,7 @@ fun CustomToolbar(
                 }
             }
             if (showBorder) {
-                Divider(
+                HorizontalDivider(
                     thickness = borderState, color = JetTodoListTheme.colors.support.separator
                 )
             }

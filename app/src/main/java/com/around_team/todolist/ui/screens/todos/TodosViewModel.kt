@@ -36,21 +36,21 @@ class TodosViewModel @Inject constructor(
         when (viewEvent) {
             is TodosEvent.CompleteTodo -> completeTodo(viewEvent.id)
             TodosEvent.ClickShowCompletedTodos -> clickShowCompletedTodos()
-            is TodosEvent.AddNewTodo -> addNewTodo(viewEvent.todo, viewEvent.delete)
+            is TodosEvent.AddNewTodo -> addOrDeleteTodo(viewEvent.todo, viewEvent.delete)
         }
     }
 
-    private fun addNewTodo(newTodo: TodoItem, delete: Boolean) {
-        val index = todos.find(newTodo.id).first
+    private fun addOrDeleteTodo(newTodo: TodoItem, delete: Boolean) {
+        viewModelScope.launch {
+            if (delete) {
+                repository.deleteTodo(newTodo)
+            } else repository.addOrEditTodo(newTodo)
 
-        when {
-            index == -1 -> todos.add(newTodo)
-            delete -> todos.removeAt(index)
-            else -> todos[index] = newTodo
+            todos = repository.getAllTodos().toMutableList()
+            showedTodos = getShowedTodos()
+            completeCnt = todos.count { it.completed }
+            viewState.update { it.copy(todos = showedTodos, completeCnt = completeCnt) }
         }
-        showedTodos = getShowedTodos()
-        completeCnt = todos.count { it.completed }
-        viewState.update { it.copy(todos = showedTodos, completeCnt = completeCnt) }
     }
 
     private fun clickShowCompletedTodos() {

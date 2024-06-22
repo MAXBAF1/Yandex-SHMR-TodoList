@@ -140,7 +140,7 @@ class EditScreen(
     ) {
         val state = rememberDatePickerState()
         if (state.selectedDateMillis == null && selectedDate != null) {
-            state.setSelection(selectedDate)
+            state.selectedDateMillis = selectedDate
         }
 
         if (checked && state.selectedDateMillis != null && state.selectedDateMillis != selectedDate) {
@@ -168,7 +168,7 @@ class EditScreen(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                 checked = checked,
                 onCheckedChange = {
-                    if (!checked) setCalendarState(true)
+                    if (!checked) setCalendarState(true) else state.selectedDateMillis = null
                     onCheckedChange()
                 },
                 selectedDate = selectedDate,
@@ -179,7 +179,8 @@ class EditScreen(
                     modifier = Modifier
                         .offset(y = (-124).dp)
                         .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally), state = state
+                        .align(Alignment.CenterHorizontally),
+                    state = state,
                 )
             }
         }
