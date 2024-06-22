@@ -41,17 +41,21 @@ class TodoItemsRepository @Inject constructor() {
         return todos
     }
 
-    suspend fun addOrEditTodo(todoItem: TodoItem): Boolean {
+    suspend fun addOrEditTodo(todoItem: TodoItem) {
         val index = todos.find(todoItem.id).first
         if (index == -1) todos.add(todoItem) else todos[index] = todoItem
-
-        return true
     }
 
-    suspend fun deleteTodo(todoItem: TodoItem): Boolean {
+    suspend fun deleteTodo(todoItem: TodoItem) {
         val index = todos.find(todoItem.id).first
         todos.removeAt(index)
+    }
 
-        return true
+    suspend fun completeTodo(id: String) {
+        val (index: Int, foundTodo: TodoItem?) = todos.find(id)
+
+        if (foundTodo != null) {
+            todos[index] = foundTodo.copy(completed = !foundTodo.completed)
+        }
     }
 }

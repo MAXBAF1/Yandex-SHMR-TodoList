@@ -6,7 +6,6 @@ import com.around_team.todolist.ui.common.models.BaseViewModel
 import com.around_team.todolist.ui.common.models.TodoItem
 import com.around_team.todolist.ui.screens.todos.models.TodosEvent
 import com.around_team.todolist.ui.screens.todos.models.TodosViewState
-import com.around_team.todolist.utils.find
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -60,15 +59,14 @@ class TodosViewModel @Inject constructor(
     }
 
     private fun completeTodo(id: String) {
-        val (index: Int, foundTodo: TodoItem?) = todos.find(id)
+        viewModelScope.launch {
+            repository.completeTodo(id)
 
-        if (foundTodo != null) {
-            todos[index] = foundTodo.copy(completed = !foundTodo.completed)
+            todos = repository.getAllTodos().toMutableList()
+            showedTodos = getShowedTodos()
+            completeCnt = todos.count { it.completed }
+            viewState.update { it.copy(todos = showedTodos, completeCnt = completeCnt) }
         }
-
-        showedTodos = getShowedTodos()
-        completeCnt = todos.count { it.completed }
-        viewState.update { it.copy(todos = showedTodos, completeCnt = completeCnt) }
     }
 
     private fun getShowedTodos(): List<TodoItem> {
