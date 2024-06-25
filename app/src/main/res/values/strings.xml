@@ -1,3 +1,20 @@
 <resources>
     <string name="app_name">TodoList</string>
+
+    <!--TodosScreen-->
+    <string name="title">Мои дела</string>
+    <string name="complete">Выполнено —</string>
+    <string name="show">Показать</string>
+    <string name="hide">Скрыть</string>
+    <string name="new_todo">Новое</string>
+
+    <!--EditScreen-->
+    <string name="cancel">Отменить</string>
+    <string name="todo">Дело</string>
+    <string name="save">Сохранить</string>
+    <string name="what_todo">Что надо сделать?</string>
+    <string name="priority">Важность</string>
+    <string name="deadline">Сделать до</string>
+    <string name="no">нет</string>
+    <string name="delete">Удалить</string>
 </resources>

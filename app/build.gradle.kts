@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("kotlin-kapt")
+    alias(libs.plugins.google.dagger.hilt.android)
 }
 
 android {
@@ -50,6 +52,22 @@ android {
 }
 
 dependencies {
+    // Gson
+    implementation(libs.gson)
+
+    // Extended icons
+    implementation(libs.androidx.material.icons.extended)
+
+    // Compose lifecycle
+    implementation(libs.androidx.lifecycle.runtime.compose)
+
+    // Hilt
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+
+    // Navigation
+    implementation(libs.androidx.navigation.compose)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

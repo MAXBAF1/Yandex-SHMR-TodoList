@@ -10,42 +10,42 @@ import com.around_team.todolist.R
 val typography = JetTodoListTypography(
     largeTitle = TextStyle(
         fontFamily = FontFamily(Font(R.font.sf_pro_display_bold)),
-        fontWeight = FontWeight.W700,
         fontSize = 38.sp,
         lineHeight = 46.sp,
         letterSpacing = 0.42.sp
     ),
+    collapsedLargeTitle = TextStyle(
+        fontFamily = FontFamily(Font(R.font.sf_pro_display_bold)),
+        fontSize = 38.sp,
+        lineHeight = 22.sp,
+        letterSpacing = 0.42.sp
+    ),
     title = TextStyle(
         fontFamily = FontFamily(Font(R.font.sf_pro_display_semibold)),
-        fontWeight = FontWeight.W600,
         fontSize = 20.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.38.sp
     ),
     headline = TextStyle(
         fontFamily = FontFamily(Font(R.font.sf_pro_text_semibold)),
-        fontWeight = FontWeight.W600,
         fontSize = 17.sp,
         lineHeight = 22.sp,
         letterSpacing = (-0.41).sp
     ),
     body = TextStyle(
         fontFamily = FontFamily(Font(R.font.sf_pro_text_regular)),
-        fontWeight = FontWeight.W400,
         fontSize = 17.sp,
         lineHeight = 22.sp,
         letterSpacing = (-0.41).sp
     ),
     subhead = TextStyle(
         fontFamily = FontFamily(Font(R.font.sf_pro_text_regular)),
-        fontWeight = FontWeight.W400,
         fontSize = 15.sp,
         lineHeight = 20.sp,
         letterSpacing = (-0.24).sp
     ),
     footnote = TextStyle(
         fontFamily = FontFamily(Font(R.font.sf_pro_text_semibold)),
-        fontWeight = FontWeight.W600,
         fontSize = 13.sp,
         lineHeight = 18.sp,
         letterSpacing = (-0.08).sp

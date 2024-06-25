@@ -44,6 +44,7 @@ data class JetTodoListColors(
 
 data class JetTodoListTypography(
     val largeTitle: TextStyle,
+    val collapsedLargeTitle: TextStyle,
     val title: TextStyle,
     val headline: TextStyle,
     val body: TextStyle,
