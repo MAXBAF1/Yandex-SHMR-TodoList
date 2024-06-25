@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.around_team.todolist.R
 import com.around_team.todolist.ui.common.enums.TodoPriority
-import com.around_team.todolist.ui.common.models.TodoItem
 import com.around_team.todolist.ui.common.views.CustomButton
 import com.around_team.todolist.ui.common.views.MyDivider
 import com.around_team.todolist.ui.common.views.custom_toolbar.CustomToolbar
@@ -43,21 +42,21 @@ import com.around_team.todolist.ui.screens.edit.views.CustomDatePicker
 import com.around_team.todolist.ui.screens.edit.views.CustomSwitch
 import com.around_team.todolist.ui.screens.edit.views.CustomTabRow
 import com.around_team.todolist.ui.theme.JetTodoListTheme
-import com.around_team.todolist.utils.formatTimeInMillis
+import com.around_team.todolist.utils.FormatTimeInMillis
 
 class EditScreen(
     private val viewModel: EditViewModel,
     private val onCancelClick: () -> Unit,
-    private val onSaveClick: (editedTodo: TodoItem, delete: Boolean) -> Unit,
-    private val editedTodo: TodoItem? = null,
+    private val toTodosScreen: () -> Unit,
+    private val editedTodoId: String? = null,
 ) {
     @Composable
     fun Create() {
         val viewState by viewModel.getViewState().collectAsStateWithLifecycle()
         val scrollBehavior = rememberToolbarScrollBehavior()
 
-        LaunchedEffect(key1 = editedTodo) {
-            viewModel.obtainEvent(EditEvent.SetEditedTodo(editedTodo))
+        LaunchedEffect(key1 = editedTodoId) {
+            viewModel.obtainEvent(EditEvent.SetEditedTodo(editedTodoId))
         }
 
         Scaffold(
@@ -76,8 +75,8 @@ class EditScreen(
                         CustomClickableText(
                             text = stringResource(id = R.string.save),
                             onClick = {
-                                onSaveClick(viewState.editedTodo, false)
-                                viewModel.obtainEvent(EditEvent.ClearViewState)
+                                viewModel.obtainEvent(EditEvent.SaveTodo)
+                                toTodosScreen()
                             },
                             fontWeight = FontWeight.Bold, enable = viewState.saveEnable,
                         )
@@ -113,11 +112,14 @@ class EditScreen(
                     showCalendar = viewState.showCalendar,
                     setCalendarState = { viewModel.obtainEvent(EditEvent.SetCalendarShowState(it)) },
                 )
-                if (editedTodo != null) {
+                AnimatedVisibility(visible = editedTodoId != null) {
                     CustomButton(
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                         text = stringResource(id = R.string.delete),
-                        onClick = { onSaveClick(editedTodo, true) },
+                        onClick = {
+                            viewModel.obtainEvent(EditEvent.DeleteTodo)
+                            toTodosScreen()
+                        },
                         textColor = JetTodoListTheme.colors.colors.red,
                     )
                 }
@@ -233,7 +235,7 @@ class EditScreen(
                 )
                 if (checked && selectedDate != null) {
                     CustomClickableText(
-                        text = formatTimeInMillis(selectedDate),
+                        text = FormatTimeInMillis.format(selectedDate),
                         onClick = onSelectedDateClick,
                         style = JetTodoListTheme.typography.footnote
                     )

@@ -3,7 +3,7 @@
 
     <!--TodosScreen-->
     <string name="title">Мои дела</string>
-    <string name="complete">Выполнено —</string>
+    <string name="complete">Выполнено — %d</string>
     <string name="show">Показать</string>
     <string name="hide">Скрыть</string>
     <string name="new_todo">Новое</string>
@@ -17,4 +17,11 @@
     <string name="deadline">Сделать до</string>
     <string name="no">нет</string>
     <string name="delete">Удалить</string>
+
+    <!--Icons strings-->
+    <string name="calendar_icon">Иконка календаря</string>
+    <string name="priority_icon">Иконка приоритета</string>
+    <string name="arrow_icon">Иконка стрелочки</string>
+    <string name="complete_icon">Иконка выполнения</string>
+    <string name="add_icon">Иконка добавления</string>
 </resources>

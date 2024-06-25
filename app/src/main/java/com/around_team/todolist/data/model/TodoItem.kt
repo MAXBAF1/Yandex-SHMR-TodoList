@@ -1,4 +1,4 @@
-package com.around_team.todolist.ui.common.models
+package com.around_team.todolist.data.model
 
 import com.around_team.todolist.ui.common.enums.TodoPriority
 

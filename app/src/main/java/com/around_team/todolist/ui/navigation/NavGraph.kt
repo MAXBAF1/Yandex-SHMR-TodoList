@@ -1,6 +1,5 @@
 package com.around_team.todolist.ui.navigation
 
-import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -11,12 +10,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
-import com.around_team.todolist.ui.common.models.TodoItem
 import com.around_team.todolist.ui.screens.edit.EditScreen
 import com.around_team.todolist.ui.screens.edit.EditViewModel
 import com.around_team.todolist.ui.screens.todos.TodosScreen
 import com.around_team.todolist.ui.screens.todos.TodosViewModel
-import com.google.gson.Gson
 
 class NavGraph(
     private val navController: NavHostController,
@@ -32,22 +29,18 @@ class NavGraph(
             contentAlignment = Alignment.TopStart,
         ) {
             composable(
-                route = "${Screens.TodosScreen.name}?$TO_TODOS_TODO_KEY={$TO_TODOS_TODO_KEY}&$DELETE_KEY={$DELETE_KEY}",
+                route = "${Screens.TodosScreen.name}?$UPDATE_LIST_KEY={$UPDATE_LIST_KEY}",
                 arguments = listOf(
-                    navArgument(TO_TODOS_TODO_KEY) {
-                        type = NavType.StringType
-                        defaultValue = ""
-                    },
-                    navArgument(DELETE_KEY) {
+                    navArgument(UPDATE_LIST_KEY) {
                         type = NavType.BoolType
                         defaultValue = false
                     },
-                ),
+                )
             ) { CreateTodosScreen(todosViewModel) }
             composable(
-                route = "${Screens.EditScreen.name}?$TO_EDIT_TODO_KEY={$TO_EDIT_TODO_KEY}",
+                route = "${Screens.EditScreen.name}?$TO_EDIT_TODO_ID_KEY={$TO_EDIT_TODO_ID_KEY}",
                 arguments = listOf(
-                    navArgument(TO_EDIT_TODO_KEY) {
+                    navArgument(TO_EDIT_TODO_ID_KEY) {
                         type = NavType.StringType
                         defaultValue = ""
                     },
@@ -60,15 +53,16 @@ class NavGraph(
     private fun CreateTodosScreen(viewModel: TodosViewModel) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val arguments = navBackStackEntry?.arguments
-        val newTodo =
-            Gson().fromJson(arguments?.getString(TO_TODOS_TODO_KEY, null), TodoItem::class.java)
-        val deleteTodo = arguments?.getBoolean(DELETE_KEY, false) ?: false
+        val updateList = arguments?.getBoolean(TO_EDIT_TODO_ID_KEY, false) ?: true
 
         TodosScreen(
             viewModel = viewModel,
-            toEditScreen = { navigateWithTodo(Screens.EditScreen.name, TO_EDIT_TODO_KEY, it) },
-            newTodo = newTodo,
-            deleteTodo = deleteTodo
+            toEditScreen = {
+                if (it == null) {
+                    navController.navigate(Screens.EditScreen.name)
+                } else navController.navigate("${Screens.EditScreen.name}?$TO_EDIT_TODO_ID_KEY=$it")
+            },
+            updateList = updateList,
         ).Create()
     }
 
@@ -76,36 +70,19 @@ class NavGraph(
     private fun CreateEditScreen(viewModel: EditViewModel) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val arguments = navBackStackEntry?.arguments
-        val editedTodo =
-            Gson().fromJson(arguments?.getString(TO_EDIT_TODO_KEY, null), TodoItem::class.java)
-
+        val editedTodoId = arguments?.getString(TO_EDIT_TODO_ID_KEY, null)
 
         EditScreen(
             viewModel = viewModel,
             onCancelClick = { navController.popBackStack() },
-            onSaveClick = { todo, delete ->
-                navigateWithTodo(Screens.TodosScreen.name, TO_TODOS_TODO_KEY, todo, delete)
-            },
-            editedTodo = editedTodo
+            toTodosScreen = { navController.navigate("${Screens.TodosScreen.name}?$UPDATE_LIST_KEY=true") },
+            editedTodoId = if (editedTodoId.isNullOrBlank()) null else editedTodoId
         ).Create()
     }
 
-    private fun navigateWithTodo(
-        route: String,
-        key: String,
-        todo: TodoItem?,
-        delete: Boolean = false,
-    ) {
-        val jsonTodo = Gson().toJson(todo)
-        val encodedTodo = Uri.encode(jsonTodo)
-        if (todo == null) {
-            navController.navigate(route)
-        } else navController.navigate("$route?$key=$encodedTodo&$DELETE_KEY=$delete")
-    }
-
     companion object {
-        const val TO_TODOS_TODO_KEY = "TO_TODOS_TODO_KEY"
-        const val TO_EDIT_TODO_KEY = "TO_EDIT_TODO_KEY"
+        const val UPDATE_LIST_KEY = "UPDATE_LIST_KEY"
+        const val TO_EDIT_TODO_ID_KEY = "TO_EDIT_TODO_KEY"
         const val DELETE_KEY = "DELETE_KEY"
     }
 }

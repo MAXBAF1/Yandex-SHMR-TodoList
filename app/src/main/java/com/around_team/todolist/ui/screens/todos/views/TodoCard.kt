@@ -15,16 +15,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.around_team.todolist.R
 import com.around_team.todolist.ui.common.enums.TodoPriority
 import com.around_team.todolist.ui.common.enums.getIconColor
-import com.around_team.todolist.ui.common.models.TodoItem
+import com.around_team.todolist.data.model.TodoItem
 import com.around_team.todolist.ui.theme.JetTodoListTheme
-import com.around_team.todolist.utils.formatTimeInMillis
+import com.around_team.todolist.utils.FormatTimeInMillis
 
 @Composable
 fun TodoCard(todo: TodoItem, onClick: () -> Unit, onCompleteClick: () -> Unit) {
@@ -55,7 +57,7 @@ fun TodoCard(todo: TodoItem, onClick: () -> Unit, onCompleteClick: () -> Unit) {
         )
         Icon(
             painter = painterResource(id = R.drawable.ic_arrow),
-            contentDescription = "arrow icon",
+            contentDescription = stringResource(id = R.string.arrow_icon),
             tint = JetTodoListTheme.colors.colors.gray
         )
     }
@@ -70,8 +72,8 @@ private fun NameAndDateColumn(todo: TodoItem, modifier: Modifier = Modifier) {
                 Icon(
                     modifier = Modifier.padding(end = 2.dp),
                     painter = painterResource(id = todo.priority.iconId!!),
-                    contentDescription = "priority icon",
-                    tint = todo.priority.getIconColor()!!
+                    contentDescription = stringResource(id = R.string.priority_icon),
+                    tint = todo.priority.getIconColor()
                 )
             }
             Text(
@@ -89,11 +91,11 @@ private fun NameAndDateColumn(todo: TodoItem, modifier: Modifier = Modifier) {
                 Icon(
                     modifier = Modifier.padding(end = 2.dp),
                     painter = painterResource(id = R.drawable.ic_calendar),
-                    contentDescription = "calendar icon",
+                    contentDescription = stringResource(id = R.string.calendar_icon),
                     tint = JetTodoListTheme.colors.label.tertiary
                 )
                 Text(
-                    text = formatTimeInMillis(todo.deadline, "d MMMM"),
+                    text = FormatTimeInMillis.format(todo.deadline, "d MMMM"),
                     style = JetTodoListTheme.typography.subhead,
                     color = JetTodoListTheme.colors.label.tertiary
                 )

@@ -3,7 +3,7 @@ package com.around_team.todolist.utils
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
-import com.around_team.todolist.ui.common.models.TodoItem
+import com.around_team.todolist.data.model.TodoItem
 
 fun Modifier.background(color: () -> Color): Modifier {
     return drawBehind { drawRect(color()) }
