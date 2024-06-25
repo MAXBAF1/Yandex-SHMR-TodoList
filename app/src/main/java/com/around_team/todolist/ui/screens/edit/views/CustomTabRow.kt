@@ -29,6 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.around_team.todolist.R
 import com.around_team.todolist.ui.common.enums.TodoPriority
 import com.around_team.todolist.ui.common.enums.getIconColor
 import com.around_team.todolist.ui.theme.JetTodoListTheme
@@ -121,8 +122,8 @@ class CustomTabRow(
             if (tab.iconId != null) {
                 Icon(
                     painter = painterResource(id = tab.iconId),
-                    contentDescription = "icon",
-                    tint = tab.getIconColor()!!
+                    contentDescription = stringResource(id = R.string.priority_icon),
+                    tint = tab.getIconColor()
                 )
             } else if (tab.text != null) {
                 Text(

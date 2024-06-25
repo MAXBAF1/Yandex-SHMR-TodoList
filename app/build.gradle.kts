@@ -52,12 +52,6 @@ android {
 }
 
 dependencies {
-    // Gson
-    implementation(libs.gson)
-
-    // Extended icons
-    implementation(libs.androidx.material.icons.extended)
-
     // Compose lifecycle
     implementation(libs.androidx.lifecycle.runtime.compose)
 

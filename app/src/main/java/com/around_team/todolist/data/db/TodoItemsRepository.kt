@@ -1,11 +1,13 @@
 package com.around_team.todolist.data.db
 
 import com.around_team.todolist.ui.common.enums.TodoPriority
-import com.around_team.todolist.ui.common.models.TodoItem
+import com.around_team.todolist.data.model.TodoItem
 import com.around_team.todolist.utils.find
 import java.util.Date
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class TodoItemsRepository @Inject constructor() {
     private val todos = mutableListOf(
         TodoItem("1", "Купить что-то", TodoPriority.Medium, false, ""),
@@ -41,13 +43,17 @@ class TodoItemsRepository @Inject constructor() {
         return todos
     }
 
-    suspend fun addOrEditTodo(todoItem: TodoItem) {
+    suspend fun getTodoById(id: String): TodoItem? {
+        return todos.find(id).second
+    }
+
+    suspend fun saveTodo(todoItem: TodoItem) {
         val index = todos.find(todoItem.id).first
         if (index == -1) todos.add(todoItem) else todos[index] = todoItem
     }
 
-    suspend fun deleteTodo(todoItem: TodoItem) {
-        val index = todos.find(todoItem.id).first
+    suspend fun deleteTodo(id: String) {
+        val index = todos.find(id).first
         todos.removeAt(index)
     }
 

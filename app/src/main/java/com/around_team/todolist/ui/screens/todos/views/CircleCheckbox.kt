@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.around_team.todolist.R
 import com.around_team.todolist.ui.theme.JetTodoListTheme
@@ -49,7 +50,7 @@ fun CircleCheckbox(
         Icon(
             modifier = Modifier.size(24.dp),
             painter = painterResource(id = iconId),
-            contentDescription = "complete icon",
+            contentDescription = stringResource(id = R.string.complete_icon),
             tint = tint
         )
     }

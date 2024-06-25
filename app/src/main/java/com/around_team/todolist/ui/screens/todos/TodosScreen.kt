@@ -38,7 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.around_team.todolist.R
-import com.around_team.todolist.ui.common.models.TodoItem
+import com.around_team.todolist.data.model.TodoItem
 import com.around_team.todolist.ui.common.views.CustomFab
 import com.around_team.todolist.ui.common.views.MyDivider
 import com.around_team.todolist.ui.common.views.custom_toolbar.CustomToolbar
@@ -50,9 +50,8 @@ import com.around_team.todolist.ui.theme.JetTodoListTheme
 
 class TodosScreen(
     private val viewModel: TodosViewModel,
-    private val toEditScreen: (TodoItem?) -> Unit,
-    private val newTodo: TodoItem?,
-    private val deleteTodo: Boolean,
+    private val toEditScreen: (id: String?) -> Unit,
+    private val updateList: Boolean,
 ) {
 
     @Composable
@@ -60,9 +59,9 @@ class TodosScreen(
         val viewState by viewModel.getViewState().collectAsStateWithLifecycle()
         val scrollBehavior = rememberToolbarScrollBehavior()
 
-        if (newTodo != null) {
-            LaunchedEffect(key1 = newTodo) {
-                viewModel.obtainEvent(TodosEvent.AddNewTodo(newTodo, deleteTodo))
+        if (updateList) {
+            LaunchedEffect(key1 = Unit) {
+                viewModel.obtainEvent(TodosEvent.UpdateTodos)
             }
         }
 
@@ -99,7 +98,7 @@ class TodosScreen(
                         viewModel.obtainEvent(TodosEvent.ClickShowCompletedTodos)
                     },
                     onCompleteClick = { viewModel.obtainEvent(TodosEvent.CompleteTodo(it)) },
-                    onDelete = { viewModel.obtainEvent(TodosEvent.AddNewTodo(it, true)) },
+                    onDelete = { viewModel.obtainEvent(TodosEvent.DeleteTodo(it)) },
                     onTodoClick = { toEditScreen(it) },
                 )
             }
@@ -114,8 +113,8 @@ class TodosScreen(
         completeCnt: Int,
         onShowClick: () -> Unit,
         onCompleteClick: (id: String) -> Unit,
-        onDelete: (todo: TodoItem) -> Unit,
-        onTodoClick: (todo: TodoItem) -> Unit,
+        onDelete: (id: String) -> Unit,
+        onTodoClick: (id: String) -> Unit,
         modifier: Modifier = Modifier,
     ) {
         LazyColumn(
@@ -132,26 +131,30 @@ class TodosScreen(
                 )
             }
             itemsIndexed(items = todos, key = { _, todo -> todo.id }) { i, todo ->
-                val indexModifier = when (i) {
-                    0 -> Modifier.clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-
-                    else -> Modifier
-                }
                 TodoRow(
-                    modifier = indexModifier
+                    modifier = if (i == 0) Modifier.clip(
+                        RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                    ) else Modifier
                         .animateItemPlacement()
                         .background(JetTodoListTheme.colors.back.secondary),
                     todo = todo,
-                    onClick = { onTodoClick(todo) },
+                    onClick = { onTodoClick(todo.id) },
                     onCompleteClick = { onCompleteClick(todo.id) },
-                    onDelete = { onDelete(todo) },
+                    onDelete = { onDelete(todo.id) },
                 )
             }
             item {
                 CreateNewCard(
                     modifier = Modifier
                         .padding(bottom = 100.dp)
-                        .clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)),
+                        .clip(
+                            RoundedCornerShape(
+                                topStart = if (todos.isEmpty()) 16.dp else 0.dp,
+                                topEnd = if (todos.isEmpty()) 16.dp else 0.dp,
+                                bottomStart = 16.dp,
+                                bottomEnd = 16.dp
+                            )
+                        ),
                     onClick = { toEditScreen(null) },
                 )
             }
@@ -171,7 +174,7 @@ class TodosScreen(
             verticalAlignment = Alignment.Top
         ) {
             Text(
-                text = "${stringResource(id = R.string.complete)} $completeCnt",
+                text = stringResource(R.string.complete, completeCnt),
                 style = JetTodoListTheme.typography.subhead,
                 color = JetTodoListTheme.colors.label.tertiary
             )

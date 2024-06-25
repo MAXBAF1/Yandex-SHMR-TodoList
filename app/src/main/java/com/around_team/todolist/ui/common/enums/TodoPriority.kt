@@ -24,10 +24,10 @@ enum class TodoPriority(val text: Int? = null, val iconId: Int? = null) {
 
 
 @Composable
-fun TodoPriority.getIconColor(): Color? {
+fun TodoPriority.getIconColor(): Color {
     return when (this) {
         TodoPriority.Low -> JetTodoListTheme.colors.colors.gray
-        TodoPriority.Medium -> null
+        TodoPriority.Medium -> Color.Transparent
         TodoPriority.High -> JetTodoListTheme.colors.colors.red
     }
 }

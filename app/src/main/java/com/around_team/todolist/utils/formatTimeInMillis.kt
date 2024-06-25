@@ -4,8 +4,12 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-fun formatTimeInMillis(timeInMillis: Long, format: String = "d MMMM yyyy"): String {
-    val dateFormat = SimpleDateFormat(format, Locale("ru"))
-    val date = Date(timeInMillis)
-    return dateFormat.format(date)
+object FormatTimeInMillis {
+    private val dateFormat = SimpleDateFormat("d MMMM yyyy", Locale("ru"))
+    fun format(timeInMillis: Long, format: String = "d MMMM yyyy"): String {
+        dateFormat.applyPattern(format)
+        val date = Date(timeInMillis)
+        return dateFormat.format(date)
+    }
 }
+
