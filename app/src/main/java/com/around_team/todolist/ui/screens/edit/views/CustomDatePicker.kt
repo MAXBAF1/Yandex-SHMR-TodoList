@@ -4,9 +4,13 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import com.around_team.todolist.R
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,4 +37,12 @@ fun CustomDatePicker(state: DatePickerState, modifier: Modifier = Modifier) {
             todayDateBorderColor = Color.Transparent
         ),
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+private fun CustomDatePickerPreview() {
+    val state = rememberDatePickerState()
+    CustomDatePicker(state)
 }

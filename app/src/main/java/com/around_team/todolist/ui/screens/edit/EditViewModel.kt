@@ -2,25 +2,33 @@ package com.around_team.todolist.ui.screens.edit
 
 import androidx.lifecycle.viewModelScope
 import com.around_team.todolist.data.db.TodoItemsRepository
-import com.around_team.todolist.ui.common.enums.TodoPriority
-import com.around_team.todolist.ui.common.models.BaseViewModel
 import com.around_team.todolist.data.model.TodoItem
+import com.around_team.todolist.ui.common.enums.TodoImportance
+import com.around_team.todolist.ui.common.models.BaseViewModel
 import com.around_team.todolist.ui.screens.edit.models.EditEvent
 import com.around_team.todolist.ui.screens.edit.models.EditViewState
+import com.around_team.todolist.utils.ExceptionHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Date
 import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
 class EditViewModel @Inject constructor(
     private val repository: TodoItemsRepository,
+    private val exceptionHandler: ExceptionHandler,
 ) : BaseViewModel<EditViewState, EditEvent>(initialState = EditViewState()) {
 
     private var saveEnable: Boolean = false
-    private var editedTodo: TodoItem =
-        TodoItem(UUID.randomUUID().toString(), "", TodoPriority.Medium, false, "")
+    private var editedTodo: TodoItem = TodoItem(
+        id = UUID.randomUUID().toString(),
+        text = "",
+        importance = TodoImportance.Basic,
+        done = false,
+        creationDate = Date().time
+    )
     private var deadlineChecked: Boolean = false
     private var showCalendar: Boolean = true
     private var oldTodo: TodoItem? = null
@@ -35,25 +43,38 @@ class EditViewModel @Inject constructor(
             is EditEvent.SetCalendarShowState -> setCalendarShowState(viewEvent.state)
             EditEvent.SaveTodo -> saveTodo()
             EditEvent.DeleteTodo -> deleteTodo()
+            EditEvent.ClearViewState -> clearViewState()
         }
     }
 
     private fun saveTodo() {
         viewModelScope.launch {
-            repository.saveTodo(editedTodo)
+            exceptionHandler.handleException {
+                repository.saveTodo(editedTodo)
+                viewState.update { it.copy(toTodosScreen = true) }
+            }
         }
     }
 
     private fun deleteTodo() {
         viewModelScope.launch {
-            repository.deleteTodo(editedTodo.id)
+            exceptionHandler.handleException {
+                repository.deleteTodo(editedTodo.id)
+                viewState.update { it.copy(toTodosScreen = true) }
+            }
         }
     }
 
     private fun clearViewState() {
         oldTodo = null
         saveEnable = false
-        editedTodo = TodoItem(UUID.randomUUID().toString(), "", TodoPriority.Medium, false, "")
+        editedTodo = TodoItem(
+            id = UUID.randomUUID().toString(),
+            text = "",
+            importance = TodoImportance.Basic,
+            done = false,
+            creationDate = Date().time
+        )
         deadlineChecked = false
         showCalendar = true
         viewState.update { EditViewState() }
@@ -115,8 +136,8 @@ class EditViewModel @Inject constructor(
         viewState.update { it.copy(saveEnable = saveEnable, editedTodo = editedTodo) }
     }
 
-    private fun changePriority(priority: TodoPriority) {
-        editedTodo = editedTodo.copy(priority = priority)
+    private fun changePriority(priority: TodoImportance) {
+        editedTodo = editedTodo.copy(importance = priority)
         viewState.update { it.copy(saveEnable = isSaveEnable(), editedTodo = editedTodo) }
     }
 

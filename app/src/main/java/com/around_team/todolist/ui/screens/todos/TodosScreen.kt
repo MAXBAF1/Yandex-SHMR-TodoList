@@ -1,5 +1,6 @@
 package com.around_team.todolist.ui.screens.todos
 
+import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,19 +26,21 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.around_team.todolist.R
+import com.around_team.todolist.data.db.TodoItemsRepository
 import com.around_team.todolist.data.model.TodoItem
 import com.around_team.todolist.ui.common.views.CustomFab
 import com.around_team.todolist.ui.common.views.MyDivider
@@ -47,11 +50,11 @@ import com.around_team.todolist.ui.screens.todos.models.TodosEvent
 import com.around_team.todolist.ui.screens.todos.views.CreateNewCard
 import com.around_team.todolist.ui.screens.todos.views.TodoCard
 import com.around_team.todolist.ui.theme.JetTodoListTheme
+import com.around_team.todolist.utils.ExceptionHandler
 
 class TodosScreen(
     private val viewModel: TodosViewModel,
     private val toEditScreen: (id: String?) -> Unit,
-    private val updateList: Boolean,
 ) {
 
     @Composable
@@ -59,11 +62,6 @@ class TodosScreen(
         val viewState by viewModel.getViewState().collectAsStateWithLifecycle()
         val scrollBehavior = rememberToolbarScrollBehavior()
 
-        if (updateList) {
-            LaunchedEffect(key1 = Unit) {
-                viewModel.obtainEvent(TodosEvent.UpdateTodos)
-            }
-        }
 
         Scaffold(
             topBar = {
@@ -94,9 +92,7 @@ class TodosScreen(
                     completedTodosShowed = viewState.completedShowed,
                     todos = viewState.todos,
                     completeCnt = viewState.completeCnt,
-                    onShowClick = {
-                        viewModel.obtainEvent(TodosEvent.ClickShowCompletedTodos)
-                    },
+                    onShowClick = { viewModel.obtainEvent(TodosEvent.ClickShowCompletedTodos) },
                     onCompleteClick = { viewModel.obtainEvent(TodosEvent.CompleteTodo(it)) },
                     onDelete = { viewModel.obtainEvent(TodosEvent.DeleteTodo(it)) },
                     onTodoClick = { toEditScreen(it) },
@@ -211,7 +207,7 @@ class TodosScreen(
 
                     SwipeToDismissBoxValue.EndToStart -> {
                         onDelete()
-                        true
+                        false
                     }
 
                     SwipeToDismissBoxValue.Settled -> false
@@ -274,4 +270,22 @@ class TodosScreen(
             SwipeToDismissBoxValue.Settled -> {}
         }
     }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Composable
+private fun TodosScreenPreviewLight() {
+    TodosScreen(
+        viewModel = TodosViewModel(TodoItemsRepository(), ExceptionHandler(LocalContext.current)),
+        toEditScreen = {},
+    )
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun TodosScreenPreviewNight() {
+    TodosScreen(
+        viewModel = TodosViewModel(TodoItemsRepository(), ExceptionHandler(LocalContext.current)),
+        toEditScreen = {},
+    )
 }

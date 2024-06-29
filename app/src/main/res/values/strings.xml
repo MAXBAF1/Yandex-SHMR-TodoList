@@ -24,4 +24,7 @@
     <string name="arrow_icon">Иконка стрелочки</string>
     <string name="complete_icon">Иконка выполнения</string>
     <string name="add_icon">Иконка добавления</string>
+
+    <!--Errors-->
+    <string name="error">Произошла ошибка</string>
 </resources>

@@ -1,67 +1,54 @@
 package com.around_team.todolist.data.db
 
-import com.around_team.todolist.ui.common.enums.TodoPriority
+import com.around_team.todolist.data.MyCustomBackend
 import com.around_team.todolist.data.model.TodoItem
-import com.around_team.todolist.utils.find
-import java.util.Date
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class TodoItemsRepository @Inject constructor() {
-    private val todos = mutableListOf(
-        TodoItem("1", "Купить что-то", TodoPriority.Medium, false, ""),
-        TodoItem(
-            "2",
-            "Купить что-то, где-то, зачем-то, но зачем не очень понятно",
-            TodoPriority.Medium,
-            false,
-            ""
-        ),
-        TodoItem(
-            "3",
-            "Купить что-то, где-то, зачем-то, но зачем не очень понятно, но точно чтобы показать как обрезан текст",
-            TodoPriority.Medium,
-            false,
-            ""
-        ),
-        TodoItem("4", "Купить что-то", TodoPriority.Low, false, ""),
-        TodoItem("5", "Купить что-то", TodoPriority.High, false, ""),
-        TodoItem("6", "Купить что-то", TodoPriority.Medium, true, ""),
-        TodoItem("7", "Купить что-то", TodoPriority.Medium, false, "", deadline = Date().time),
-        TodoItem("8", "Купить что-то", TodoPriority.Medium, false, ""),
-        TodoItem("9", "Купить что-то", TodoPriority.Medium, false, ""),
-        TodoItem("10", "Купить что-то", TodoPriority.Medium, false, ""),
-        TodoItem("11", "Купить что-то", TodoPriority.Medium, false, ""),
-        TodoItem("12", "Купить что-то", TodoPriority.Medium, false, ""),
-        TodoItem("13", "Купить что-то", TodoPriority.Medium, false, ""),
-        TodoItem("14", "Купить что-то", TodoPriority.Medium, false, ""),
-        TodoItem("15", "Купить что-то", TodoPriority.Medium, false, ""),
-    )
+    private val todos = MutableStateFlow(listOf<TodoItem>())
 
-    suspend fun getAllTodos(): List<TodoItem> {
-        return todos
+    fun getTodos(): StateFlow<List<TodoItem>> = todos
+
+    suspend fun getAllTodos() {
+        withContext(Dispatchers.IO) {
+            todos.update { MyCustomBackend.getAllTodos() }
+        }
     }
 
     suspend fun getTodoById(id: String): TodoItem? {
-        return todos.find(id).second
+        return todos.value.find { it.id == id }
     }
 
     suspend fun saveTodo(todoItem: TodoItem) {
-        val index = todos.find(todoItem.id).first
-        if (index == -1) todos.add(todoItem) else todos[index] = todoItem
+        withContext(Dispatchers.IO) {
+            MyCustomBackend.addTodo(todoItem)
+            todos.update { MyCustomBackend.getAllTodos() }
+
+        }
     }
 
     suspend fun deleteTodo(id: String) {
-        val index = todos.find(id).first
-        todos.removeAt(index)
+        withContext(Dispatchers.IO) {
+            MyCustomBackend.deleteTodo(id)
+            todos.update { MyCustomBackend.getAllTodos() }
+        }
     }
 
-    suspend fun completeTodo(id: String) {
-        val (index: Int, foundTodo: TodoItem?) = todos.find(id)
-
-        if (foundTodo != null) {
-            todos[index] = foundTodo.copy(completed = !foundTodo.completed)
+    suspend fun clickCompleteTodo(id: String) {
+        withContext(Dispatchers.IO) {
+            val foundTodo: TodoItem? = todos.value.find { it.id == id }
+            if (foundTodo != null) {
+                val newTodo = foundTodo.copy(done = !foundTodo.done)
+                MyCustomBackend.updateTodo(id, newTodo)
+                todos.update { MyCustomBackend.getAllTodos() }
+            }
         }
     }
 }

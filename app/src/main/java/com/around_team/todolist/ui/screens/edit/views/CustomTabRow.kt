@@ -27,16 +27,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.around_team.todolist.R
-import com.around_team.todolist.ui.common.enums.TodoPriority
+import com.around_team.todolist.ui.common.enums.TodoImportance
 import com.around_team.todolist.ui.common.enums.getIconColor
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 
 class CustomTabRow(
     private val selectedTab: Int,
-    private val tabList: Array<TodoPriority>,
+    private val tabList: Array<TodoImportance>,
     private val onTabChanged: (Int) -> Unit,
     private val modifier: Modifier = Modifier,
 ) {
@@ -106,7 +107,7 @@ class CustomTabRow(
     }
 
     @Composable
-    private fun CustomTab(tab: TodoPriority, onClick: () -> Unit) {
+    private fun CustomTab(tab: TodoImportance, onClick: () -> Unit) {
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(7.dp))
@@ -134,4 +135,14 @@ class CustomTabRow(
             }
         }
     }
+}
+
+@Preview
+@Composable
+private fun CustomTabRowPreview() {
+    CustomTabRow(
+        selectedTab = 1,
+        tabList = TodoImportance.entries.toTypedArray(),
+        onTabChanged = { },
+    ).Create()
 }

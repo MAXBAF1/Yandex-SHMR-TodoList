@@ -7,20 +7,24 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun CustomSwitch(
     checked: Boolean,
-    modifier: Modifier = Modifier,
     onCheckedChange: () -> Unit,
+    modifier: Modifier = Modifier,
     width: Dp = 51.dp,
     height: Dp = 31.dp,
     thumbColor: Color = Color(0xFFFFFFFF),
@@ -58,4 +62,10 @@ fun CustomSwitch(
             center = Offset(x = animatePosition.value, y = size.height / 2),
         )
     }
+}
+
+@Preview
+@Composable
+private fun CustomSwitchPreview() {
+    CustomSwitch(checked = true, onCheckedChange = { })
 }

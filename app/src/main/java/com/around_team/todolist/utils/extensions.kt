@@ -4,6 +4,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import com.around_team.todolist.data.model.TodoItem
+import io.ktor.client.call.body
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.HttpStatusCode
 
 fun Modifier.background(color: () -> Color): Modifier {
     return drawBehind { drawRect(color()) }
@@ -21,4 +24,12 @@ fun List<TodoItem>.find(otherTodoId: String): Pair<Int, TodoItem?> {
     }
 
     return index to foundTodo
+}
+
+suspend inline fun <reified T> HttpResponse?.castOrNull(): T? {
+    if (this != null && this.status == HttpStatusCode.OK) {
+        return this.body<T>()
+    }
+
+    return null
 }

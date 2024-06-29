@@ -52,11 +52,6 @@ data class JetTodoListTypography(
     val footnote: TextStyle,
 )
 
-
-data class JetTodoListMargin(
-    val mainMargin: Dp,
-)
-
 enum class JetTodoListStyle {
     Base
 }
@@ -67,9 +62,6 @@ object JetTodoListTheme {
 
     internal val typography: JetTodoListTypography
         @Composable get() = LocalJetTodoListTypography.current
-
-    internal val margins: JetTodoListMargin
-        @Composable get() = LocalJetTodoListMargin.current
 }
 
 internal val LocalJetAroundColors = staticCompositionLocalOf<JetTodoListColors> {
@@ -78,8 +70,4 @@ internal val LocalJetAroundColors = staticCompositionLocalOf<JetTodoListColors> 
 
 internal val LocalJetTodoListTypography = staticCompositionLocalOf<JetTodoListTypography> {
     error("No font provided")
-}
-
-internal val LocalJetTodoListMargin = staticCompositionLocalOf<JetTodoListMargin> {
-    error("No margins provided")
 }
