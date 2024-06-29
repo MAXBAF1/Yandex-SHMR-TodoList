@@ -199,19 +199,13 @@ class TodosScreen(
     ) {
         val dismissState = rememberSwipeToDismissBoxState(
             confirmValueChange = {
-                return@rememberSwipeToDismissBoxState when (it) {
-                    SwipeToDismissBoxValue.StartToEnd -> {
-                        onCompleteClick()
-                        false
-                    }
-
-                    SwipeToDismissBoxValue.EndToStart -> {
-                        onDelete()
-                        false
-                    }
-
-                    SwipeToDismissBoxValue.Settled -> false
+                when (it) {
+                    SwipeToDismissBoxValue.StartToEnd -> onCompleteClick()
+                    SwipeToDismissBoxValue.EndToStart -> onDelete()
+                    SwipeToDismissBoxValue.Settled -> {}
                 }
+
+                return@rememberSwipeToDismissBoxState false
             },
             positionalThreshold = { it * 0.25F },
         )
