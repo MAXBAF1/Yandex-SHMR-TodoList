@@ -1,5 +1,6 @@
 package com.around_team.todolist.ui.screens.edit
 
+import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,12 +27,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.around_team.todolist.R
-import com.around_team.todolist.ui.common.enums.TodoPriority
+import com.around_team.todolist.data.db.TodoItemsRepository
+import com.around_team.todolist.ui.common.enums.TodoImportance
 import com.around_team.todolist.ui.common.views.CustomButton
 import com.around_team.todolist.ui.common.views.MyDivider
 import com.around_team.todolist.ui.common.views.custom_toolbar.CustomToolbar
@@ -42,6 +46,7 @@ import com.around_team.todolist.ui.screens.edit.views.CustomDatePicker
 import com.around_team.todolist.ui.screens.edit.views.CustomSwitch
 import com.around_team.todolist.ui.screens.edit.views.CustomTabRow
 import com.around_team.todolist.ui.theme.JetTodoListTheme
+import com.around_team.todolist.utils.ExceptionHandler
 import com.around_team.todolist.utils.FormatTimeInMillis
 
 class EditScreen(
@@ -57,6 +62,11 @@ class EditScreen(
 
         LaunchedEffect(key1 = editedTodoId) {
             viewModel.obtainEvent(EditEvent.SetEditedTodo(editedTodoId))
+        }
+
+        if (viewState.toTodosScreen) {
+            toTodosScreen()
+            viewModel.obtainEvent(EditEvent.ClearViewState)
         }
 
         Scaffold(
@@ -76,7 +86,6 @@ class EditScreen(
                             text = stringResource(id = R.string.save),
                             onClick = {
                                 viewModel.obtainEvent(EditEvent.SaveTodo)
-                                toTodosScreen()
                             },
                             fontWeight = FontWeight.Bold, enable = viewState.saveEnable,
                         )
@@ -103,7 +112,7 @@ class EditScreen(
 
                 PriorityAndDatePicker(
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
-                    selectedPriority = viewState.editedTodo.priority,
+                    selectedPriority = viewState.editedTodo.importance,
                     onPriorityChanged = { viewModel.obtainEvent(EditEvent.ChangePriority(it)) },
                     checked = viewState.deadlineChecked,
                     onCheckedChange = { viewModel.obtainEvent(EditEvent.CheckDeadline) },
@@ -118,7 +127,6 @@ class EditScreen(
                         text = stringResource(id = R.string.delete),
                         onClick = {
                             viewModel.obtainEvent(EditEvent.DeleteTodo)
-                            toTodosScreen()
                         },
                         textColor = JetTodoListTheme.colors.colors.red,
                     )
@@ -130,8 +138,8 @@ class EditScreen(
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun PriorityAndDatePicker(
-        selectedPriority: TodoPriority,
-        onPriorityChanged: (TodoPriority) -> Unit,
+        selectedPriority: TodoImportance,
+        onPriorityChanged: (TodoImportance) -> Unit,
         checked: Boolean,
         onCheckedChange: () -> Unit,
         selectedDate: Long?,
@@ -147,7 +155,6 @@ class EditScreen(
 
         if (checked && state.selectedDateMillis != null && state.selectedDateMillis != selectedDate) {
             LaunchedEffect(key1 = state.selectedDateMillis) {
-                //setCalendarState(false)
                 onDateChange(state.selectedDateMillis!!)
             }
         }
@@ -190,11 +197,11 @@ class EditScreen(
 
     @Composable
     private fun PriorityRow(
-        selectedPriority: TodoPriority,
-        onPriorityChanged: (TodoPriority) -> Unit,
+        selectedPriority: TodoImportance,
+        onPriorityChanged: (TodoImportance) -> Unit,
         modifier: Modifier = Modifier,
     ) {
-        val tabList = TodoPriority.entries.toTypedArray()
+        val tabList = TodoImportance.entries.toTypedArray()
 
         Row(
             modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
@@ -209,7 +216,7 @@ class EditScreen(
                 modifier = Modifier.weight(1F),
                 selectedTab = selectedPriority.ordinal,
                 tabList = tabList,
-                onTabChanged = { onPriorityChanged(TodoPriority.getFromOrdinal(it)) },
+                onTabChanged = { onPriorityChanged(TodoImportance.getFromOrdinal(it)) },
             ).Create()
         }
     }
@@ -284,4 +291,25 @@ class EditScreen(
             minLines = 6
         )
     }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Composable
+private fun EditScreenPreviewLight() {
+
+    EditScreen(
+        viewModel = EditViewModel(TodoItemsRepository(), ExceptionHandler(LocalContext.current)),
+        onCancelClick = {},
+        toTodosScreen = {},
+    )
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun EditScreenPreviewNight() {
+    EditScreen(
+        viewModel = EditViewModel(TodoItemsRepository(), ExceptionHandler(LocalContext.current)),
+        onCancelClick = {},
+        toTodosScreen = {},
+    )
 }
