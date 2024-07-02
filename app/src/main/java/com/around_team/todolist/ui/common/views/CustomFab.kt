@@ -16,9 +16,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.around_team.todolist.R
 import com.around_team.todolist.ui.theme.JetTodoListTheme
+import com.around_team.todolist.ui.theme.TodoListTheme
 
 @Composable
 fun CustomFab(onClick: () -> Unit, modifier: Modifier = Modifier) {
@@ -40,5 +42,13 @@ fun CustomFab(onClick: () -> Unit, modifier: Modifier = Modifier) {
             contentDescription = stringResource(id = R.string.add_icon),
             tint = JetTodoListTheme.colors.colors.white
         )
+    }
+}
+
+@Preview
+@Composable
+private fun CustomButtonPreview() {
+    TodoListTheme {
+        CustomFab(onClick = {})
     }
 }

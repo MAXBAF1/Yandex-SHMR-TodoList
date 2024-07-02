@@ -34,6 +34,7 @@ import com.around_team.todolist.R
 import com.around_team.todolist.ui.common.enums.TodoImportance
 import com.around_team.todolist.ui.common.enums.getIconColor
 import com.around_team.todolist.ui.theme.JetTodoListTheme
+import com.around_team.todolist.ui.theme.TodoListTheme
 
 class CustomTabRow(
     private val selectedTab: Int,
@@ -140,9 +141,13 @@ class CustomTabRow(
 @Preview
 @Composable
 private fun CustomTabRowPreview() {
-    CustomTabRow(
-        selectedTab = 1,
-        tabList = TodoImportance.entries.toTypedArray(),
-        onTabChanged = { },
-    ).Create()
+    TodoListTheme {
+        Box(modifier = Modifier.background(JetTodoListTheme.colors.back.primary)) {
+            CustomTabRow(
+                selectedTab = 1,
+                tabList = TodoImportance.entries.toTypedArray(),
+                onTabChanged = { },
+            ).Create()
+        }
+    }
 }

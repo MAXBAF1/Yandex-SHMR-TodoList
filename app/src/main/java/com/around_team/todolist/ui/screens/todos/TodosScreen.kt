@@ -20,19 +20,20 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -40,9 +41,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.around_team.todolist.R
-import com.around_team.todolist.data.db.TodoItemsRepository
 import com.around_team.todolist.data.model.TodoItem
+import com.around_team.todolist.data.repositories.TodoItemsRepository
 import com.around_team.todolist.ui.common.views.CustomFab
+import com.around_team.todolist.ui.common.views.CustomSnackbar
 import com.around_team.todolist.ui.common.views.MyDivider
 import com.around_team.todolist.ui.common.views.custom_toolbar.CustomToolbar
 import com.around_team.todolist.ui.common.views.custom_toolbar.rememberToolbarScrollBehavior
@@ -50,7 +52,7 @@ import com.around_team.todolist.ui.screens.todos.models.TodosEvent
 import com.around_team.todolist.ui.screens.todos.views.CreateNewCard
 import com.around_team.todolist.ui.screens.todos.views.TodoCard
 import com.around_team.todolist.ui.theme.JetTodoListTheme
-import com.around_team.todolist.utils.ExceptionHandler
+import com.around_team.todolist.ui.theme.TodoListTheme
 
 class TodosScreen(
     private val viewModel: TodosViewModel,
@@ -61,9 +63,20 @@ class TodosScreen(
     fun Create() {
         val viewState by viewModel.getViewState().collectAsStateWithLifecycle()
         val scrollBehavior = rememberToolbarScrollBehavior()
+        val snackbarHostState = remember { SnackbarHostState() }
 
+        val actionStr = stringResource(id = R.string.repeat)
+        if (viewState.error != null) {
+            LaunchedEffect(key1 = viewState.error) {
+                val result = snackbarHostState.showSnackbar(viewState.error.toString(), actionStr)
+                viewModel.obtainEvent(TodosEvent.HandleSnackbarResult(result))
+            }
+        }
 
         Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
                 CustomToolbar(
                     collapsingTitle = stringResource(id = R.string.title),
@@ -77,9 +90,7 @@ class TodosScreen(
                     onClick = { toEditScreen(null) },
                 )
             },
-            modifier = Modifier
-                .fillMaxSize()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            snackbarHost = { CustomSnackbar(hostState = snackbarHostState) },
             containerColor = JetTodoListTheme.colors.back.primary,
         ) { paddingValues ->
             Column(
@@ -269,17 +280,21 @@ class TodosScreen(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
 private fun TodosScreenPreviewLight() {
-    TodosScreen(
-        viewModel = TodosViewModel(TodoItemsRepository(), ExceptionHandler(LocalContext.current)),
-        toEditScreen = {},
-    )
+    TodoListTheme {
+        TodosScreen(
+            viewModel = TodosViewModel(TodoItemsRepository()),
+            toEditScreen = {},
+        )
+    }
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun TodosScreenPreviewNight() {
-    TodosScreen(
-        viewModel = TodosViewModel(TodoItemsRepository(), ExceptionHandler(LocalContext.current)),
-        toEditScreen = {},
-    )
+    TodoListTheme {
+        TodosScreen(
+            viewModel = TodosViewModel(TodoItemsRepository()),
+            toEditScreen = {},
+        )
+    }
 }

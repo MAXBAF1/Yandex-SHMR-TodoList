@@ -26,6 +26,7 @@ import com.around_team.todolist.data.model.TodoItem
 import com.around_team.todolist.ui.common.enums.TodoImportance
 import com.around_team.todolist.ui.common.enums.getIconColor
 import com.around_team.todolist.ui.theme.JetTodoListTheme
+import com.around_team.todolist.ui.theme.TodoListTheme
 import com.around_team.todolist.utils.FormatTimeInMillis
 import java.util.Date
 import java.util.UUID
@@ -109,11 +110,14 @@ private fun NameAndDateColumn(todo: TodoItem, modifier: Modifier = Modifier) {
 @Preview
 @Composable
 private fun TodoCardPreview() {
-    TodoCard(TodoItem(
-        id = UUID.randomUUID().toString(),
-        text = "",
-        importance = TodoImportance.Basic,
-        done = false,
-        creationDate = Date().time
-    ), onClick = {}, onCompleteClick = {})
+    TodoListTheme {
+        TodoCard(TodoItem(
+            id = UUID.randomUUID().toString(),
+            text = stringResource(id = R.string.what_todo),
+            importance = TodoImportance.Important,
+            done = false,
+            creationDate = Date().time,
+            deadline = Date().time
+        ), onClick = {}, onCompleteClick = {})
+    }
 }

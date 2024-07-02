@@ -65,6 +65,7 @@ object MyCustomBackend {
     )
 
     suspend fun getAllTodos(): List<TodoItem> {
+        if (Random.nextInt(0, 2) == 0) throw RuntimeException("Random Error")
         return todos.toList()
     }
 

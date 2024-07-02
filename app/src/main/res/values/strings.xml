@@ -27,4 +27,6 @@
 
     <!--Errors-->
     <string name="error">Произошла ошибка</string>
+    <string name="ok">Ок</string>
+    <string name="repeat">Повторить</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.around_team.todolist.ui.screens.edit.models
 
+import androidx.compose.material3.SnackbarResult
 import com.around_team.todolist.ui.common.enums.TodoImportance
 
 sealed class EditEvent {
@@ -12,4 +13,5 @@ sealed class EditEvent {
     data object SaveTodo : EditEvent()
     data object DeleteTodo : EditEvent()
     data object ClearViewState : EditEvent()
+    data class HandleSnackbarResult(val result: SnackbarResult) : EditEvent()
 }

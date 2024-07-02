@@ -1,14 +1,16 @@
 package com.around_team.todolist.ui.screens.edit
 
+import androidx.compose.material3.SnackbarResult
 import androidx.lifecycle.viewModelScope
-import com.around_team.todolist.data.db.TodoItemsRepository
 import com.around_team.todolist.data.model.TodoItem
+import com.around_team.todolist.data.repositories.TodoItemsRepository
 import com.around_team.todolist.ui.common.enums.TodoImportance
 import com.around_team.todolist.ui.common.models.BaseViewModel
 import com.around_team.todolist.ui.screens.edit.models.EditEvent
 import com.around_team.todolist.ui.screens.edit.models.EditViewState
-import com.around_team.todolist.utils.ExceptionHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -18,9 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EditViewModel @Inject constructor(
     private val repository: TodoItemsRepository,
-    private val exceptionHandler: ExceptionHandler,
 ) : BaseViewModel<EditViewState, EditEvent>(initialState = EditViewState()) {
-
     private var saveEnable: Boolean = false
     private var editedTodo: TodoItem = TodoItem(
         id = UUID.randomUUID().toString(),
@@ -32,6 +32,17 @@ class EditViewModel @Inject constructor(
     private var deadlineChecked: Boolean = false
     private var showCalendar: Boolean = true
     private var oldTodo: TodoItem? = null
+    private var error: String? = null
+    private var lastOperation: () -> Unit = { }
+
+    init {
+        viewModelScope.launch {
+            repository.getErrors().onEach { error ->
+                this@EditViewModel.error = error.message
+                viewState.update { it.copy(error = error.message) }
+            }.collect()
+        }
+    }
 
     override fun obtainEvent(viewEvent: EditEvent) {
         when (viewEvent) {
@@ -44,25 +55,33 @@ class EditViewModel @Inject constructor(
             EditEvent.SaveTodo -> saveTodo()
             EditEvent.DeleteTodo -> deleteTodo()
             EditEvent.ClearViewState -> clearViewState()
+            is EditEvent.HandleSnackbarResult -> handleSnackbarResult(viewEvent.result)
+        }
+    }
+
+    private fun handleSnackbarResult(result: SnackbarResult) {
+        when (result) {
+            SnackbarResult.Dismissed -> {}
+            SnackbarResult.ActionPerformed -> {
+                error = null
+                viewState.update { it.copy(error = null) }
+                lastOperation()
+            }
         }
     }
 
     private fun saveTodo() {
-        viewModelScope.launch {
-            exceptionHandler.handleException {
-                repository.saveTodo(editedTodo)
-                viewState.update { it.copy(toTodosScreen = true) }
-            }
+        repository.saveTodo(editedTodo) {
+            viewState.update { it.copy(toTodosScreen = true) }
         }
+        lastOperation = { saveTodo() }
     }
 
     private fun deleteTodo() {
-        viewModelScope.launch {
-            exceptionHandler.handleException {
-                repository.deleteTodo(editedTodo.id)
-                viewState.update { it.copy(toTodosScreen = true) }
-            }
+        repository.deleteTodo(editedTodo.id) {
+            viewState.update { it.copy(toTodosScreen = true) }
         }
+        lastOperation = { deleteTodo() }
     }
 
     private fun clearViewState() {
@@ -77,26 +96,27 @@ class EditViewModel @Inject constructor(
         )
         deadlineChecked = false
         showCalendar = true
+        error = null
         viewState.update { EditViewState() }
     }
 
     private fun setEditedTodo(id: String?) {
-        viewModelScope.launch {
-            if (id == null) {
-                if (oldTodo != null) clearViewState()
-            } else {
-                val todo = repository.getTodoById(id) ?: return@launch
-                oldTodo = todo
-                editedTodo = todo.copy()
-                deadlineChecked = todo.deadline != null
-            }
+        if (id == null) {
+            error = null
+            viewState.update { it.copy(error = null) }
+            if (oldTodo != null) clearViewState()
+        } else {
+            val todo = repository.getTodoById(id) ?: return
+            oldTodo = todo
+            editedTodo = todo.copy()
+            deadlineChecked = todo.deadline != null
+        }
 
-            viewState.update {
-                it.copy(
-                    editedTodo = editedTodo,
-                    deadlineChecked = deadlineChecked,
-                )
-            }
+        viewState.update {
+            it.copy(
+                editedTodo = editedTodo,
+                deadlineChecked = deadlineChecked,
+            )
         }
     }
 

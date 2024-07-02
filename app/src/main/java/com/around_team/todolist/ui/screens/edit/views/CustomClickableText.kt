@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import com.around_team.todolist.R
 import com.around_team.todolist.ui.theme.JetTodoListTheme
+import com.around_team.todolist.ui.theme.TodoListTheme
 import kotlinx.coroutines.delay
 
 @Composable
@@ -62,5 +63,7 @@ fun CustomClickableText(
 @Preview
 @Composable
 private fun CustomClickableTextPreview() {
-    CustomClickableText(text = stringResource(id = R.string.what_todo), onClick = {  })
+    TodoListTheme {
+        CustomClickableText(text = stringResource(id = R.string.what_todo), onClick = { })
+    }
 }

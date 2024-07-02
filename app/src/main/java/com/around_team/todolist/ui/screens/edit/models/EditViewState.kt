@@ -17,5 +17,6 @@ data class EditViewState(
     val deadlineChecked: Boolean = false,
     val showCalendar: Boolean = true,
     val toTodosScreen: Boolean = false,
-    val exception: Boolean = true
+    val exception: Boolean = true,
+    val error: String? = null,
 )

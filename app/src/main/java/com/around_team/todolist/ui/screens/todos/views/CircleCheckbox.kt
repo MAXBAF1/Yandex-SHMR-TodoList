@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.around_team.todolist.R
 import com.around_team.todolist.ui.theme.JetTodoListTheme
+import com.around_team.todolist.ui.theme.TodoListTheme
 
 @Composable
 fun CircleCheckbox(
@@ -58,5 +59,7 @@ fun CircleCheckbox(
 @Preview
 @Composable
 private fun CircleCheckboxPreview() {
-    CircleCheckbox(checked = true, onChecked = {})
+    TodoListTheme {
+        CircleCheckbox(checked = true, onChecked = {})
+    }
 }
