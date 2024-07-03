@@ -4,6 +4,7 @@ plugins {
     id("kotlin-kapt")
     alias(libs.plugins.google.dagger.hilt.android)
     kotlin("plugin.serialization")
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -38,12 +39,6 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
-    }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14"
     }
     packaging {
         resources {
