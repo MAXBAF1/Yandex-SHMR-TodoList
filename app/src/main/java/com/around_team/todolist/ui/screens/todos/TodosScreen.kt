@@ -25,6 +25,8 @@ import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -59,9 +61,12 @@ class TodosScreen(
     private val toEditScreen: (id: String?) -> Unit,
 ) {
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun Create() {
-        val viewState by viewModel.getViewState().collectAsStateWithLifecycle()
+        val viewState by viewModel
+            .getViewState()
+            .collectAsStateWithLifecycle()
         val scrollBehavior = rememberToolbarScrollBehavior()
         val snackbarHostState = remember { SnackbarHostState() }
 
@@ -73,10 +78,27 @@ class TodosScreen(
             }
         }
 
+        val pullState = rememberPullToRefreshState()
+
+        LaunchedEffect(pullState.isRefreshing) {
+            if (pullState.isRefreshing) viewModel.obtainEvent(TodosEvent.RefreshTodos)
+        }
+
+        LaunchedEffect(key1 = viewState.refreshing) {
+            if (!viewState.refreshing) pullState.endRefresh()
+        }
+
+        if (scrollBehavior.state.collapsedFraction != 0f) pullState.endRefresh()
+
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .let {
+                    if (scrollBehavior.state.collapsedFraction == 0f) {
+                        it.nestedScroll(pullState.nestedScrollConnection)
+                    } else it
+                },
             topBar = {
                 CustomToolbar(
                     collapsingTitle = stringResource(id = R.string.title),
@@ -93,13 +115,13 @@ class TodosScreen(
             snackbarHost = { CustomSnackbar(hostState = snackbarHostState) },
             containerColor = JetTodoListTheme.colors.back.primary,
         ) { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxWidth()
+            Box(
+                modifier = Modifier.padding(paddingValues)
             ) {
                 TodoList(
-                    modifier = Modifier.padding(horizontal = 12.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .fillMaxSize(),
                     completedTodosShowed = viewState.completedShowed,
                     todos = viewState.todos,
                     completeCnt = viewState.completeCnt,
@@ -107,6 +129,12 @@ class TodosScreen(
                     onCompleteClick = { viewModel.obtainEvent(TodosEvent.CompleteTodo(it)) },
                     onDelete = { viewModel.obtainEvent(TodosEvent.DeleteTodo(it)) },
                     onTodoClick = { toEditScreen(it) },
+                )
+                PullToRefreshContainer(
+                    state = pullState,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    containerColor = JetTodoListTheme.colors.back.primary,
+                    contentColor = JetTodoListTheme.colors.label.primary
                 )
             }
         }
@@ -139,9 +167,9 @@ class TodosScreen(
             }
             itemsIndexed(items = todos, key = { _, todo -> todo.id }) { i, todo ->
                 TodoRow(
-                    modifier = if (i == 0) Modifier.clip(
-                        RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
-                    ) else Modifier
+                    modifier = if (i == 0) {
+                        Modifier.clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                    } else Modifier
                         .animateItemPlacement()
                         .background(JetTodoListTheme.colors.back.secondary),
                     todo = todo,
@@ -245,7 +273,7 @@ class TodosScreen(
                         .background(JetTodoListTheme.colors.colors.green)
                         .fillMaxSize()
                         .padding(start = 20.dp),
-                    contentAlignment = Alignment.CenterStart
+                    contentAlignment = Alignment.CenterStart,
                 ) {
                     Icon(
                         modifier = Modifier.size(24.dp),

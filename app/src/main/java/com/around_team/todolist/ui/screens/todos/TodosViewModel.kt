@@ -2,8 +2,8 @@ package com.around_team.todolist.ui.screens.todos
 
 import androidx.compose.material3.SnackbarResult
 import androidx.lifecycle.viewModelScope
-import com.around_team.todolist.data.repositories.TodoItemsRepository
 import com.around_team.todolist.data.model.TodoItem
+import com.around_team.todolist.data.repositories.TodoItemsRepository
 import com.around_team.todolist.ui.common.models.BaseViewModel
 import com.around_team.todolist.ui.screens.todos.models.TodosEvent
 import com.around_team.todolist.ui.screens.todos.models.TodosViewState
@@ -24,11 +24,11 @@ class TodosViewModel @Inject constructor(
     private var showedTodos: List<TodoItem> = listOf()
     private var completeCnt = 0
     private var completedShowed = false
-    private var lastOperation: () -> Unit = { repository.getAllTodos() }
+    private var lastOperation: () -> Unit = { repository.refreshAllTodos() }
 
     init {
         viewModelScope.launch {
-            repository.getAllTodos()
+            repository.refreshAllTodos()
             repository.getTodos().collect {
                 todos = it
                 updateTodos()
@@ -48,7 +48,15 @@ class TodosViewModel @Inject constructor(
             is TodosEvent.DeleteTodo -> deleteTodo(viewEvent.id)
             TodosEvent.CancelJobs -> viewModelScope.cancel()
             is TodosEvent.HandleSnackbarResult -> handleSnackbarResult(viewEvent.result)
+            TodosEvent.RefreshTodos -> refreshTodos()
         }
+    }
+
+    private fun refreshTodos() {
+        repository.refreshAllTodos {
+            viewState.update { it.copy(refreshing = false) }
+        }
+        viewState.update { it.copy(refreshing = true) }
     }
 
     private fun handleSnackbarResult(result: SnackbarResult) {
@@ -65,7 +73,11 @@ class TodosViewModel @Inject constructor(
         showedTodos = getShowedTodos()
         completeCnt = todos.count { it.done }
 
-        viewState.update { it.copy(todos = showedTodos, completeCnt = completeCnt, error = null) }
+        viewState.update {
+            it.copy(
+                todos = showedTodos, completeCnt = completeCnt, error = null, refreshing = false
+            )
+        }
     }
 
     private fun deleteTodo(id: String) {

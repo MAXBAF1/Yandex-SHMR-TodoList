@@ -7,5 +7,6 @@ data class TodosViewState(
     val completeCnt: Int = 0,
     val completedShowed: Boolean = false,
     val exception: Boolean = true,
-    val error: String? = null
+    val error: String? = null,
+    val refreshing: Boolean = false
 )
