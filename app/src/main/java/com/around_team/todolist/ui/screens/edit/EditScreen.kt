@@ -35,7 +35,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.around_team.todolist.R
-import com.around_team.todolist.data.repositories.TodoItemsRepository
+import com.around_team.todolist.data.db.DatabaseRepository
+import com.around_team.todolist.data.network.repositories.Repository
 import com.around_team.todolist.ui.common.enums.TodoImportance
 import com.around_team.todolist.ui.common.views.CustomButton
 import com.around_team.todolist.ui.common.views.CustomSnackbar
@@ -47,7 +48,7 @@ import com.around_team.todolist.ui.screens.edit.views.CustomClickableText
 import com.around_team.todolist.ui.screens.edit.views.CustomDatePicker
 import com.around_team.todolist.ui.screens.edit.views.CustomSwitch
 import com.around_team.todolist.ui.screens.edit.views.CustomTabRow
-import com.around_team.todolist.ui.screens.todos.models.TodosEvent
+import com.around_team.todolist.ui.screens.todos.testDao
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.ui.theme.TodoListTheme
 import com.around_team.todolist.utils.FormatTimeInMillis
@@ -62,7 +63,6 @@ class EditScreen(
     fun Create() {
         val viewState by viewModel.getViewState().collectAsStateWithLifecycle()
         val scrollBehavior = rememberToolbarScrollBehavior()
-        val snackbarHostState = remember { SnackbarHostState() }
 
         LaunchedEffect(key1 = editedTodoId) {
             viewModel.obtainEvent(EditEvent.SetEditedTodo(editedTodoId))
@@ -71,14 +71,6 @@ class EditScreen(
         if (viewState.toTodosScreen) {
             toTodosScreen()
             viewModel.obtainEvent(EditEvent.ClearViewState)
-        }
-
-        val actionStr = stringResource(id = R.string.repeat)
-        if (viewState.error != null) {
-            LaunchedEffect(key1 = viewState.error) {
-                val result = snackbarHostState.showSnackbar(viewState.error.toString(), actionStr)
-                viewModel.obtainEvent(EditEvent.HandleSnackbarResult(result))
-            }
         }
 
         Scaffold(
@@ -108,7 +100,6 @@ class EditScreen(
                     scrollBehavior = scrollBehavior,
                 )
             },
-            snackbarHost = { CustomSnackbar(hostState = snackbarHostState) },
             containerColor = JetTodoListTheme.colors.back.primary,
         ) { paddingValues ->
             Column(
@@ -311,7 +302,7 @@ class EditScreen(
 private fun EditScreenPreviewLight() {
     TodoListTheme {
         EditScreen(
-            viewModel = EditViewModel(TodoItemsRepository()),
+            viewModel = EditViewModel(Repository(DatabaseRepository(testDao))),
             onCancelClick = {},
             toTodosScreen = {},
         )
@@ -323,7 +314,7 @@ private fun EditScreenPreviewLight() {
 private fun EditScreenPreviewNight() {
     TodoListTheme {
         EditScreen(
-            viewModel = EditViewModel(TodoItemsRepository()),
+            viewModel = EditViewModel(Repository(DatabaseRepository(testDao))),
             onCancelClick = {},
             toTodosScreen = {},
         )

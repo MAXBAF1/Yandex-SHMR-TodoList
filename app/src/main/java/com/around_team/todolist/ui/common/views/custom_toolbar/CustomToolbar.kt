@@ -1,6 +1,7 @@
 package com.around_team.todolist.ui.common.views.custom_toolbar
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,13 +56,13 @@ fun CustomToolbar(
 
     val collapsingTitleScale = lerp(1f, fullyCollapsedTitleScale, collapsedFraction)
 
-    val showBorder = when {
-        scrollBehavior == null -> false
-        scrollBehavior.state.contentOffset <= 0 && collapsedFraction == 1f -> true
-        else -> false
-    }
-
-    val borderState = if (showBorder) 0.5.dp else 0.dp
+    val borderColor = animateColorAsState(
+        targetValue = lerp(
+            JetTodoListTheme.colors.back.primary,
+            JetTodoListTheme.colors.support.separator,
+            collapsedFraction
+        ), label = ""
+    )
 
     val bgColor = animateColorAsState(
         targetValue = lerp(
@@ -87,8 +88,7 @@ fun CustomToolbar(
                 content = {
                     if (collapsingTitle != null) {
                         Text(
-                            modifier = Modifier
-                                .layoutId(ExpandedTitleId)
+                            modifier = Modifier.layoutId(ExpandedTitleId)
                                 .wrapContentHeight(align = Alignment.Top)
                                 .graphicsLayer(
                                     scaleX = collapsingTitleScale,
@@ -100,9 +100,7 @@ fun CustomToolbar(
                             color = JetTodoListTheme.colors.label.primary
                         )
                         Text(
-                            modifier = Modifier
-                                .layoutId(CollapsedTitleId)
-                                .graphicsLayer(
+                            modifier = Modifier.layoutId(CollapsedTitleId).graphicsLayer(
                                     scaleX = collapsingTitleScale,
                                     scaleY = collapsingTitleScale,
                                     transformOrigin = TransformOrigin(0f, 0f)
@@ -117,25 +115,17 @@ fun CustomToolbar(
 
                     if (navigationIcon != null) {
                         Box(
-                            modifier = Modifier
-                                .wrapContentSize()
-                                .layoutId(NavigationIconId)
+                            modifier = Modifier.wrapContentSize().layoutId(NavigationIconId)
                         ) { navigationIcon() }
                     }
 
                     if (actions != null) {
                         Row(
-                            modifier = Modifier
-                                .wrapContentSize()
-                                .layoutId(ActionsId)
+                            modifier = Modifier.wrapContentSize().layoutId(ActionsId)
                         ) { actions() }
                     }
-                }, modifier = modifier
-                    .then(Modifier.heightIn(min = MinCollapsedHeight))
-                    .padding(
-                        WindowInsets.systemBars
-                            .only(WindowInsetsSides.Top)
-                            .asPaddingValues()
+                }, modifier = modifier.then(Modifier.heightIn(min = MinCollapsedHeight)).padding(
+                        WindowInsets.systemBars.only(WindowInsetsSides.Top).asPaddingValues()
                     )
             ) { measurables, constraints ->
                 val horizontalPaddingPx = HorizontalPadding.toPx()
@@ -268,11 +258,10 @@ fun CustomToolbar(
                     }
                 }
             }
-            if (showBorder) {
-                HorizontalDivider(
-                    thickness = borderState, color = JetTodoListTheme.colors.support.separator
-                )
-            }
+            HorizontalDivider(
+                thickness = 0.5.dp,
+                color = borderColor.value
+            )
         }
     }
 }

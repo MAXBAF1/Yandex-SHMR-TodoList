@@ -29,4 +29,6 @@
     <string name="error">Произошла ошибка</string>
     <string name="ok">Ок</string>
     <string name="repeat">Повторить</string>
+    <string name="network_unavailable">Подключение к интернету отсутствует</string>
+    <string name="sync_error">Не удалось синхронизироваться с сервером</string>
 </resources>

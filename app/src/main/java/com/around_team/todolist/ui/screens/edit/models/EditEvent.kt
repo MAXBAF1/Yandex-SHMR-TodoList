@@ -13,5 +13,4 @@ sealed class EditEvent {
     data object SaveTodo : EditEvent()
     data object DeleteTodo : EditEvent()
     data object ClearViewState : EditEvent()
-    data class HandleSnackbarResult(val result: SnackbarResult) : EditEvent()
 }

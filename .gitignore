@@ -47,3 +47,5 @@ _ReSharper*/
 .vs/
 #Nuget packages folder
 packages/
+
+Token.kt

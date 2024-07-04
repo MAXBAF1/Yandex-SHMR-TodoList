@@ -22,7 +22,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.around_team.todolist.R
-import com.around_team.todolist.data.model.TodoItem
+import com.around_team.todolist.ui.common.models.TodoItem
 import com.around_team.todolist.ui.common.enums.TodoImportance
 import com.around_team.todolist.ui.common.enums.getIconColor
 import com.around_team.todolist.ui.theme.JetTodoListTheme
@@ -71,10 +71,10 @@ fun TodoCard(todo: TodoItem, onClick: () -> Unit, onCompleteClick: () -> Unit) {
 private fun NameAndDateColumn(todo: TodoItem, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if (todo.importance != TodoImportance.Basic) {
+            if (todo.importance != TodoImportance.Basic && todo.importance.iconId != null) {
                 Icon(
                     modifier = Modifier.padding(end = 2.dp),
-                    painter = painterResource(id = todo.importance.iconId!!),
+                    painter = painterResource(id = todo.importance.iconId),
                     contentDescription = stringResource(id = R.string.priority_icon),
                     tint = todo.importance.getIconColor()
                 )
@@ -111,7 +111,8 @@ private fun NameAndDateColumn(todo: TodoItem, modifier: Modifier = Modifier) {
 @Composable
 private fun TodoCardPreview() {
     TodoListTheme {
-        TodoCard(TodoItem(
+        TodoCard(
+            TodoItem(
             id = UUID.randomUUID().toString(),
             text = stringResource(id = R.string.what_todo),
             importance = TodoImportance.Important,
