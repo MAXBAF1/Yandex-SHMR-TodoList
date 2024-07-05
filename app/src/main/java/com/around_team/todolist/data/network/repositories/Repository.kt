@@ -48,7 +48,7 @@ class Repository @Inject constructor(private val databaseRepository: DatabaseRep
         }
     }
 
-    fun refreshAllTodos(onSuccess: () -> Unit = {}) {
+    fun refreshAllTodos() {
         repositoryScope.launch {
             val todosDTO = RequestManager.createRequest<GetAllItemsReceive>(
                 methodType = HttpMethod.Get,
@@ -57,20 +57,21 @@ class Repository @Inject constructor(private val databaseRepository: DatabaseRep
             val todoItems = todosDTO.map { it.toTodoItem() }
             databaseRepository.replaceTodos(todoItems)
             todos.update { todoItems }
-            onSuccess()
         }
     }
 
-    fun sendAllTodos(list: List<TodoItem>) {
+    fun sendAllTodos(list: List<TodoItem>, onSuccess: () -> Unit = {}) {
         repositoryScope.launch {
             val todosDTO = RequestManager.createRequest<GetAllItemsReceive>(
                 methodType = HttpMethod.Patch,
                 address = TodoListConfig.LIST_ADDRESS.toString(),
                 body = SendAllItemsRequest(list.map { it.toDTO() })
             )?.list ?: return@launch
+
             val todoItems = todosDTO.map { it.toTodoItem() }
             databaseRepository.replaceTodos(todoItems)
             todos.update { todoItems }
+            onSuccess()
         }
     }
 

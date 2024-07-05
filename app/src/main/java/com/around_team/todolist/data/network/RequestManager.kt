@@ -9,6 +9,7 @@ import com.around_team.todolist.utils.castOrNull
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.DefaultRequest
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.header
 import io.ktor.client.request.request
@@ -34,7 +35,15 @@ object RequestManager {
             }
         }
         install(DefaultRequest) {
-            header(HttpHeaders.Authorization, "Bearer ${Token.TOKEN}")
+            header(HttpHeaders.Authorization, "OAuth ${Token.TOKEN}")
+            header(ERRORS_HEADER, 50)
+            header(REVISION_HEADER, lastKnownRevision.toString())
+            header(HttpHeaders.ContentType, ContentType.Application.Json)
+            header(HttpHeaders.Accept, ContentType.Application.Json)
+        }
+        install(HttpRequestRetry) {
+            retryOnServerErrors(maxRetries = 2)
+            exponentialDelay()
         }
     }
     var lastKnownRevision = 0
@@ -51,12 +60,7 @@ object RequestManager {
                     url(address)
                     body?.let { setBody(it) }
 
-                    header(ERRORS_HEADER, 0)
-                    header(REVISION_HEADER, lastKnownRevision.toString())
-                    header(HttpHeaders.ContentType, ContentType.Application.Json)
-                    header(HttpHeaders.Accept, ContentType.Application.Json)
-
-                    Log.d("MyLog", "Request body: $body")
+                    Log.d("MyLog", "type: $method; body: $body")
                 }
                 Log.d("MyLog", "Receive body: ${response.bodyAsText()}")
 
@@ -74,6 +78,6 @@ object RequestManager {
         }
     }
 
-    const val ERRORS_HEADER = "X-Generate-Fails"
-    const val REVISION_HEADER = "X-Last-Known-Revision"
+    private const val ERRORS_HEADER = "X-Generate-Fails"
+    private const val REVISION_HEADER = "X-Last-Known-Revision"
 }

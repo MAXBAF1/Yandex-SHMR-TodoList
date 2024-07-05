@@ -6,6 +6,7 @@ import com.around_team.todolist.ui.common.models.BaseViewModel
 import com.around_team.todolist.ui.common.models.TodoItem
 import com.around_team.todolist.ui.screens.edit.models.EditEvent
 import com.around_team.todolist.ui.screens.edit.models.EditViewState
+import com.around_team.todolist.utils.PreferencesHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.update
 import java.util.Date
@@ -15,6 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EditViewModel @Inject constructor(
     private val repository: Repository,
+    private val preferencesHelper: PreferencesHelper
 ) : BaseViewModel<EditViewState, EditEvent>(initialState = EditViewState()) {
     private var saveEnable: Boolean = false
     private var editedTodo: TodoItem = TodoItem(
@@ -45,7 +47,10 @@ class EditViewModel @Inject constructor(
     }
 
     private fun saveTodo() {
-        repository.saveTodo(editedTodo)
+        editedTodo = editedTodo.copy(
+            modifiedDate = Date().time, lastUpdatedBy =  preferencesHelper.getUUID()
+        )
+        if (oldTodo == null) repository.saveTodo(editedTodo) else repository.updateTodo(editedTodo)
         viewState.update { it.copy(toTodosScreen = true) }
     }
 

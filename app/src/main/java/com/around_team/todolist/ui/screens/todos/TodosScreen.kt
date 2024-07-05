@@ -1,6 +1,8 @@
 package com.around_team.todolist.ui.screens.todos
 
+import android.content.Context
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -64,6 +66,7 @@ import com.around_team.todolist.ui.screens.todos.views.CreateNewCard
 import com.around_team.todolist.ui.screens.todos.views.TodoCard
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.ui.theme.TodoListTheme
+import com.around_team.todolist.utils.PreferencesHelper
 import com.around_team.todolist.utils.observeConnectivityAsFlow
 
 class TodosScreen(
@@ -172,11 +175,18 @@ class TodosScreen(
         viewState: TodosViewState,
         snackbarHostState: SnackbarHostState,
     ) {
-        val actionStr = stringResource(id = R.string.repeat)
-        if (viewState.errorId != null) {
-            val errorStr = stringResource(viewState.errorId)
-            LaunchedEffect(key1 = viewState.errorId) {
-                val result = snackbarHostState.showSnackbar(errorStr, actionStr)
+        if (viewState.messageId == null) return
+        val notActionMessages = listOf(R.string.network_unavailable, R.string.success_sync)
+        val messageStr = stringResource(viewState.messageId)
+        if (notActionMessages.contains(viewState.messageId)) {
+            Toast
+                .makeText(LocalContext.current, messageStr, Toast.LENGTH_LONG)
+                .show()
+        } else {
+            val actionStr = stringResource(id = R.string.repeat)
+
+            LaunchedEffect(key1 = viewState.messageId) {
+                val result = snackbarHostState.showSnackbar(messageStr, actionStr)
                 viewModel.obtainEvent(TodosEvent.HandleSnackbarResult(result))
             }
         }
@@ -352,7 +362,12 @@ class TodosScreen(
 private fun TodosScreenPreviewLight() {
     TodoListTheme {
         TodosScreen(
-            viewModel = TodosViewModel(Repository(DatabaseRepository(testDao))),
+            viewModel = TodosViewModel(
+                Repository(DatabaseRepository(testDao)),
+                PreferencesHelper(
+                    LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE)
+                ),
+            ),
             toEditScreen = {},
         )
     }
@@ -363,7 +378,12 @@ private fun TodosScreenPreviewLight() {
 private fun TodosScreenPreviewNight() {
     TodoListTheme {
         TodosScreen(
-            viewModel = TodosViewModel(Repository(DatabaseRepository(testDao))),
+            viewModel = TodosViewModel(
+                Repository(DatabaseRepository(testDao)),
+                PreferencesHelper(
+                    LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE)
+                ),
+            ),
             toEditScreen = {},
         )
     }

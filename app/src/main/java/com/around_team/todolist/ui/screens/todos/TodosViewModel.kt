@@ -9,19 +9,21 @@ import com.around_team.todolist.ui.common.models.BaseViewModel
 import com.around_team.todolist.ui.common.models.TodoItem
 import com.around_team.todolist.ui.screens.todos.models.TodosEvent
 import com.around_team.todolist.ui.screens.todos.models.TodosViewState
+import com.around_team.todolist.utils.PreferencesHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
 class TodosViewModel @Inject constructor(
     private val repository: Repository,
-
-    ) : BaseViewModel<TodosViewState, TodosEvent>(initialState = TodosViewState()) {
+    private val preferencesHelper: PreferencesHelper,
+) : BaseViewModel<TodosViewState, TodosEvent>(initialState = TodosViewState()) {
 
     private var todos: List<TodoItem> = listOf()
     private var showedTodos: List<TodoItem> = listOf()
@@ -44,7 +46,7 @@ class TodosViewModel @Inject constructor(
             repository
                 .getErrors()
                 .onEach { errorId ->
-                    viewState.update { it.copy(errorId = errorId) }
+                    viewState.update { it.copy(messageId = errorId, refreshing = false) }
                 }
                 .collect()
         }
@@ -66,14 +68,14 @@ class TodosViewModel @Inject constructor(
         networkState = connectionState
         when (connectionState) {
             NetworkConnectionState.Available -> {
-                viewState.update { it.copy(errorId = null, connectionState = connectionState) }
+                viewState.update { it.copy(messageId = null, connectionState = connectionState) }
                 repository.sendAllTodos(todos)
             }
 
             NetworkConnectionState.Unavailable -> {
                 viewState.update {
                     it.copy(
-                        errorId = R.string.network_unavailable, connectionState = connectionState
+                        messageId = R.string.network_unavailable, connectionState = connectionState
                     )
                 }
             }
@@ -81,18 +83,20 @@ class TodosViewModel @Inject constructor(
     }
 
     private fun refreshTodos() {
-        repository.refreshAllTodos {
-            viewState.update { it.copy(refreshing = false) }
+        repository.sendAllTodos(todos) {
+            viewState.update { it.copy(refreshing = false, messageId = R.string.success_sync) }
         }
-        viewState.update { it.copy(refreshing = true) }
+        viewState.update { it.copy(refreshing = true, messageId = null) }
     }
 
     private fun handleSnackbarResult(result: SnackbarResult) {
         when (result) {
             SnackbarResult.Dismissed -> {}
             SnackbarResult.ActionPerformed -> {
-                repository.sendAllTodos(todos)
-                viewState.update { it.copy(errorId = null) }
+                repository.sendAllTodos(todos) {
+                    viewState.update { it.copy(messageId = R.string.success_sync) }
+                }
+                viewState.update { it.copy(messageId = null) }
             }
         }
     }
@@ -103,7 +107,7 @@ class TodosViewModel @Inject constructor(
 
         viewState.update {
             it.copy(
-                todos = showedTodos, completeCnt = completeCnt, errorId = null, refreshing = false
+                todos = showedTodos, completeCnt = completeCnt, messageId = null, refreshing = false
             )
         }
     }
@@ -114,7 +118,11 @@ class TodosViewModel @Inject constructor(
 
     private fun onCompleteTodo(id: String) {
         val foundTodo = repository.getTodoById(id) ?: return
-        val newTodo = foundTodo.copy(done = !foundTodo.done)
+        val newTodo = foundTodo.copy(
+            done = !foundTodo.done,
+            modifiedDate = Date().time,
+            lastUpdatedBy = preferencesHelper.getUUID()
+        )
 
         repository.updateTodo(newTodo)
     }
