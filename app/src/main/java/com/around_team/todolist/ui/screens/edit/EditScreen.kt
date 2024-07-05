@@ -115,7 +115,6 @@ class EditScreen(
                     text = viewState.editedTodo.text,
                     onTextChange = { viewModel.obtainEvent(EditEvent.ChangeText(it)) },
                 )
-
                 PriorityAndDatePicker(
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                     selectedPriority = viewState.editedTodo.importance,
@@ -131,9 +130,7 @@ class EditScreen(
                     CustomButton(
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                         text = stringResource(id = R.string.delete),
-                        onClick = {
-                            viewModel.obtainEvent(EditEvent.DeleteTodo)
-                        },
+                        onClick = { viewModel.obtainEvent(EditEvent.DeleteTodo) },
                         textColor = JetTodoListTheme.colors.colors.red,
                     )
                 }

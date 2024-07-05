@@ -327,12 +327,7 @@ class TodosScreen(
                         .padding(start = 20.dp),
                     contentAlignment = Alignment.CenterStart,
                 ) {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        painter = painterResource(id = R.drawable.ic_complete),
-                        contentDescription = "complete icon",
-                        tint = JetTodoListTheme.colors.colors.white
-                    )
+                    SwipeIcon(R.drawable.ic_complete, R.string.complete_icon)
                 }
             }
 
@@ -341,19 +336,25 @@ class TodosScreen(
                     modifier = Modifier
                         .background(JetTodoListTheme.colors.colors.red)
                         .fillMaxSize()
-                        .padding(end = 20.dp), contentAlignment = Alignment.CenterEnd
+                        .padding(end = 20.dp),
+                    contentAlignment = Alignment.CenterEnd,
                 ) {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        painter = painterResource(id = R.drawable.ic_delete),
-                        contentDescription = "delete icon",
-                        tint = JetTodoListTheme.colors.colors.white
-                    )
+                    SwipeIcon(R.drawable.ic_delete, R.string.delete_icon)
                 }
             }
 
             SwipeToDismissBoxValue.Settled -> {}
         }
+    }
+
+    @Composable
+    private fun SwipeIcon(iconId: Int, descriptionId: Int) {
+        Icon(
+            modifier = Modifier.size(24.dp),
+            painter = painterResource(id = iconId),
+            contentDescription = stringResource(descriptionId),
+            tint = JetTodoListTheme.colors.colors.white
+        )
     }
 }
 
