@@ -11,13 +11,24 @@ import androidx.compose.ui.unit.dp
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.ui.theme.TodoListTheme
 
+/**
+ * Composable function that displays a horizontal divider with a specified thickness and color.
+ *
+ * @param modifier Optional [Modifier] for configuring the divider's layout and behavior.
+ */
 @Composable
 fun MyDivider(modifier: Modifier = Modifier) {
     HorizontalDivider(
-        modifier = modifier, thickness = 0.5.dp, color = JetTodoListTheme.colors.support.separator
+        modifier = modifier,
+        thickness = 0.5.dp,
+        color = JetTodoListTheme.colors.support.separator
     )
 }
 
+/**
+ * Preview function for the [MyDivider] composable. Displays the divider within a Box with background
+ * and padding to showcase its appearance.
+ */
 @Preview
 @Composable
 private fun CustomButtonPreview() {

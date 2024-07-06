@@ -5,10 +5,20 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.around_team.todolist.ui.common.enums.TodoImportance
 import com.around_team.todolist.ui.common.models.TodoItem
-import com.google.gson.annotations.SerializedName
-import java.util.Date
 import java.util.Locale
 
+/**
+ * Data class representing a Todo item entity in the local database.
+ *
+ * @property id The unique identifier for the todo item.
+ * @property text The description text of the todo item.
+ * @property importance The importance level of the todo item.
+ * @property deadline The deadline for the todo item, represented as a timestamp. Nullable.
+ * @property done A boolean indicating whether the todo item is done.
+ * @property creationDate The creation date of the todo item, represented as a timestamp.
+ * @property modifiedDate The last modified date of the todo item, represented as a timestamp.
+ * @property lastUpdatedBy The identifier of the user who last updated the todo item, default is "1".
+ */
 @Entity(tableName = "todo_list")
 data class TodoItemEntity(
     @PrimaryKey val id: String,

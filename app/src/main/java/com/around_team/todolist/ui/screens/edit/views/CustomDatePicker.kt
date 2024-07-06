@@ -14,6 +14,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.ui.theme.TodoListTheme
 
+/**
+ * A composable function that displays a custom date picker using Jetpack Compose.
+ *
+ * @param state The state object that holds the date picker's state.
+ * @param modifier Optional modifier for styling or positioning the date picker.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomDatePicker(state: DatePickerState, modifier: Modifier = Modifier) {

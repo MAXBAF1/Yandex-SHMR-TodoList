@@ -26,6 +26,9 @@ import kotlinx.coroutines.withContext
 import java.net.UnknownHostException
 import java.text.DateFormat
 
+/**
+ * Object responsible for managing HTTP requests using Ktor HttpClient.
+ */
 object RequestManager {
     val client = HttpClient(OkHttp) {
         install(ContentNegotiation) {

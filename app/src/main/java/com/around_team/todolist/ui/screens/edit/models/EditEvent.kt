@@ -1,8 +1,10 @@
 package com.around_team.todolist.ui.screens.edit.models
 
-import androidx.compose.material3.SnackbarResult
 import com.around_team.todolist.ui.common.enums.TodoImportance
 
+/**
+ * Sealed class representing events related to editing or creating a todo item.
+ */
 sealed class EditEvent {
     data class SetEditedTodo(val todoId: String?) : EditEvent()
     data class ChangeText(val text: String) : EditEvent()

@@ -19,6 +19,12 @@ import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
 
+/**
+ * ViewModel responsible for managing the state and business logic related to todos.
+ *
+ * @param repository The repository interface providing access to data operations.
+ * @param preferencesHelper Helper class for managing application preferences.
+ */
 @HiltViewModel
 class TodosViewModel @Inject constructor(
     private val repository: Repository,

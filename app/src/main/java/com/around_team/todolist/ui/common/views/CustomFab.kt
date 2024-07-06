@@ -22,6 +22,12 @@ import com.around_team.todolist.R
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.ui.theme.TodoListTheme
 
+/**
+ * Composable function that displays a custom floating action button (FAB).
+ *
+ * @param onClick Callback executed when the FAB is clicked.
+ * @param modifier Optional [Modifier] for configuring the FAB's layout and behavior.
+ */
 @Composable
 fun CustomFab(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Box(
@@ -45,6 +51,10 @@ fun CustomFab(onClick: () -> Unit, modifier: Modifier = Modifier) {
     }
 }
 
+/**
+ * Preview function for the [CustomFab] composable. Displays the FAB within the TodoListTheme
+ * for previewing its appearance.
+ */
 @Preview
 @Composable
 private fun CustomButtonPreview() {

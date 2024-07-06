@@ -25,6 +25,12 @@ import com.around_team.todolist.R
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.ui.theme.TodoListTheme
 
+/**
+ * Composable function to create a new card with an "Add" icon and text.
+ *
+ * @param onClick Callback function invoked when the card is clicked.
+ * @param modifier Optional [Modifier] that can be used to adjust layout or appearance.
+ */
 @Composable
 fun CreateNewCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Row(

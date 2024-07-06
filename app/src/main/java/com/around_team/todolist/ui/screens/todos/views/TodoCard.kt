@@ -31,6 +31,13 @@ import com.around_team.todolist.utils.FormatTimeInMillis
 import java.util.Date
 import java.util.UUID
 
+/**
+ * Composable function representing a Todo item card.
+ *
+ * @param todo The TodoItem object representing the todo to be displayed.
+ * @param onClick Callback function invoked when the card is clicked.
+ * @param onCompleteClick Callback function invoked when the checkbox for completing the todo is clicked.
+ */
 @Composable
 fun TodoCard(todo: TodoItem, onClick: () -> Unit, onCompleteClick: () -> Unit) {
     Row(

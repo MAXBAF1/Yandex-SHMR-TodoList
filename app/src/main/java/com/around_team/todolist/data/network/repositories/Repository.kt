@@ -24,6 +24,13 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Singleton repository class responsible for managing Todo items.
+ *
+ * @property databaseRepository The repository for interacting with the local database.
+ * @property todos Mutable state flow holding the current list of Todo items.
+ * @property errors Mutable shared flow used for emitting error codes.
+ */
 @Singleton
 class Repository @Inject constructor(private val databaseRepository: DatabaseRepository) {
     private val todos = MutableStateFlow(listOf<TodoItem>())

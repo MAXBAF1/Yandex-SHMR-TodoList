@@ -5,7 +5,14 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import com.around_team.todolist.ui.common.enums.NetworkConnectionState
 
-
+/**
+ * Creates a [ConnectivityManager.NetworkCallback] that invokes the provided [callback] function
+ * when network availability changes.
+ *
+ * @param callback The function to call when network availability changes. It receives a
+ * [NetworkConnectionState] parameter indicating the current network state.
+ * @return A [ConnectivityManager.NetworkCallback] instance.
+ */
 fun networkCallback(callback: (NetworkConnectionState) -> Unit): ConnectivityManager.NetworkCallback {
     return object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
@@ -18,6 +25,12 @@ fun networkCallback(callback: (NetworkConnectionState) -> Unit): ConnectivityMan
     }
 }
 
+/**
+ * Retrieves the current network connectivity state.
+ *
+ * @param connectivityManager The [ConnectivityManager] instance used to retrieve the network state.
+ * @return The current [NetworkConnectionState], indicating whether the network is available or not.
+ */
 fun getCurrentConnectivityState(connectivityManager: ConnectivityManager): NetworkConnectionState {
     val network = connectivityManager.activeNetwork
 

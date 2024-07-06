@@ -69,6 +69,12 @@ import com.around_team.todolist.ui.theme.TodoListTheme
 import com.around_team.todolist.utils.PreferencesHelper
 import com.around_team.todolist.utils.observeConnectivityAsFlow
 
+/**
+ * Screen component displaying a list of todo items.
+ *
+ * @param viewModel View model managing the state and logic for todos.
+ * @param toEditScreen Callback function to navigate to the edit screen with optional todo item ID.
+ */
 class TodosScreen(
     private val viewModel: TodosViewModel,
     private val toEditScreen: (id: String?) -> Unit,
@@ -83,7 +89,7 @@ class TodosScreen(
         val scrollBehavior = rememberToolbarScrollBehavior()
 
         val snackbarHostState = remember { SnackbarHostState() }
-        ErrorSnackbarLogic(viewState, snackbarHostState)
+        ErrorMessageLogic(viewState, snackbarHostState)
 
         val pullState = rememberPullToRefreshState()
         PullToRefreshLogic(pullState, viewState, scrollBehavior)
@@ -171,21 +177,22 @@ class TodosScreen(
     }
 
     @Composable
-    private fun ErrorSnackbarLogic(
+    private fun ErrorMessageLogic(
         viewState: TodosViewState,
         snackbarHostState: SnackbarHostState,
     ) {
         if (viewState.messageId == null) return
         val notActionMessages = listOf(R.string.network_unavailable, R.string.success_sync)
         val messageStr = stringResource(viewState.messageId)
-        if (notActionMessages.contains(viewState.messageId)) {
-            Toast
-                .makeText(LocalContext.current, messageStr, Toast.LENGTH_LONG)
-                .show()
-        } else {
-            val actionStr = stringResource(id = R.string.repeat)
+        val actionStr = stringResource(id = R.string.repeat)
+        val context = LocalContext.current
 
-            LaunchedEffect(key1 = viewState.messageId) {
+        LaunchedEffect(key1 = viewState.messageId) {
+            if (notActionMessages.contains(viewState.messageId)) {
+                Toast
+                    .makeText(context, messageStr, Toast.LENGTH_LONG)
+                    .show()
+            } else {
                 val result = snackbarHostState.showSnackbar(messageStr, actionStr)
                 viewModel.obtainEvent(TodosEvent.HandleSnackbarResult(result))
             }

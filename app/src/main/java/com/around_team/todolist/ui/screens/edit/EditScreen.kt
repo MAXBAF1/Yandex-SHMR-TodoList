@@ -53,6 +53,14 @@ import com.around_team.todolist.ui.theme.TodoListTheme
 import com.around_team.todolist.utils.FormatTimeInMillis
 import com.around_team.todolist.utils.PreferencesHelper
 
+/**
+ * Represents the Edit screen for editing or creating a new todo item.
+ *
+ * @param viewModel The view model associated with this screen, providing access to business logic and state management.
+ * @param onCancelClick Lambda function invoked when the cancel button is clicked, typically used to navigate back or dismiss the screen.
+ * @param toTodosScreen Lambda function invoked to navigate back to the Todos screen after saving or canceling the edit operation.
+ * @param editedTodoId Optional ID of the todo item being edited, if provided, otherwise indicates a new todo item creation.
+ */
 class EditScreen(
     private val viewModel: EditViewModel,
     private val onCancelClick: () -> Unit,

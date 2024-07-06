@@ -11,6 +11,11 @@ import androidx.compose.ui.unit.dp
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.ui.theme.TodoListTheme
 
+/**
+ * Composable function that displays a custom Snackbar using Jetpack Compose.
+ *
+ * @param hostState [SnackbarHostState] object that manages the state of the Snackbar.
+ */
 @Composable
 fun CustomSnackbar(hostState: SnackbarHostState) {
     SnackbarHost(hostState = hostState) {
@@ -24,6 +29,10 @@ fun CustomSnackbar(hostState: SnackbarHostState) {
     }
 }
 
+/**
+ * Preview function for the [CustomSnackbar] composable. Displays the Snackbar within the
+ * TodoListTheme for previewing its appearance.
+ */
 @Preview
 @Composable
 private fun CustomSnackbarPreview() {

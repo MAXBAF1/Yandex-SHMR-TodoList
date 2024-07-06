@@ -17,6 +17,14 @@ import com.around_team.todolist.R
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.ui.theme.TodoListTheme
 
+/**
+ * Composable function that displays a custom button with specified text and click behavior.
+ *
+ * @param text The text displayed on the button.
+ * @param onClick The callback lambda that is called when the button is clicked.
+ * @param modifier Optional [Modifier] for configuring the button's layout and behavior.
+ * @param textColor The color of the text displayed on the button.
+ */
 @Composable
 fun CustomButton(
     text: String,
@@ -38,6 +46,10 @@ fun CustomButton(
     }
 }
 
+/**
+* Preview function for the [CustomButton] composable. Displays the button in a preview window
+* with default styling and behavior.
+*/
 @Preview
 @Composable
 private fun CustomButtonPreview() {

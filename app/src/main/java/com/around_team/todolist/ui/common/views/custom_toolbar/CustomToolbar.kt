@@ -36,6 +36,18 @@ import com.around_team.todolist.utils.background
 import com.around_team.todolist.utils.lerp
 import kotlin.math.roundToInt
 
+/**
+ * Customizable toolbar component for the application.
+ *
+ * @param modifier The modifier for the toolbar.
+ * @param navigationIcon Optional composable function for rendering the navigation icon.
+ * @param actions Optional composable function for rendering actions in the toolbar.
+ * @param collapsingTitle Optional string representing the title that can collapse when scrolled.
+ * @param expandedTitleStyle The style of the title when expanded.
+ * @param collapsedTitleStyle The style of the title when collapsed.
+ * @param changeTitlePosition Flag indicating whether to change the title position when scrolling.
+ * @param scrollBehavior Optional behavior for handling toolbar scrolling.
+ */
 @Composable
 fun CustomToolbar(
     modifier: Modifier = Modifier,

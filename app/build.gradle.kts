@@ -22,6 +22,7 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        manifestPlaceholders["YANDEX_CLIENT_ID"] = "cd99950c00a44bd2b22e9261aaa000c4"
     }
 
     buildTypes {
@@ -48,6 +49,9 @@ android {
 }
 
 dependencies {
+    // Yandex Oauth
+    implementation(libs.android.authsdk)
+
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.work)

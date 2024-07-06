@@ -36,6 +36,15 @@ import com.around_team.todolist.ui.common.enums.getIconColor
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.ui.theme.TodoListTheme
 
+/**
+ * A custom composable that displays a tab row for selecting different levels of todo importance.
+ * Each tab represents a level of importance defined by [tabList].
+ *
+ * @param selectedTab The index of the currently selected tab.
+ * @param tabList An array of [TodoImportance] values representing different levels of importance.
+ * @param onTabChanged Lambda that will be called when a tab is selected. It provides the index of the selected tab.
+ * @param modifier Optional modifier for styling or positioning the tab row.
+ */
 class CustomTabRow(
     private val selectedTab: Int,
     private val tabList: Array<TodoImportance>,

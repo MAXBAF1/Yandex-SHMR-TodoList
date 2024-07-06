@@ -11,6 +11,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/**
+ * Dagger Hilt module that provides dependencies related to SharedPreferences.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object SharedPreferencesModule {

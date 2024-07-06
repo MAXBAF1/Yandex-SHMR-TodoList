@@ -13,6 +13,14 @@ import java.util.Date
 import java.util.UUID
 import javax.inject.Inject
 
+/**
+ * ViewModel for managing the state and business logic related to editing or creating a todo item.
+ *
+ * This ViewModel extends [BaseViewModel] and manages [EditViewState] and [EditEvent].
+ *
+ * @param repository The repository used for accessing and manipulating todo item data.
+ * @param preferencesHelper Helper class for managing application preferences.
+ */
 @HiltViewModel
 class EditViewModel @Inject constructor(
     private val repository: Repository,

@@ -14,6 +14,12 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.unit.Velocity
 import kotlin.math.abs
 
+/**
+ * Class defining the scroll behavior for the CustomToolbar.
+ *
+ * @param state The scroll state of the CustomToolbar.
+ * @param flingAnimationSpec The animation specification for fling behavior.
+ */
 class CustomToolbarScrollBehavior(
     val state: CustomToolbarScrollState,
     val flingAnimationSpec: DecayAnimationSpec<Float>?,
@@ -21,6 +27,14 @@ class CustomToolbarScrollBehavior(
 
     val nestedScrollConnection = object : NestedScrollConnection {
 
+        /**
+         * Callback invoked when the nested scrolling system reports that a scroll
+         * has occurred before it is processed by the scrolling child.
+         *
+         * @param available The offset distance available to scroll.
+         * @param source The source of the nested scroll.
+         * @return The offset consumed by this method.
+         */
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
             // Don't intercept if scrolling down.
             if (available.y > 0f) return Offset.Zero
@@ -36,6 +50,15 @@ class CustomToolbarScrollBehavior(
             }
         }
 
+        /**
+         * Callback invoked when the nested scrolling system reports that a scroll
+         * has occurred after it is processed by the scrolling child.
+         *
+         * @param consumed The offset consumed by the nested scrolling child.
+         * @param available The offset distance available to scroll.
+         * @param source The source of the nested scroll.
+         * @return The offset consumed by this method.
+         */
         override fun onPostScroll(
             consumed: Offset,
             available: Offset,
@@ -66,6 +89,13 @@ class CustomToolbarScrollBehavior(
             return Offset.Zero
         }
 
+        /**
+         * Callback invoked when a nested scroll is flung.
+         *
+         * @param consumed The velocity consumed by the nested scrolling child.
+         * @param available The velocity available to scroll.
+         * @return The velocity consumed by this method.
+         */
         override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
             var result = super.onPostFling(consumed, available)
             // Check if the app bar is partially collapsed/expanded.
@@ -86,6 +116,14 @@ class CustomToolbarScrollBehavior(
 
 }
 
+/**
+ * Function to handle the fling animation for toolbar expansion or collapse.
+ *
+ * @param state The scroll state of the CustomToolbar.
+ * @param initialVelocity The initial velocity of the fling.
+ * @param flingAnimationSpec The animation specification for fling behavior.
+ * @return The velocity consumed by the fling animation.
+ */
 private suspend fun flingToolbar(
     state: CustomToolbarScrollState,
     initialVelocity: Float,
@@ -115,6 +153,11 @@ private suspend fun flingToolbar(
     return Velocity(0f, remainingVelocity)
 }
 
+/**
+ * Function to snap the toolbar to the nearest state after a fling animation.
+ *
+ * @param state The scroll state of the CustomToolbar.
+ */
 private suspend fun snapToolbar(state: CustomToolbarScrollState) {
     // In case the app bar motion was stopped in a state where it's partially visible, snap it to
     // the nearest state.
@@ -130,6 +173,11 @@ private suspend fun snapToolbar(state: CustomToolbarScrollState) {
     }
 }
 
+/**
+ * Composable function to remember the toolbar scroll behavior.
+ *
+ * @return The CustomToolbarScrollBehavior instance.
+ */
 @Composable
 fun rememberToolbarScrollBehavior() = CustomToolbarScrollBehavior(
     state = rememberToolbarScrollState(initialHeightOffsetLimit = -Float.MAX_VALUE),

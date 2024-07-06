@@ -19,6 +19,16 @@ import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.ui.theme.TodoListTheme
 import kotlinx.coroutines.delay
 
+/**
+ * A composable function that displays clickable text.
+ *
+ * @param text The text to display.
+ * @param onClick The callback to be invoked when the text is clicked.
+ * @param modifier Optional modifier for styling or positioning the text.
+ * @param enable Boolean flag indicating whether the text is clickable.
+ * @param style The style to apply to the text.
+ * @param fontWeight Optional font weight to apply to the text.
+ */
 @Composable
 fun CustomClickableText(
     text: String,
