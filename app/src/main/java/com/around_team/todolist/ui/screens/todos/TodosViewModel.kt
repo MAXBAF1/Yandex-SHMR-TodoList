@@ -31,32 +31,12 @@ class TodosViewModel @Inject constructor(
     private val preferencesHelper: PreferencesHelper,
 ) : BaseViewModel<TodosViewState, TodosEvent>(initialState = TodosViewState()) {
 
+    private var collectingStarted = false
     private var todos: List<TodoItem> = listOf()
     private var showedTodos: List<TodoItem> = listOf()
     private var completeCnt = 0
     private var completedShowed = false
     private var networkState: NetworkConnectionState = NetworkConnectionState.Available
-
-    init {
-        viewModelScope.launch {
-            repository.getAllTodosFromBD()
-            repository.refreshAllTodos()
-            repository
-                .getTodos()
-                .collect {
-                    todos = it
-                    updateTodos()
-                }
-        }
-        viewModelScope.launch {
-            repository
-                .getErrors()
-                .onEach { errorId ->
-                    viewState.update { it.copy(messageId = errorId, refreshing = false) }
-                }
-                .collect()
-        }
-    }
 
     override fun obtainEvent(viewEvent: TodosEvent) {
         when (viewEvent) {
@@ -67,7 +47,32 @@ class TodosViewModel @Inject constructor(
             is TodosEvent.HandleSnackbarResult -> handleSnackbarResult(viewEvent.result)
             TodosEvent.RefreshTodos -> refreshTodos()
             is TodosEvent.HandleNetworkState -> handleNetworkState(viewEvent.networkConnectionState)
+            TodosEvent.StartCollecting -> startCollecting()
         }
+    }
+
+    private fun startCollecting() {
+        if (!collectingStarted) {
+            viewModelScope.launch {
+                repository.getAllTodosFromBD()
+                repository.refreshAllTodos()
+                repository
+                    .getTodos()
+                    .collect {
+                        todos = it
+                        updateTodos()
+                    }
+            }
+            viewModelScope.launch {
+                repository
+                    .getErrors()
+                    .onEach { errorId ->
+                        viewState.update { it.copy(messageId = errorId, refreshing = false) }
+                    }
+                    .collect()
+            }
+        }
+        collectingStarted = true
     }
 
     private fun handleNetworkState(connectionState: NetworkConnectionState) {
@@ -75,7 +80,9 @@ class TodosViewModel @Inject constructor(
         when (connectionState) {
             NetworkConnectionState.Available -> {
                 viewState.update { it.copy(messageId = null, connectionState = connectionState) }
-                repository.sendAllTodos(todos)
+                repository.sendAllTodos(todos) {
+                    viewState.update { it.copy(messageId = R.string.success_sync) }
+                }
             }
 
             NetworkConnectionState.Unavailable -> {

@@ -1,8 +1,10 @@
 package com.around_team.todolist.ui.navigation
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -10,10 +12,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.around_team.todolist.di.SharedPreferencesModule
 import com.around_team.todolist.ui.screens.edit.EditScreen
 import com.around_team.todolist.ui.screens.edit.EditViewModel
+import com.around_team.todolist.ui.screens.registration.RegistrationScreen
+import com.around_team.todolist.ui.screens.registration.RegistrationViewModel
 import com.around_team.todolist.ui.screens.todos.TodosScreen
 import com.around_team.todolist.ui.screens.todos.TodosViewModel
+import com.around_team.todolist.utils.PreferencesHelper
 
 /**
  * NavGraph manages the navigation within the application using Jetpack Compose Navigation.
@@ -29,14 +35,18 @@ class NavGraph(
      */
     @Composable
     fun Create() {
+        val registrationViewModel = hiltViewModel<RegistrationViewModel>()
         val todosViewModel = hiltViewModel<TodosViewModel>()
         val editViewModel = hiltViewModel<EditViewModel>()
 
         NavHost(
             navController = navController,
-            startDestination = Screens.TodosScreen.name,
+            startDestination = getStartDestination(),
             contentAlignment = Alignment.TopStart,
         ) {
+            composable(Screens.RegistrationScreen.name) {
+                CreateRegistrationScreen(registrationViewModel)
+            }
             composable(Screens.TodosScreen.name) { CreateTodosScreen(todosViewModel) }
             composable(
                 route = "${Screens.EditScreen.name}?$TO_EDIT_TODO_ID_KEY={$TO_EDIT_TODO_ID_KEY}",
@@ -50,11 +60,25 @@ class NavGraph(
         }
     }
 
-    /**
-     * Composable function to create the Todos screen.
-     *
-     * @param viewModel The TodosViewModel to provide data and behavior for the Todos screen.
-     */
+    @Composable
+    private fun getStartDestination(): String {
+        val context = LocalContext.current
+        val sharedPreferences =
+            context.getSharedPreferences(SharedPreferencesModule.KEY, Context.MODE_PRIVATE)
+        val helper = PreferencesHelper(sharedPreferences)
+
+        return if (helper.getToken() == null) Screens.RegistrationScreen.name else Screens.TodosScreen.name
+    }
+
+    @Composable
+    private fun CreateRegistrationScreen(registrationViewModel: RegistrationViewModel) {
+        RegistrationScreen(
+            viewModel = registrationViewModel,
+            toNextScreen = { navController.navigate(Screens.TodosScreen.name) { popUpTo(0) } },
+        ).Create()
+    }
+
+
     @Composable
     private fun CreateTodosScreen(viewModel: TodosViewModel) {
         TodosScreen(
@@ -67,11 +91,6 @@ class NavGraph(
         ).Create()
     }
 
-    /**
-     * Composable function to create the Edit screen.
-     *
-     * @param viewModel The EditViewModel to provide data and behavior for the Edit screen.
-     */
     @Composable
     private fun CreateEditScreen(viewModel: EditViewModel) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()

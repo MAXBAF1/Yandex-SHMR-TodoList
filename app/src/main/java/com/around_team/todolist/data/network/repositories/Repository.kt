@@ -32,7 +32,10 @@ import javax.inject.Singleton
  * @property errors Mutable shared flow used for emitting error codes.
  */
 @Singleton
-class Repository @Inject constructor(private val databaseRepository: DatabaseRepository) {
+class Repository @Inject constructor(
+    private val requestManager: RequestManager,
+    private val databaseRepository: DatabaseRepository
+) {
     private val todos = MutableStateFlow(listOf<TodoItem>())
     private val errors = MutableSharedFlow<Int>(replay = 2)
 
@@ -57,7 +60,7 @@ class Repository @Inject constructor(private val databaseRepository: DatabaseRep
 
     fun refreshAllTodos() {
         repositoryScope.launch {
-            val todosDTO = RequestManager.createRequest<GetAllItemsReceive>(
+            val todosDTO = requestManager.createRequest<GetAllItemsReceive>(
                 methodType = HttpMethod.Get,
                 address = TodoListConfig.LIST_ADDRESS.toString(),
             )?.list ?: return@launch
@@ -69,7 +72,7 @@ class Repository @Inject constructor(private val databaseRepository: DatabaseRep
 
     fun sendAllTodos(list: List<TodoItem>, onSuccess: () -> Unit = {}) {
         repositoryScope.launch {
-            val todosDTO = RequestManager.createRequest<GetAllItemsReceive>(
+            val todosDTO = requestManager.createRequest<GetAllItemsReceive>(
                 methodType = HttpMethod.Patch,
                 address = TodoListConfig.LIST_ADDRESS.toString(),
                 body = SendAllItemsRequest(list.map { it.toDTO() })
@@ -92,7 +95,7 @@ class Repository @Inject constructor(private val databaseRepository: DatabaseRep
             }
         }
         repositoryScope.launch {
-            RequestManager.createRequest<GetItemReceive>(
+            requestManager.createRequest<GetItemReceive>(
                 methodType = HttpMethod.Post,
                 address = TodoListConfig.LIST_ADDRESS.toString(),
                 body = PostItemRequest(todo = todoItem.toDTO()),
@@ -111,7 +114,7 @@ class Repository @Inject constructor(private val databaseRepository: DatabaseRep
             }
         }
         repositoryScope.launch {
-            RequestManager.createRequest<GetItemReceive>(
+            requestManager.createRequest<GetItemReceive>(
                 methodType = HttpMethod.Delete,
                 address = TodoListConfig.getElementListAddress(id),
             )
@@ -129,7 +132,7 @@ class Repository @Inject constructor(private val databaseRepository: DatabaseRep
             }
         }
         repositoryScope.launch {
-            RequestManager.createRequest<GetItemReceive>(
+            requestManager.createRequest<GetItemReceive>(
                 methodType = HttpMethod.Put,
                 address = TodoListConfig.getElementListAddress(todo.id),
                 body = PostItemRequest(todo = todo.toDTO())

@@ -7,6 +7,7 @@ import com.around_team.todolist.ui.common.enums.NetworkConnectionState
  * Sealed class representing events related to Todos functionality.
  */
 sealed class TodosEvent {
+    data object StartCollecting : TodosEvent()
     data class DeleteTodo(val id: String) : TodosEvent()
     data object ClickShowCompletedTodos : TodosEvent()
     data class CompleteTodo(val id: String): TodosEvent()

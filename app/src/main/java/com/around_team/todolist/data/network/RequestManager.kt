@@ -5,6 +5,7 @@ import com.around_team.todolist.R
 import com.around_team.todolist.data.network.model.receive.ReceiveDTO
 import com.around_team.todolist.data.network.model.request.RequestDTO
 import com.around_team.todolist.utils.MyErrorIdException
+import com.around_team.todolist.utils.PreferencesHelper
 import com.around_team.todolist.utils.castOrNull
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -25,11 +26,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.net.UnknownHostException
 import java.text.DateFormat
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
- * Object responsible for managing HTTP requests using Ktor HttpClient.
+ * A manager for handling HTTP requests using the Ktor HTTP client with OkHttp and JSON content negotiation.
  */
-object RequestManager {
+class RequestManager @Inject constructor(private val preferencesHelper: PreferencesHelper) {
     val client = HttpClient(OkHttp) {
         install(ContentNegotiation) {
             gson {
@@ -38,8 +41,8 @@ object RequestManager {
             }
         }
         install(DefaultRequest) {
-            header(HttpHeaders.Authorization, "OAuth ${Token.TOKEN}")
-            header(ERRORS_HEADER, 50)
+            header(HttpHeaders.Authorization, "OAuth ${preferencesHelper.getToken()}")
+            header(ERRORS_HEADER, 20)
             header(REVISION_HEADER, lastKnownRevision.toString())
             header(HttpHeaders.ContentType, ContentType.Application.Json)
             header(HttpHeaders.Accept, ContentType.Application.Json)
@@ -81,6 +84,8 @@ object RequestManager {
         }
     }
 
-    private const val ERRORS_HEADER = "X-Generate-Fails"
-    private const val REVISION_HEADER = "X-Last-Known-Revision"
+    companion object {
+        private const val ERRORS_HEADER = "X-Generate-Fails"
+        private const val REVISION_HEADER = "X-Last-Known-Revision"
+    }
 }

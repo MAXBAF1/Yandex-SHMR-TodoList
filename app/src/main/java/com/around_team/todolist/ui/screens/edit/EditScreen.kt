@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.around_team.todolist.R
 import com.around_team.todolist.data.db.DatabaseRepository
+import com.around_team.todolist.data.network.RequestManager
 import com.around_team.todolist.data.network.repositories.Repository
 import com.around_team.todolist.ui.common.enums.TodoImportance
 import com.around_team.todolist.ui.common.views.CustomButton
@@ -307,13 +308,12 @@ class EditScreen(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
 private fun EditScreenPreviewLight() {
+    val prefHelper =
+        PreferencesHelper(LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE))
     TodoListTheme {
         EditScreen(
             viewModel = EditViewModel(
-                Repository(DatabaseRepository(testDao)),
-                PreferencesHelper(
-                    LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE)
-                ),
+                Repository(RequestManager(prefHelper), DatabaseRepository(testDao)), prefHelper
             ),
             onCancelClick = {},
             toTodosScreen = {},
@@ -324,13 +324,12 @@ private fun EditScreenPreviewLight() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun EditScreenPreviewNight() {
+    val prefHelper =
+        PreferencesHelper(LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE))
     TodoListTheme {
         EditScreen(
             viewModel = EditViewModel(
-                Repository(DatabaseRepository(testDao)),
-                PreferencesHelper(
-                    LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE)
-                ),
+                Repository(RequestManager(prefHelper), DatabaseRepository(testDao)), prefHelper
             ),
             onCancelClick = {},
             toTodosScreen = {},
