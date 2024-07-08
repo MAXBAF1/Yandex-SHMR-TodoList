@@ -21,7 +21,7 @@ object SharedPreferencesModule {
     @Provides
     @Singleton
     fun provideSharedPreferences(@ApplicationContext app: Context): SharedPreferences {
-        return app.getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
+        return app.getSharedPreferences(KEY, Context.MODE_PRIVATE)
     }
 
     @Provides
@@ -29,4 +29,6 @@ object SharedPreferencesModule {
     fun providePreferencesHelper(sharedPreferences: SharedPreferences): PreferencesHelper {
         return PreferencesHelper(sharedPreferences)
     }
+
+    const val KEY = "my_prefs"
 }

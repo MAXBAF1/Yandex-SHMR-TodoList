@@ -51,6 +51,7 @@ import com.around_team.todolist.R
 import com.around_team.todolist.data.db.Dao
 import com.around_team.todolist.data.db.DatabaseRepository
 import com.around_team.todolist.data.db.entities.TodoItemEntity
+import com.around_team.todolist.data.network.RequestManager
 import com.around_team.todolist.data.network.repositories.Repository
 import com.around_team.todolist.ui.common.enums.NetworkConnectionState
 import com.around_team.todolist.ui.common.models.TodoItem
@@ -87,6 +88,8 @@ class TodosScreen(
             .getViewState()
             .collectAsStateWithLifecycle()
         val scrollBehavior = rememberToolbarScrollBehavior()
+
+        LaunchedEffect(Unit) { viewModel.obtainEvent(TodosEvent.StartCollecting) }
 
         val snackbarHostState = remember { SnackbarHostState() }
         ErrorMessageLogic(viewState, snackbarHostState)
@@ -368,13 +371,12 @@ class TodosScreen(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
 private fun TodosScreenPreviewLight() {
+    val prefHelper =
+        PreferencesHelper(LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE))
     TodoListTheme {
         TodosScreen(
             viewModel = TodosViewModel(
-                Repository(DatabaseRepository(testDao)),
-                PreferencesHelper(
-                    LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE)
-                ),
+                Repository(RequestManager(prefHelper), DatabaseRepository(testDao)), prefHelper
             ),
             toEditScreen = {},
         )
@@ -384,13 +386,12 @@ private fun TodosScreenPreviewLight() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun TodosScreenPreviewNight() {
+    val prefHelper =
+        PreferencesHelper(LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE))
     TodoListTheme {
         TodosScreen(
             viewModel = TodosViewModel(
-                Repository(DatabaseRepository(testDao)),
-                PreferencesHelper(
-                    LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE)
-                ),
+                Repository(RequestManager(prefHelper), DatabaseRepository(testDao)), prefHelper
             ),
             toEditScreen = {},
         )

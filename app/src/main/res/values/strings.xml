@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">TodoList</string>
 
+    <!--RegistrationScreen-->
+    <string name="sign_in_with_yandex_id">Войти с Яндекс ID</string>
+
     <!--TodosScreen-->
     <string name="title">Мои дела</string>
     <string name="complete">Выполнено — %d</string>
@@ -25,6 +28,7 @@
     <string name="complete_icon">Иконка выполнения</string>
     <string name="add_icon">Иконка добавления</string>
     <string name="delete_icon">Иконка удаления</string>
+    <string name="yandex_icon">Иконка Яндекса</string>
 
     <!--Errors-->
     <string name="error">Произошла ошибка</string>

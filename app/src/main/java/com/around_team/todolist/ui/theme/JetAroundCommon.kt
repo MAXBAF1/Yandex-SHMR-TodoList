@@ -11,6 +11,7 @@ data class JetTodoListColors(
     val label: Label,
     val colors: Colors,
     val back: Back,
+    val yandex: Yandex
 ) {
     data class Support(
         val separator: Color,
@@ -39,6 +40,11 @@ data class JetTodoListColors(
         val primary: Color,
         val secondary: Color,
         val elevated: Color,
+    )
+
+    data class Yandex(
+        val label: Color,
+        val back: Color,
     )
 }
 

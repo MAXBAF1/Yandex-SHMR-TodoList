@@ -12,14 +12,9 @@ class PreferencesHelper(private val preferences: SharedPreferences) {
 
     companion object {
         private const val KEY_UUID = "uuid"
+        private const val KEY_TOKEN = "KEY_TOKEN"
     }
 
-    /**
-     * Retrieves the UUID stored in preferences. If no UUID is found, generates a new UUID,
-     * stores it in preferences, and returns it.
-     *
-     * @return The UUID string.
-     */
     fun getUUID(): String {
         var uuid = preferences.getString(KEY_UUID, null)
         if (uuid == null) {
@@ -29,5 +24,15 @@ class PreferencesHelper(private val preferences: SharedPreferences) {
                 .apply()
         }
         return uuid
+    }
+
+    fun saveToken(token: String) {
+        preferences.edit()
+            .putString(KEY_TOKEN, token)
+            .apply()
+    }
+
+    fun getToken(): String? {
+        return preferences.getString(KEY_TOKEN, null)
     }
 }

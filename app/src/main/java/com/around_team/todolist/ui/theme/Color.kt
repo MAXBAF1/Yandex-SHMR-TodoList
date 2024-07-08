@@ -27,6 +27,10 @@ internal val baseLightPalette = JetTodoListColors(
         primary = Color(0.97F, 0.97F, 0.95F, 1.0F),
         secondary = Color(1.0F, 1.0F, 1.0F, 1.0F),
         elevated = Color(1.0F, 1.0F, 1.0F, 1.0F),
+    ),
+    yandex = JetTodoListColors.Yandex(
+        label = Color(1.0F, 1.0F, 1.0F, 1.0F),
+        back = Color(0.0F, 0.0F, 0.0F, 1.0F)
     )
 )
 
@@ -55,5 +59,9 @@ internal val baseDarkPalette = JetTodoListColors(
         primary = Color(0.09F, 0.09F, 0.09F, 1.0F),
         secondary = Color(0.14F, 0.14F, 0.16F, 1.0F),
         elevated = Color(0.23F, 0.23F, 0.25F, 1.0F),
+    ),
+    yandex = JetTodoListColors.Yandex(
+        label = Color(0.0F, 0.0F, 0.0F, 1.0F),
+        back = Color(1.0F, 1.0F, 1.0F, 1.0F)
     )
 )
