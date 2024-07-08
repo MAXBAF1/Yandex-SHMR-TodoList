@@ -19,7 +19,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.around_team.todolist.R
 import com.around_team.todolist.ui.theme.JetTodoListTheme
+import com.around_team.todolist.ui.theme.TodoListTheme
 
+/**
+ * Composable representing a circular checkbox.
+ *
+ * @param checked Boolean indicating whether the checkbox is checked.
+ * @param onChecked Callback function invoked when the checkbox is toggled.
+ * @param modifier Optional [Modifier] that can be used to adjust layout or appearance.
+ * @param highPriority Boolean indicating whether the checkbox represents a high priority item.
+ */
 @Composable
 fun CircleCheckbox(
     checked: Boolean,
@@ -58,5 +67,7 @@ fun CircleCheckbox(
 @Preview
 @Composable
 private fun CircleCheckboxPreview() {
-    CircleCheckbox(checked = true, onChecked = {})
+    TodoListTheme {
+        CircleCheckbox(checked = true, onChecked = {})
+    }
 }

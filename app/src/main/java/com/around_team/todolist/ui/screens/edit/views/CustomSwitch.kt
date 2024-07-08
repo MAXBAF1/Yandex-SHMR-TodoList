@@ -19,7 +19,21 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.around_team.todolist.ui.theme.TodoListTheme
 
+/**
+ * A composable function that displays a custom switch component using Jetpack Compose.
+ *
+ * @param checked The current checked state of the switch.
+ * @param onCheckedChange Lambda that will be called when the switch state changes.
+ * @param modifier Optional modifier for styling or positioning the switch.
+ * @param width The width of the switch.
+ * @param height The height of the switch.
+ * @param thumbColor The color of the switch's thumb.
+ * @param checkedTrackColor The color of the track when the switch is checked.
+ * @param uncheckedTrackColor The color of the track when the switch is unchecked.
+ * @param gapBetweenThumbAndTrackEdge The gap between the thumb and the edges of the track.
+ */
 @Composable
 fun CustomSwitch(
     checked: Boolean,
@@ -67,5 +81,7 @@ fun CustomSwitch(
 @Preview
 @Composable
 private fun CustomSwitchPreview() {
-    CustomSwitch(checked = true, onCheckedChange = { })
+    TodoListTheme {
+        CustomSwitch(checked = true, onCheckedChange = { })
+    }
 }

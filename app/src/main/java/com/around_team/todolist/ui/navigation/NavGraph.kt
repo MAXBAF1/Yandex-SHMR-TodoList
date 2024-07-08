@@ -15,9 +15,18 @@ import com.around_team.todolist.ui.screens.edit.EditViewModel
 import com.around_team.todolist.ui.screens.todos.TodosScreen
 import com.around_team.todolist.ui.screens.todos.TodosViewModel
 
+/**
+ * NavGraph manages the navigation within the application using Jetpack Compose Navigation.
+ *
+ * @param navController The NavHostController responsible for managing navigation within the graph.
+ */
 class NavGraph(
     private val navController: NavHostController,
 ) {
+    /**
+     * Composable function to create and define the navigation graph.
+     * This function sets up the NavHost with specified start destination and screens.
+     */
     @Composable
     fun Create() {
         val todosViewModel = hiltViewModel<TodosViewModel>()
@@ -41,6 +50,11 @@ class NavGraph(
         }
     }
 
+    /**
+     * Composable function to create the Todos screen.
+     *
+     * @param viewModel The TodosViewModel to provide data and behavior for the Todos screen.
+     */
     @Composable
     private fun CreateTodosScreen(viewModel: TodosViewModel) {
         TodosScreen(
@@ -53,6 +67,11 @@ class NavGraph(
         ).Create()
     }
 
+    /**
+     * Composable function to create the Edit screen.
+     *
+     * @param viewModel The EditViewModel to provide data and behavior for the Edit screen.
+     */
     @Composable
     private fun CreateEditScreen(viewModel: EditViewModel) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()

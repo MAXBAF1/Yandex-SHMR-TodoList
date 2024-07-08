@@ -1,6 +1,8 @@
 package com.around_team.todolist.ui.screens.todos
 
+import android.content.Context
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,12 +22,18 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -40,30 +48,63 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.around_team.todolist.R
-import com.around_team.todolist.data.db.TodoItemsRepository
-import com.around_team.todolist.data.model.TodoItem
+import com.around_team.todolist.data.db.Dao
+import com.around_team.todolist.data.db.DatabaseRepository
+import com.around_team.todolist.data.db.entities.TodoItemEntity
+import com.around_team.todolist.data.network.repositories.Repository
+import com.around_team.todolist.ui.common.enums.NetworkConnectionState
+import com.around_team.todolist.ui.common.models.TodoItem
 import com.around_team.todolist.ui.common.views.CustomFab
+import com.around_team.todolist.ui.common.views.CustomSnackbar
 import com.around_team.todolist.ui.common.views.MyDivider
 import com.around_team.todolist.ui.common.views.custom_toolbar.CustomToolbar
+import com.around_team.todolist.ui.common.views.custom_toolbar.CustomToolbarScrollBehavior
 import com.around_team.todolist.ui.common.views.custom_toolbar.rememberToolbarScrollBehavior
 import com.around_team.todolist.ui.screens.todos.models.TodosEvent
+import com.around_team.todolist.ui.screens.todos.models.TodosViewState
 import com.around_team.todolist.ui.screens.todos.views.CreateNewCard
 import com.around_team.todolist.ui.screens.todos.views.TodoCard
 import com.around_team.todolist.ui.theme.JetTodoListTheme
-import com.around_team.todolist.utils.ExceptionHandler
+import com.around_team.todolist.ui.theme.TodoListTheme
+import com.around_team.todolist.utils.PreferencesHelper
+import com.around_team.todolist.utils.observeConnectivityAsFlow
 
+/**
+ * Screen component displaying a list of todo items.
+ *
+ * @param viewModel View model managing the state and logic for todos.
+ * @param toEditScreen Callback function to navigate to the edit screen with optional todo item ID.
+ */
 class TodosScreen(
     private val viewModel: TodosViewModel,
     private val toEditScreen: (id: String?) -> Unit,
 ) {
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun Create() {
-        val viewState by viewModel.getViewState().collectAsStateWithLifecycle()
+        val viewState by viewModel
+            .getViewState()
+            .collectAsStateWithLifecycle()
         val scrollBehavior = rememberToolbarScrollBehavior()
 
+        val snackbarHostState = remember { SnackbarHostState() }
+        ErrorMessageLogic(viewState, snackbarHostState)
+
+        val pullState = rememberPullToRefreshState()
+        PullToRefreshLogic(pullState, viewState, scrollBehavior)
+
+        NetworkLogic(viewState.connectionState)
 
         Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .let {
+                    if (scrollBehavior.state.collapsedFraction == 0f) {
+                        it.nestedScroll(pullState.nestedScrollConnection)
+                    } else it
+                },
             topBar = {
                 CustomToolbar(
                     collapsingTitle = stringResource(id = R.string.title),
@@ -77,18 +118,16 @@ class TodosScreen(
                     onClick = { toEditScreen(null) },
                 )
             },
-            modifier = Modifier
-                .fillMaxSize()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            snackbarHost = { CustomSnackbar(hostState = snackbarHostState) },
             containerColor = JetTodoListTheme.colors.back.primary,
         ) { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxWidth()
+            Box(
+                modifier = Modifier.padding(paddingValues)
             ) {
                 TodoList(
-                    modifier = Modifier.padding(horizontal = 12.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .fillMaxSize(),
                     completedTodosShowed = viewState.completedShowed,
                     todos = viewState.todos,
                     completeCnt = viewState.completeCnt,
@@ -97,6 +136,65 @@ class TodosScreen(
                     onDelete = { viewModel.obtainEvent(TodosEvent.DeleteTodo(it)) },
                     onTodoClick = { toEditScreen(it) },
                 )
+                PullToRefreshContainer(
+                    state = pullState,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    containerColor = JetTodoListTheme.colors.back.primary,
+                    contentColor = JetTodoListTheme.colors.label.primary
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun NetworkLogic(connectionViewState: NetworkConnectionState) {
+        val networkState = LocalContext.current
+            .observeConnectivityAsFlow()
+            .collectAsState(NetworkConnectionState.Available)
+        LaunchedEffect(networkState.value) {
+            if (networkState.value != connectionViewState) {
+                viewModel.obtainEvent(TodosEvent.HandleNetworkState(networkState.value))
+            }
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun PullToRefreshLogic(
+        pullState: PullToRefreshState,
+        viewState: TodosViewState,
+        scrollBehavior: CustomToolbarScrollBehavior,
+    ) {
+        LaunchedEffect(pullState.isRefreshing) {
+            if (pullState.isRefreshing) viewModel.obtainEvent(TodosEvent.RefreshTodos)
+        }
+
+        LaunchedEffect(key1 = viewState.refreshing) {
+            if (!viewState.refreshing) pullState.endRefresh()
+        }
+
+        if (scrollBehavior.state.collapsedFraction != 0f) pullState.endRefresh()
+    }
+
+    @Composable
+    private fun ErrorMessageLogic(
+        viewState: TodosViewState,
+        snackbarHostState: SnackbarHostState,
+    ) {
+        if (viewState.messageId == null) return
+        val notActionMessages = listOf(R.string.network_unavailable, R.string.success_sync)
+        val messageStr = stringResource(viewState.messageId)
+        val actionStr = stringResource(id = R.string.repeat)
+        val context = LocalContext.current
+
+        LaunchedEffect(key1 = viewState.messageId) {
+            if (notActionMessages.contains(viewState.messageId)) {
+                Toast
+                    .makeText(context, messageStr, Toast.LENGTH_LONG)
+                    .show()
+            } else {
+                val result = snackbarHostState.showSnackbar(messageStr, actionStr)
+                viewModel.obtainEvent(TodosEvent.HandleSnackbarResult(result))
             }
         }
     }
@@ -128,9 +226,9 @@ class TodosScreen(
             }
             itemsIndexed(items = todos, key = { _, todo -> todo.id }) { i, todo ->
                 TodoRow(
-                    modifier = if (i == 0) Modifier.clip(
-                        RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
-                    ) else Modifier
+                    modifier = if (i == 0) {
+                        Modifier.clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                    } else Modifier
                         .animateItemPlacement()
                         .background(JetTodoListTheme.colors.back.secondary),
                     todo = todo,
@@ -234,14 +332,9 @@ class TodosScreen(
                         .background(JetTodoListTheme.colors.colors.green)
                         .fillMaxSize()
                         .padding(start = 20.dp),
-                    contentAlignment = Alignment.CenterStart
+                    contentAlignment = Alignment.CenterStart,
                 ) {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        painter = painterResource(id = R.drawable.ic_complete),
-                        contentDescription = "complete icon",
-                        tint = JetTodoListTheme.colors.colors.white
-                    )
+                    SwipeIcon(R.drawable.ic_complete, R.string.complete_icon)
                 }
             }
 
@@ -250,36 +343,64 @@ class TodosScreen(
                     modifier = Modifier
                         .background(JetTodoListTheme.colors.colors.red)
                         .fillMaxSize()
-                        .padding(end = 20.dp), contentAlignment = Alignment.CenterEnd
+                        .padding(end = 20.dp),
+                    contentAlignment = Alignment.CenterEnd,
                 ) {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        painter = painterResource(id = R.drawable.ic_delete),
-                        contentDescription = "delete icon",
-                        tint = JetTodoListTheme.colors.colors.white
-                    )
+                    SwipeIcon(R.drawable.ic_delete, R.string.delete_icon)
                 }
             }
 
             SwipeToDismissBoxValue.Settled -> {}
         }
     }
+
+    @Composable
+    private fun SwipeIcon(iconId: Int, descriptionId: Int) {
+        Icon(
+            modifier = Modifier.size(24.dp),
+            painter = painterResource(id = iconId),
+            contentDescription = stringResource(descriptionId),
+            tint = JetTodoListTheme.colors.colors.white
+        )
+    }
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
 private fun TodosScreenPreviewLight() {
-    TodosScreen(
-        viewModel = TodosViewModel(TodoItemsRepository(), ExceptionHandler(LocalContext.current)),
-        toEditScreen = {},
-    )
+    TodoListTheme {
+        TodosScreen(
+            viewModel = TodosViewModel(
+                Repository(DatabaseRepository(testDao)),
+                PreferencesHelper(
+                    LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE)
+                ),
+            ),
+            toEditScreen = {},
+        )
+    }
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun TodosScreenPreviewNight() {
-    TodosScreen(
-        viewModel = TodosViewModel(TodoItemsRepository(), ExceptionHandler(LocalContext.current)),
-        toEditScreen = {},
-    )
+    TodoListTheme {
+        TodosScreen(
+            viewModel = TodosViewModel(
+                Repository(DatabaseRepository(testDao)),
+                PreferencesHelper(
+                    LocalContext.current.getSharedPreferences("", Context.MODE_PRIVATE)
+                ),
+            ),
+            toEditScreen = {},
+        )
+    }
+}
+
+val testDao = object : Dao {
+    override suspend fun insertTodo(todo: TodoItemEntity) {}
+    override suspend fun insertTodos(todos: List<TodoItemEntity>) {}
+    override suspend fun getAllTodos(): List<TodoItemEntity> = emptyList()
+    override suspend fun deleteTodoById(todoId: String) {}
+    override suspend fun deleteAllTodos() {}
 }

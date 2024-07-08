@@ -1,29 +1,36 @@
 package com.around_team.todolist.ui.screens.edit
 
-import androidx.lifecycle.viewModelScope
-import com.around_team.todolist.data.db.TodoItemsRepository
-import com.around_team.todolist.data.model.TodoItem
+import com.around_team.todolist.data.network.repositories.Repository
 import com.around_team.todolist.ui.common.enums.TodoImportance
 import com.around_team.todolist.ui.common.models.BaseViewModel
+import com.around_team.todolist.ui.common.models.TodoItem
 import com.around_team.todolist.ui.screens.edit.models.EditEvent
 import com.around_team.todolist.ui.screens.edit.models.EditViewState
-import com.around_team.todolist.utils.ExceptionHandler
+import com.around_team.todolist.utils.PreferencesHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.UUID
 import javax.inject.Inject
 
+/**
+ * ViewModel for managing the state and business logic related to editing or creating a todo item.
+ *
+ * This ViewModel extends [BaseViewModel] and manages [EditViewState] and [EditEvent].
+ *
+ * @param repository The repository used for accessing and manipulating todo item data.
+ * @param preferencesHelper Helper class for managing application preferences.
+ */
 @HiltViewModel
 class EditViewModel @Inject constructor(
-    private val repository: TodoItemsRepository,
-    private val exceptionHandler: ExceptionHandler,
+    private val repository: Repository,
+    private val preferencesHelper: PreferencesHelper
 ) : BaseViewModel<EditViewState, EditEvent>(initialState = EditViewState()) {
-
     private var saveEnable: Boolean = false
     private var editedTodo: TodoItem = TodoItem(
-        id = UUID.randomUUID().toString(),
+        id = UUID
+            .randomUUID()
+            .toString(),
         text = "",
         importance = TodoImportance.Basic,
         done = false,
@@ -48,28 +55,25 @@ class EditViewModel @Inject constructor(
     }
 
     private fun saveTodo() {
-        viewModelScope.launch {
-            exceptionHandler.handleException {
-                repository.saveTodo(editedTodo)
-                viewState.update { it.copy(toTodosScreen = true) }
-            }
-        }
+        editedTodo = editedTodo.copy(
+            modifiedDate = Date().time, lastUpdatedBy =  preferencesHelper.getUUID()
+        )
+        if (oldTodo == null) repository.saveTodo(editedTodo) else repository.updateTodo(editedTodo)
+        viewState.update { it.copy(toTodosScreen = true) }
     }
 
     private fun deleteTodo() {
-        viewModelScope.launch {
-            exceptionHandler.handleException {
-                repository.deleteTodo(editedTodo.id)
-                viewState.update { it.copy(toTodosScreen = true) }
-            }
-        }
+        repository.deleteTodo(editedTodo.id)
+        viewState.update { it.copy(toTodosScreen = true) }
     }
 
     private fun clearViewState() {
         oldTodo = null
         saveEnable = false
         editedTodo = TodoItem(
-            id = UUID.randomUUID().toString(),
+            id = UUID
+                .randomUUID()
+                .toString(),
             text = "",
             importance = TodoImportance.Basic,
             done = false,
@@ -81,31 +85,27 @@ class EditViewModel @Inject constructor(
     }
 
     private fun setEditedTodo(id: String?) {
-        viewModelScope.launch {
-            if (id == null) {
-                if (oldTodo != null) clearViewState()
-            } else {
-                val todo = repository.getTodoById(id) ?: return@launch
-                oldTodo = todo
-                editedTodo = todo.copy()
-                deadlineChecked = todo.deadline != null
-            }
+        if (id == null) {
+            if (oldTodo != null) clearViewState()
+        } else {
+            val todo = repository.getTodoById(id) ?: return
+            oldTodo = todo
+            editedTodo = todo.copy()
+            deadlineChecked = todo.deadline != null
+        }
 
-            viewState.update {
-                it.copy(
-                    editedTodo = editedTodo,
-                    deadlineChecked = deadlineChecked,
-                )
-            }
+        viewState.update {
+            it.copy(
+                editedTodo = editedTodo,
+                deadlineChecked = deadlineChecked,
+            )
         }
     }
 
     private fun setCalendarShowState(state: Boolean) {
         showCalendar = state
 
-        viewState.update {
-            it.copy(showCalendar = showCalendar)
-        }
+        viewState.update { it.copy(showCalendar = showCalendar) }
     }
 
     private fun changeDeadline(date: Long) {

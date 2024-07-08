@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -47,7 +48,7 @@ internal fun TodoListTheme(
     )
 }
 
-@Preview
+@Preview(widthDp = 410)
 @Composable
 private fun TextStylesPreview() {
     TodoListTheme {
@@ -90,15 +91,20 @@ private fun TextStylesPreview() {
     }
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, widthDp = 1440)
 @Composable
 private fun PaletteLightPreview() {
-    Palette()
+    TodoListTheme {
+        Palette()
+    }
 }
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, widthDp = 1440)
 @Composable
 private fun PaletteNightPreview() {
-    Palette()
+    TodoListTheme {
+        Palette()
+    }
 }
 
 @Composable
@@ -132,20 +138,25 @@ private fun Palette(modifier: Modifier = Modifier) {
 }
 
 
-
+@OptIn(ExperimentalStdlibApi::class)
 @Composable
 private fun ColorCard(color: Color, text: String, modifier: Modifier = Modifier) {
-    val textColor = if (color.luminance() > 0.5) Color.Black else Color.White
+    val textColor = if (color.luminance() > 0.6) Color.Black else Color.White
 
     Column(
         modifier = modifier
             .size(240.dp, 100.dp)
-            .background(color),
+            .background(color)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Bottom
     ) {
         Text(text = text, color = textColor, fontSize = 10.sp)
-        Text(text = color.toString(), color = textColor, fontSize = 10.sp)
+        Text(
+            text = "#${color.toArgb().toHexString().uppercase()}",
+            color = textColor,
+            fontSize = 10.sp
+        )
     }
 }
 

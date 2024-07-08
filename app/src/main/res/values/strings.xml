@@ -24,7 +24,13 @@
     <string name="arrow_icon">Иконка стрелочки</string>
     <string name="complete_icon">Иконка выполнения</string>
     <string name="add_icon">Иконка добавления</string>
+    <string name="delete_icon">Иконка удаления</string>
 
     <!--Errors-->
     <string name="error">Произошла ошибка</string>
+    <string name="ok">Ок</string>
+    <string name="repeat">Повторить</string>
+    <string name="network_unavailable">Подключение к интернету отсутствует</string>
+    <string name="sync_error">Не удалось синхронизироваться с сервером</string>
+    <string name="success_sync">Успешно синхронизированно</string>
 </resources>
