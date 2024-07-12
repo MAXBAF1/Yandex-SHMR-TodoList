@@ -49,3 +49,4 @@ _ReSharper*/
 packages/
 
 Token.kt
+/build_logic/build/
