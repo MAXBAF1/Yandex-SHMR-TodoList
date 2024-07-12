@@ -10,7 +10,6 @@ import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.TaskAction
 import telegram.TelegramApi
 import utils.BytesConverter.bytesToMegaBytes
-import utils.bytesToMegaBytes
 import java.util.Locale
 import javax.inject.Inject
 
