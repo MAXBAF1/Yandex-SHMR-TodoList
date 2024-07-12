@@ -12,6 +12,10 @@ gradlePlugin {
             id = "todolist-hilt"
             implementationClass = "HiltConventionPlugin"
         }
+        plugins.register("telegram-reporter") {
+            id = "telegram-reporter"
+            implementationClass = "telegram.TelegramReporterPlugin"
+        }
     }
 }
 

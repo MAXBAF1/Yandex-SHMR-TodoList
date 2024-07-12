@@ -12,3 +12,10 @@ android {
         versionName = "1.0"
     }
 }
+
+tgReporter {
+    token.set(providers.environmentVariable("TG_TOKEN"))
+    chatId.set(providers.environmentVariable("TG_CHAT"))
+    detailInfoEnabled.set(true)
+    apkSizeLimitInMB.set(1000)
+}
