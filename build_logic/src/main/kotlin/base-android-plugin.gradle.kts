@@ -8,14 +8,12 @@ plugins {
 }
 
 android {
-    namespace = "com.around_team.todolist"
-    compileSdk = 34
+    namespace = AndroidConst.NAMESPACE
+    compileSdk = AndroidConst.COMPILE_SKD
 
     defaultConfig {
-        minSdk = 24
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        minSdk = AndroidConst.MIN_SKD
+        targetSdk = AndroidConst.COMPILE_SKD
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -34,11 +32,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = AndroidConst.COMPILE_JDK_VERSION
+        targetCompatibility = AndroidConst.COMPILE_JDK_VERSION
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = AndroidConst.KOTLIN_JVM_TARGET
     }
     packaging {
         resources {
