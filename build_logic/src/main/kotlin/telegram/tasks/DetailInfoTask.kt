@@ -63,9 +63,7 @@ abstract class DetailInfoTask @Inject constructor(
                             chatId = chatId.get()
                         )
                     } finally {
-                        if (tempReportFile.exists()) {
-                            tempReportFile.delete()
-                        }
+                        if (tempReportFile.exists()) tempReportFile.delete()
                     }
                 }
             }
