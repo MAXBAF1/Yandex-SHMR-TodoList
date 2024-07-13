@@ -36,8 +36,7 @@ abstract class TelegramReporterTask @Inject constructor(
             ?.filter { it.name.endsWith(".apk") }
             ?.forEach {
                 runBlocking {
-                    telegramApi
-                        .sendMessage("Build finished", token, chatId)
+                    telegramApi.sendMessage("Build finished", token, chatId)
                 }
                 runBlocking {
                     telegramApi
