@@ -4,6 +4,7 @@ import AndroidConst
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.internal.tasks.factory.dependsOn
+import gradle.kotlin.dsl.accessors._254df55164c5b8200e389b57723ed3bc.android
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import org.gradle.api.GradleException
@@ -51,7 +52,7 @@ class TelegramReporterPlugin : Plugin<Project> {
                 artifacts,
                 extension,
                 variant.name,
-                AndroidConst.VERSION_NAME
+                project.android.defaultConfig.versionCode.toString()
             )
             val detailTask = registerApkDetailInfo(project, buildVariantName, telegramApi, artifacts, extension)
 
