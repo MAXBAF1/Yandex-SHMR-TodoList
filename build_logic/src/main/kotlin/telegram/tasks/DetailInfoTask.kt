@@ -9,6 +9,7 @@ import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.TaskAction
 import telegram.TelegramApi
 import utils.BytesConverter.bytesToKyloBytes
+import java.io.File
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import javax.inject.Inject
@@ -43,13 +44,29 @@ abstract class DetailInfoTask @Inject constructor(
                         val size = entry.size.bytesToKyloBytes()
                         info.appendLine("- ${entry.name} %.1f KB".format(size))
                     }
+                val tempReportFile = File.createTempFile("apk_detail_info", ".txt")
+                tempReportFile.writeText(info.toString())
 
                 runBlocking {
-                    telegramApi
-                        .sendMessage(info.toString().take(4000), token.get(), chatId.get())
-                        .apply {
-                            println("Detail status = $status")
+                    try {
+                        telegramApi.upload(
+                            file = tempReportFile,
+                            fileName = "APK INFO",
+                            chatId = chatId.get(),
+                            token = token.get()
+                        )
+                    } catch (e: Exception) {
+                        println(e)
+                        telegramApi.sendMessage(
+                            message = "Error with sending APK info",
+                            token = token.get(),
+                            chatId = chatId.get()
+                        )
+                    } finally {
+                        if (tempReportFile.exists()) {
+                            tempReportFile.delete()
                         }
+                    }
                 }
             }
     }
