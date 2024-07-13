@@ -46,7 +46,7 @@ abstract class DetailInfoTask @Inject constructor(
 
                 runBlocking {
                     telegramApi
-                        .sendMessage(info.toString(), token.get(), chatId.get(), true)
+                        .sendMessage(info.toString().take(4000), token.get(), chatId.get())
                         .apply {
                             println("Detail status = $status")
                         }

@@ -32,14 +32,10 @@ class TelegramApi(
         message: String,
         token: String,
         chatId: String,
-        useMarkdownV2: Boolean = false,
     ): HttpResponse {
         return httpClient.post("$BASE_URL/bot$token/sendMessage") {
             parameter("chat_id", chatId)
             parameter("text", message)
-            if (useMarkdownV2) {
-                parameter("parse_mode", "MarkdownV2")
-            }
         }
     }
 }
