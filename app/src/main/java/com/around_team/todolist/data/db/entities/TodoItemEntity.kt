@@ -9,15 +9,6 @@ import java.util.Locale
 
 /**
  * Data class representing a Todo item entity in the local database.
- *
- * @property id The unique identifier for the todo item.
- * @property text The description text of the todo item.
- * @property importance The importance level of the todo item.
- * @property deadline The deadline for the todo item, represented as a timestamp. Nullable.
- * @property done A boolean indicating whether the todo item is done.
- * @property creationDate The creation date of the todo item, represented as a timestamp.
- * @property modifiedDate The last modified date of the todo item, represented as a timestamp.
- * @property lastUpdatedBy The identifier of the user who last updated the todo item, default is "1".
  */
 @Entity(tableName = "todo_list")
 data class TodoItemEntity(
@@ -29,6 +20,9 @@ data class TodoItemEntity(
     @ColumnInfo("created_at") val creationDate: Long,
     @ColumnInfo("changed_at") val modifiedDate: Long,
     @ColumnInfo("last_updated_by") val lastUpdatedBy: String = "1",
+    @ColumnInfo("color") val color: String? = null,
+
+    @ColumnInfo("files") val files: List<String>? = null,
 ) {
     fun toTodoItem(): TodoItem {
         return TodoItem(
@@ -40,6 +34,8 @@ data class TodoItemEntity(
             creationDate,
             modifiedDate,
             lastUpdatedBy,
+            color,
+            files
         )
     }
 }
