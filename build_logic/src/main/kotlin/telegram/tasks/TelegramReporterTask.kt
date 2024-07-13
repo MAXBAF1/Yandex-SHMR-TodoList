@@ -12,6 +12,8 @@ import javax.inject.Inject
 
 abstract class TelegramReporterTask @Inject constructor(
     private val telegramApi: TelegramApi,
+    private val buildVariant: String,
+    private val versionCode: String,
 ) : DefaultTask() {
 
     @get:InputDirectory
@@ -27,6 +29,8 @@ abstract class TelegramReporterTask @Inject constructor(
     fun report() {
         val token = token.get()
         val chatId = chatId.get()
+        val resultFileName = "todoList-$buildVariant-$versionCode.apk"
+
         apkDir.get().asFile
             .listFiles()
             ?.filter { it.name.endsWith(".apk") }
@@ -40,7 +44,7 @@ abstract class TelegramReporterTask @Inject constructor(
                 }
                 runBlocking {
                     telegramApi
-                        .upload(it, token, chatId)
+                        .upload(it, resultFileName, token, chatId)
                         .apply {
                             println("Status = $status")
                         }

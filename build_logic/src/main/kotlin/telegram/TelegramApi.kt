@@ -18,14 +18,14 @@ class TelegramApi(
     private val httpClient: HttpClient,
 ) {
 
-    suspend fun upload(file: File, token: String, chatId: String): HttpResponse {
+    suspend fun upload(file: File, fileName: String, token: String, chatId: String): HttpResponse {
         return httpClient.post("$BASE_URL/bot$token/sendDocument") {
             parameter("chat_id", chatId)
             setBody(MultiPartFormDataContent(formData {
                 append("document",
                     file.readBytes(),
                     Headers.build {
-                    append(HttpHeaders.ContentDisposition, "filename=${file.name.escapeIfNeeded()}")
+                    append(HttpHeaders.ContentDisposition, "filename=$fileName")
                 })
             }))
         }

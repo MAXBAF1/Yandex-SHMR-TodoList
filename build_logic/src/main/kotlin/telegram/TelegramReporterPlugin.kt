@@ -1,9 +1,11 @@
 package telegram
 
+import AndroidConst
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.variant.AndroidComponentsExtension
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
+import libs
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -39,7 +41,15 @@ class TelegramReporterPlugin : Plugin<Project> {
             }
 
             registerValidateApkSize(project, buildVariantName, telegramApi, artifacts, extension)
-            registerReportTelegramApk(project, buildVariantName, telegramApi, artifacts, extension)
+            registerReportTelegramApk(
+                project,
+                buildVariantName,
+                telegramApi,
+                artifacts,
+                extension,
+                variant.name,
+                AndroidConst.VERSION_NAME
+            )
             registerApkDetailInfo(project, buildVariantName, telegramApi, artifacts, extension)
         }
     }
@@ -72,12 +82,16 @@ class TelegramReporterPlugin : Plugin<Project> {
         telegramApi: TelegramApi,
         artifacts: Provider<Directory>,
         extension: TelegramExtension,
+        buildVariant: String,
+        versionCode: String,
     ) {
         project.tasks
             .register(
                 "reportTelegramApkFor$buildVariantName",
                 TelegramReporterTask::class.java,
                 telegramApi,
+                buildVariant,
+                versionCode,
             )
             .configure {
                 apkDir.set(artifacts)

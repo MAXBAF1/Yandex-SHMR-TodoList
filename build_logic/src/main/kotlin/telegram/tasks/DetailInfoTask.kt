@@ -48,18 +48,7 @@ abstract class DetailInfoTask @Inject constructor(
                 tempReportFile.writeText(info.toString())
 
                 runBlocking {
-                    try {
-                        telegramApi.upload(tempReportFile, chatId.get(), token.get())
-                    } catch (e: Exception) {
-                        println(e)
-                        telegramApi.sendMessage(
-                            message = e.message.toString(),
-                            token = token.get(),
-                            chatId = chatId.get()
-                        )
-                    } finally {
-                        if (tempReportFile.exists()) tempReportFile.delete()
-                    }
+                    telegramApi.sendMessage(info.toString(), token.get(), chatId.get())
                 }
             }
     }

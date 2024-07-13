@@ -8,8 +8,8 @@ plugins {
 android {
     defaultConfig {
         applicationId = "com.around_team.todolist"
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = AndroidConst.VERSION_CODE
+        versionName = AndroidConst.VERSION_NAME
     }
 }
 
