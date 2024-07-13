@@ -3,15 +3,16 @@ package telegram
 import AndroidConst
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.gradle.internal.tasks.factory.dependsOn
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
-import libs
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.create
 import telegram.tasks.DetailInfoTask
 import telegram.tasks.TelegramReporterTask
@@ -40,8 +41,10 @@ class TelegramReporterPlugin : Plugin<Project> {
                 if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
             }
 
-            registerValidateApkSize(project, buildVariantName, telegramApi, artifacts, extension)
-            registerReportTelegramApk(
+            val sizeTask = registerValidateApkSize(
+                project, buildVariantName, telegramApi, artifacts, extension
+            )
+            val reportTask = registerReportTelegramApk(
                 project,
                 buildVariantName,
                 telegramApi,
@@ -50,7 +53,10 @@ class TelegramReporterPlugin : Plugin<Project> {
                 variant.name,
                 AndroidConst.VERSION_NAME
             )
-            registerApkDetailInfo(project, buildVariantName, telegramApi, artifacts, extension)
+            val detailTask = registerApkDetailInfo(project, buildVariantName, telegramApi, artifacts, extension)
+
+            sizeTask.dependsOn(detailTask)
+            reportTask.dependsOn(sizeTask)
         }
     }
 
@@ -60,18 +66,20 @@ class TelegramReporterPlugin : Plugin<Project> {
         telegramApi: TelegramApi,
         artifacts: Provider<Directory>,
         extension: TelegramExtension,
-    ) {
-        project.tasks
+    ): TaskProvider<ValidateSizeTask> {
+        return project.tasks
             .register(
                 "validateApkSizeFor$buildVariantName",
                 ValidateSizeTask::class.java,
                 telegramApi,
             )
-            .configure {
-                apkDir.set(artifacts)
-                apkSizeLimitInMB.set(extension.apkSizeLimitInMB)
-                token.set(extension.token)
-                chatId.set(extension.chatId)
+            .apply {
+                configure {
+                    apkDir.set(artifacts)
+                    apkSizeLimitInMB.set(extension.apkSizeLimitInMB)
+                    token.set(extension.token)
+                    chatId.set(extension.chatId)
+                }
             }
     }
 
@@ -83,8 +91,8 @@ class TelegramReporterPlugin : Plugin<Project> {
         extension: TelegramExtension,
         buildVariant: String,
         versionCode: String,
-    ) {
-        project.tasks
+    ): TaskProvider<TelegramReporterTask> {
+        return project.tasks
             .register(
                 "reportTelegramApkFor$buildVariantName",
                 TelegramReporterTask::class.java,
@@ -92,10 +100,12 @@ class TelegramReporterPlugin : Plugin<Project> {
                 buildVariant,
                 versionCode,
             )
-            .configure {
-                apkDir.set(artifacts)
-                token.set(extension.token)
-                chatId.set(extension.chatId)
+            .apply {
+                configure {
+                    apkDir.set(artifacts)
+                    token.set(extension.token)
+                    chatId.set(extension.chatId)
+                }
             }
     }
 
@@ -105,15 +115,17 @@ class TelegramReporterPlugin : Plugin<Project> {
         telegramApi: TelegramApi,
         artifacts: Provider<Directory>,
         extension: TelegramExtension,
-    ) {
-        project.tasks
+    ): TaskProvider<DetailInfoTask> {
+        return project.tasks
             .register(
                 "apkDetailInfoFor$buildVariantName", DetailInfoTask::class.java, telegramApi
             )
-            .configure {
-                apkDir.set(artifacts)
-                token.set(extension.token)
-                chatId.set(extension.chatId)
+            .apply {
+                configure {
+                    apkDir.set(artifacts)
+                    token.set(extension.token)
+                    chatId.set(extension.chatId)
+                }
             }
     }
 
