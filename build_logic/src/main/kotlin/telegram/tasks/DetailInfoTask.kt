@@ -44,7 +44,6 @@ abstract class DetailInfoTask @Inject constructor(
                         val size = entry.size.bytesToKyloBytes()
                         info.append("- ${entry.name} %.1f KB\n".format(size))
                     }
-                println(info.toString())
 
                 runBlocking {
                     telegramApi.sendMessage(info.toString(), token.get(), chatId.get())

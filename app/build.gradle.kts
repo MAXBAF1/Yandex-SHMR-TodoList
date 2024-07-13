@@ -17,5 +17,5 @@ tgReporter {
     token.set(providers.environmentVariable("TG_TOKEN"))
     chatId.set(providers.environmentVariable("TG_CHAT"))
     detailInfoEnabled.set(true)
-    apkSizeLimitInMB.set(10)
+    apkSizeLimitInMB.set(1000)
 }
