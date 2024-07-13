@@ -41,12 +41,12 @@ abstract class DetailInfoTask @Inject constructor(
                     .asIterator()
                     .forEach { entry: ZipEntry ->
                         val size = entry.size.bytesToKyloBytes()
-                        info.append("- ${entry.name} %.1f KB\n".format(size))
+                        info.appendLine("- ${entry.name} %.1f KB".format(size))
                     }
 
                 runBlocking {
                     telegramApi
-                        .sendMessage(info.toString(), token.get(), chatId.get())
+                        .sendMessage(info.toString(), token.get(), chatId.get(), true)
                         .apply {
                             println("Detail status = $status")
                         }
