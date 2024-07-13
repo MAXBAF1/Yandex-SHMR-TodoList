@@ -68,7 +68,6 @@ class TelegramReporterPlugin : Plugin<Project> {
                 telegramApi,
             )
             .configure {
-                enabled = extension.validateSizeTaskEnabled.get()
                 apkDir.set(artifacts)
                 apkSizeLimitInMB.set(extension.apkSizeLimitInMB)
                 token.set(extension.token)
@@ -112,7 +111,6 @@ class TelegramReporterPlugin : Plugin<Project> {
                 "apkDetailInfoFor$buildVariantName", DetailInfoTask::class.java, telegramApi
             )
             .configure {
-                enabled = extension.detailInfoEnabled.get()
                 apkDir.set(artifacts)
                 token.set(extension.token)
                 chatId.set(extension.chatId)

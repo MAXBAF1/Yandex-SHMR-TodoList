@@ -38,15 +38,12 @@ abstract class TelegramReporterTask @Inject constructor(
                 runBlocking {
                     telegramApi
                         .sendMessage("Build finished", token, chatId)
-                        .apply {
-                            println("Status = $status")
-                        }
                 }
                 runBlocking {
                     telegramApi
                         .upload(it, resultFileName, token, chatId)
                         .apply {
-                            println("Status = $status")
+                            println("Upload status = $status")
                         }
                 }
             }
