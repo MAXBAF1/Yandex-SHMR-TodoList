@@ -18,10 +18,10 @@ import androidx.work.WorkManager
 import com.around_team.todolist.di.SharedPreferencesModule
 import com.around_team.todolist.ui.navigation.NavGraph
 import com.around_team.todolist.ui.screens.settings.models.ThemeTabs
-import com.around_team.todolist.ui.theme.TodoListTheme
-import com.around_team.todolist.utils.DataUpdateWorker
 import com.around_team.todolist.ui.theme.LocalSettingsEventBus
 import com.around_team.todolist.ui.theme.SettingsEventBus
+import com.around_team.todolist.ui.theme.TodoListTheme
+import com.around_team.todolist.utils.DataUpdateWorker
 import com.around_team.todolist.utils.PreferencesHelper
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.TimeUnit
@@ -49,9 +49,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val settingsEventBus = remember { SettingsEventBus() }
+            val currentSettings = settingsEventBus.currentSettings.collectAsState().value
             val navController = rememberNavController()
 
-            TodoListTheme(darkTheme = isDarkThemeSaved()) {
+            TodoListTheme(darkTheme = currentSettings?.isDarkMode ?: isDarkThemeSaved()) {
                 CompositionLocalProvider(LocalSettingsEventBus provides settingsEventBus) {
                     NavGraph(navController = navController).Create()
                 }
