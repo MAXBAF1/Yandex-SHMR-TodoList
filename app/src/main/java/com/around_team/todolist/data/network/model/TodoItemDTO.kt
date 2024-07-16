@@ -27,6 +27,8 @@ data class TodoItemDTO(
     @SerializedName("created_at") val creationDate: Long,
     @SerializedName("changed_at") val modifiedDate: Long = Date().time,
     @SerializedName("last_updated_by") val lastUpdatedBy: String = "1",
+    @SerializedName("color") val color: String? = null,
+    @SerializedName("files") val files: List<String>? = null,
 ) {
     /**
      * Converts this DTO object to a domain model [TodoItem].
@@ -43,6 +45,8 @@ data class TodoItemDTO(
             creationDate,
             modifiedDate,
             lastUpdatedBy,
+            color,
+            files
         )
     }
 }

@@ -2,6 +2,10 @@ package com.around_team.todolist.data.db
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
+import com.around_team.todolist.data.db.converters.Converters
 import com.around_team.todolist.data.db.entities.TodoItemEntity
 
 /**
@@ -15,9 +19,10 @@ import com.around_team.todolist.data.db.entities.TodoItemEntity
  */
 @Database(
     entities = [TodoItemEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false,
 )
+@TypeConverters(Converters::class)
 abstract class TodoListDatabase : RoomDatabase() {
 
     /**
@@ -26,4 +31,13 @@ abstract class TodoListDatabase : RoomDatabase() {
      * @return The DAO for the todo list database.
      */
     abstract fun dao(): Dao
+
+    companion object {
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE todo_list ADD COLUMN color TEXT")
+                db.execSQL("ALTER TABLE todo_list ADD COLUMN files TEXT")
+            }
+        }
+    }
 }

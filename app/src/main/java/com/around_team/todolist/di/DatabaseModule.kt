@@ -22,6 +22,7 @@ object DataBaseModule {
     fun provideDatabase(@ApplicationContext context: Context): TodoListDatabase {
         return Room
             .databaseBuilder(context, TodoListDatabase::class.java, "todo_list_database")
+            .addMigrations(TodoListDatabase.MIGRATION_1_2)
             .build()
     }
 
