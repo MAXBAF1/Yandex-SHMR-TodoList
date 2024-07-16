@@ -14,21 +14,14 @@ import com.around_team.todolist.ui.theme.JetTodoListTheme
  * @property iconId Optional drawable resource ID representing icon for the importance level.
  */
 enum class TodoImportance(
-    @StringRes val text: Int? = null,
-    @DrawableRes val iconId: Int? = null
-) {
+    override val text: Int? = null,
+    override val iconId: Int? = null
+): ITabs {
     Low(iconId = R.drawable.ic_low_priority),
     Basic(text = R.string.no),
     Important(iconId = R.drawable.ic_high_priority);
 
     companion object {
-        /**
-         * Retrieves TodoImportance enum instance from its ordinal value.
-         *
-         * @param ordinal The ordinal value of the enum.
-         * @return Corresponding TodoImportance enum instance.
-         * @throws IllegalArgumentException If provided ordinal is out of valid range.
-         */
         fun getFromOrdinal(ordinal: Int): TodoImportance {
             return when (ordinal) {
                 0 -> Low

@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.around_team.todolist.R
+import com.around_team.todolist.ui.common.enums.ITabs
 import com.around_team.todolist.ui.common.enums.TodoImportance
 import com.around_team.todolist.ui.common.enums.getIconColor
 import com.around_team.todolist.ui.theme.JetTodoListTheme
@@ -47,9 +48,10 @@ import com.around_team.todolist.ui.theme.TodoListTheme
  */
 class CustomTabRow(
     private val selectedTab: Int,
-    private val tabList: Array<TodoImportance>,
+    private val tabList: List<ITabs>,
     private val onTabChanged: (Int) -> Unit,
     private val modifier: Modifier = Modifier,
+    private val highlightSelectedTab: Boolean = false,
 ) {
 
     @Composable
@@ -69,13 +71,13 @@ class CustomTabRow(
                 indicator = indicator,
                 divider = {},
             ) {
-                tabList.forEachIndexed { index, themeTab ->
-                    CustomTab(
-                        tab = themeTab,
-                        onClick = {
-                            onTabChanged(index)
+                tabList.forEachIndexed { index, tab ->
+                    val tabsTextColor = if (highlightSelectedTab && index == selectedTab) {
+                        JetTodoListTheme.colors.label.primary
+                    } else JetTodoListTheme.colors.colors.gray
 
-                        },
+                    CustomTab(
+                        tab = tab, onClick = { onTabChanged(index) }, color = tabsTextColor
                     )
                 }
             }
@@ -117,7 +119,11 @@ class CustomTabRow(
     }
 
     @Composable
-    private fun CustomTab(tab: TodoImportance, onClick: () -> Unit) {
+    private fun CustomTab(
+        tab: ITabs,
+        onClick: () -> Unit,
+        color: Color,
+    ) {
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(7.dp))
@@ -132,15 +138,15 @@ class CustomTabRow(
         ) {
             if (tab.iconId != null) {
                 Icon(
-                    painter = painterResource(id = tab.iconId),
+                    painter = painterResource(id = tab.iconId ?: R.drawable.ic_error),
                     contentDescription = stringResource(id = R.string.priority_icon),
-                    tint = tab.getIconColor()
+                    tint = if (tab is TodoImportance) tab.getIconColor() else color
                 )
             } else if (tab.text != null) {
                 Text(
-                    text = stringResource(id = tab.text),
+                    text = stringResource(id = tab.text ?: R.string.error),
                     style = JetTodoListTheme.typography.body,
-                    color = JetTodoListTheme.colors.label.primary
+                    color = if (highlightSelectedTab) color else JetTodoListTheme.colors.label.primary
                 )
             }
         }
@@ -154,7 +160,7 @@ private fun CustomTabRowPreview() {
         Box(modifier = Modifier.background(JetTodoListTheme.colors.back.primary)) {
             CustomTabRow(
                 selectedTab = 1,
-                tabList = TodoImportance.entries.toTypedArray(),
+                tabList = TodoImportance.entries,
                 onTabChanged = { },
             ).Create()
         }

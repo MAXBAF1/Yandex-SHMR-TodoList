@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.Dp
 
 data class JetTodoListColors(
     val support: Support,
@@ -64,13 +63,13 @@ enum class JetTodoListStyle {
 
 object JetTodoListTheme {
     internal val colors: JetTodoListColors
-        @Composable get() = LocalJetAroundColors.current
+        @Composable get() = LocalJetTodoListColors.current
 
     internal val typography: JetTodoListTypography
         @Composable get() = LocalJetTodoListTypography.current
 }
 
-internal val LocalJetAroundColors = staticCompositionLocalOf<JetTodoListColors> {
+internal val LocalJetTodoListColors = staticCompositionLocalOf<JetTodoListColors> {
     error("No colors provided")
 }
 

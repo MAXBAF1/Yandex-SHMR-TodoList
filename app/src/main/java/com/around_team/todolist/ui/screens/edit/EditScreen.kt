@@ -213,7 +213,7 @@ class EditScreen(
         onPriorityChanged: (TodoImportance) -> Unit,
         modifier: Modifier = Modifier,
     ) {
-        val tabList = TodoImportance.entries.toTypedArray()
+        val tabList = TodoImportance.entries
 
         Row(
             modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically

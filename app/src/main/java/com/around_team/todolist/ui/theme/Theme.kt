@@ -1,5 +1,6 @@
 package com.around_team.todolist.ui.theme
 
+import android.content.Context
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -16,10 +17,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.around_team.todolist.di.SharedPreferencesModule
+import com.around_team.todolist.ui.screens.settings.models.ThemeTabs
+import com.around_team.todolist.utils.PreferencesHelper
 
 @Composable
 internal fun TodoListTheme(
@@ -42,7 +47,7 @@ internal fun TodoListTheme(
     }
 
     CompositionLocalProvider(
-        LocalJetAroundColors provides colors,
+        LocalJetTodoListColors provides colors,
         LocalJetTodoListTypography provides typography,
         content = content
     )

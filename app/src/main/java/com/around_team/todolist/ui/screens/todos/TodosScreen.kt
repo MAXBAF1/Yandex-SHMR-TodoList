@@ -56,6 +56,7 @@ import com.around_team.todolist.data.network.repositories.Repository
 import com.around_team.todolist.ui.common.enums.NetworkConnectionState
 import com.around_team.todolist.ui.common.models.TodoItem
 import com.around_team.todolist.ui.common.views.CustomFab
+import com.around_team.todolist.ui.common.views.CustomIconButton
 import com.around_team.todolist.ui.common.views.CustomSnackbar
 import com.around_team.todolist.ui.common.views.MyDivider
 import com.around_team.todolist.ui.common.views.custom_toolbar.CustomToolbar
@@ -79,6 +80,7 @@ import com.around_team.todolist.utils.observeConnectivityAsFlow
 class TodosScreen(
     private val viewModel: TodosViewModel,
     private val toEditScreen: (id: String?) -> Unit,
+    private val toSettingsScreen: () -> Unit,
 ) {
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -111,7 +113,13 @@ class TodosScreen(
             topBar = {
                 CustomToolbar(
                     collapsingTitle = stringResource(id = R.string.title),
-                    scrollBehavior = scrollBehavior
+                    scrollBehavior = scrollBehavior,
+                    actions = {
+                        CustomIconButton(
+                            iconId = R.drawable.ic_settings,
+                            onClick = toSettingsScreen
+                        )
+                    }
                 )
             },
             floatingActionButtonPosition = FabPosition.Center,
@@ -379,6 +387,7 @@ private fun TodosScreenPreviewLight() {
                 Repository(RequestManager(prefHelper), DatabaseRepository(testDao)), prefHelper
             ),
             toEditScreen = {},
+            toSettingsScreen = {},
         )
     }
 }
@@ -394,6 +403,7 @@ private fun TodosScreenPreviewNight() {
                 Repository(RequestManager(prefHelper), DatabaseRepository(testDao)), prefHelper
             ),
             toEditScreen = {},
+            toSettingsScreen = {},
         )
     }
 }
