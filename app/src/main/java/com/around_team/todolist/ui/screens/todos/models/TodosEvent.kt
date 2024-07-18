@@ -14,6 +14,7 @@ sealed class TodosEvent {
     data object CancelJobs : TodosEvent()
     data object HandleSnackbarActionClick : TodosEvent()
     data object HideSnackbar : TodosEvent()
+    data object ClearMessage : TodosEvent()
     data object RefreshTodos : TodosEvent()
     data class HandleNetworkState(val networkConnectionState: NetworkConnectionState) : TodosEvent()
 }

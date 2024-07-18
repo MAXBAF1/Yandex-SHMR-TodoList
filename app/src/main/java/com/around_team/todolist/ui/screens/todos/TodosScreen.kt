@@ -207,6 +207,7 @@ class TodosScreen(
                 Toast
                     .makeText(context, messageStr, Toast.LENGTH_LONG)
                     .show()
+                viewModel.obtainEvent(TodosEvent.ClearMessage)
             }
         } else if (messageId == R.string.todo_deleted && snackBarVisible) {
             LaunchedEffect(Unit) {

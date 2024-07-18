@@ -48,6 +48,7 @@ class TodosViewModel @Inject constructor(
             is TodosEvent.HandleNetworkState -> handleNetworkState(viewEvent.networkConnectionState)
             TodosEvent.StartCollecting -> startCollecting()
             TodosEvent.HideSnackbar -> viewState.update { it.copy(snackBarVisible = false) }
+            TodosEvent.ClearMessage -> viewState.update { it.copy(messageId = null) }
         }
     }
 
