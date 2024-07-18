@@ -42,7 +42,7 @@ class RequestManager @Inject constructor(private val preferencesHelper: Preferen
         }
         install(DefaultRequest) {
             header(HttpHeaders.Authorization, "OAuth ${preferencesHelper.getToken()}")
-            header(ERRORS_HEADER, 20)
+            header(ERRORS_HEADER, 0)
             header(REVISION_HEADER, lastKnownRevision.toString())
             header(HttpHeaders.ContentType, ContentType.Application.Json)
             header(HttpHeaders.Accept, ContentType.Application.Json)

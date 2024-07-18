@@ -13,6 +13,7 @@ import com.around_team.todolist.utils.PreferencesHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -65,7 +66,7 @@ class TodosViewModel @Inject constructor(
             }
             viewModelScope.launch {
                 repository
-                    .getErrors()
+                    .getMessages()
                     .onEach { errorId ->
                         viewState.update { it.copy(messageId = errorId, refreshing = false) }
                     }
@@ -104,12 +105,18 @@ class TodosViewModel @Inject constructor(
 
     private fun handleSnackbarResult(result: SnackbarResult) {
         when (result) {
-            SnackbarResult.Dismissed -> {}
+            SnackbarResult.Dismissed -> {
+                val t = 5
+            }
             SnackbarResult.ActionPerformed -> {
-                repository.sendAllTodos(todos) {
-                    viewState.update { it.copy(messageId = R.string.success_sync) }
+                if (viewState.value.messageId == R.string.todo_deleted) {
+                    repository.saveTodo()
+                } else {
+                    repository.sendAllTodos(todos) {
+                        viewState.update { it.copy(messageId = R.string.success_sync) }
+                    }
+                    viewState.update { it.copy(messageId = null) }
                 }
-                viewState.update { it.copy(messageId = null) }
             }
         }
     }

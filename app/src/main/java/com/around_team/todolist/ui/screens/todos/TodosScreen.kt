@@ -63,13 +63,15 @@ import com.around_team.todolist.ui.common.views.custom_toolbar.CustomToolbar
 import com.around_team.todolist.ui.common.views.custom_toolbar.CustomToolbarScrollBehavior
 import com.around_team.todolist.ui.common.views.custom_toolbar.rememberToolbarScrollBehavior
 import com.around_team.todolist.ui.screens.todos.models.TodosEvent
-import com.around_team.todolist.ui.screens.todos.models.TodosViewState
 import com.around_team.todolist.ui.screens.todos.views.CreateNewCard
 import com.around_team.todolist.ui.screens.todos.views.TodoCard
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.ui.theme.TodoListTheme
 import com.around_team.todolist.utils.PreferencesHelper
 import com.around_team.todolist.utils.observeConnectivityAsFlow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * Screen component displaying a list of todo items.
@@ -94,10 +96,10 @@ class TodosScreen(
         LaunchedEffect(Unit) { viewModel.obtainEvent(TodosEvent.StartCollecting) }
 
         val snackbarHostState = remember { SnackbarHostState() }
-        ErrorMessageLogic(viewState, snackbarHostState)
+        MessagesLogic(viewState.messageId, snackbarHostState)
 
         val pullState = rememberPullToRefreshState()
-        PullToRefreshLogic(pullState, viewState, scrollBehavior)
+        PullToRefreshLogic(pullState, viewState.refreshing, scrollBehavior)
 
         NetworkLogic(viewState.connectionState)
 
@@ -111,16 +113,13 @@ class TodosScreen(
                     } else it
                 },
             topBar = {
-                CustomToolbar(
-                    collapsingTitle = stringResource(id = R.string.title),
+                CustomToolbar(collapsingTitle = stringResource(id = R.string.title),
                     scrollBehavior = scrollBehavior,
                     actions = {
                         CustomIconButton(
-                            iconId = R.drawable.ic_settings,
-                            onClick = toSettingsScreen
+                            iconId = R.drawable.ic_settings, onClick = toSettingsScreen
                         )
-                    }
-                )
+                    })
             },
             floatingActionButtonPosition = FabPosition.Center,
             floatingActionButton = {
@@ -173,40 +172,55 @@ class TodosScreen(
     @Composable
     private fun PullToRefreshLogic(
         pullState: PullToRefreshState,
-        viewState: TodosViewState,
+        refreshing: Boolean,
         scrollBehavior: CustomToolbarScrollBehavior,
     ) {
         LaunchedEffect(pullState.isRefreshing) {
             if (pullState.isRefreshing) viewModel.obtainEvent(TodosEvent.RefreshTodos)
         }
 
-        LaunchedEffect(key1 = viewState.refreshing) {
-            if (!viewState.refreshing) pullState.endRefresh()
+        LaunchedEffect(key1 = refreshing) {
+            if (!refreshing) pullState.endRefresh()
         }
 
         if (scrollBehavior.state.collapsedFraction != 0f) pullState.endRefresh()
     }
 
     @Composable
-    private fun ErrorMessageLogic(
-        viewState: TodosViewState,
+    private fun MessagesLogic(
+        messageId: Int?,
         snackbarHostState: SnackbarHostState,
     ) {
-        if (viewState.messageId == null) return
+        if (messageId == null) return
         val notActionMessages = listOf(R.string.network_unavailable, R.string.success_sync)
-        val messageStr = stringResource(viewState.messageId)
-        val actionStr = stringResource(id = R.string.repeat)
+        val messageStr = stringResource(messageId)
+        var countdownTime = 5
+        val actionStr = stringResource(
+            when (messageId) {
+                R.string.todo_deleted -> R.string.cancel
+                else -> R.string.repeat
+            }
+        )
+
         val context = LocalContext.current
 
-        LaunchedEffect(key1 = viewState.messageId) {
-            if (notActionMessages.contains(viewState.messageId)) {
+        LaunchedEffect(key1 = messageStr) {
+            if (notActionMessages.contains(messageId)) {
                 Toast
                     .makeText(context, messageStr, Toast.LENGTH_LONG)
                     .show()
-            } else {
-                val result = snackbarHostState.showSnackbar(messageStr, actionStr)
-                viewModel.obtainEvent(TodosEvent.HandleSnackbarResult(result))
+                return@LaunchedEffect
+            } else if (messageId == R.string.todo_deleted) {
+                launch(Dispatchers.IO) {
+                    while (countdownTime > 0) {
+                        delay(1000)
+                        countdownTime--
+                    }
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                }
             }
+            val result = snackbarHostState.showSnackbar(messageStr, actionStr)
+            viewModel.obtainEvent(TodosEvent.HandleSnackbarResult(result))
         }
     }
 

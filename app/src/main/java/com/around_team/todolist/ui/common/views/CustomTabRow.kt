@@ -1,4 +1,4 @@
-package com.around_team.todolist.ui.screens.edit.views
+package com.around_team.todolist.ui.common.views
 
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.spring

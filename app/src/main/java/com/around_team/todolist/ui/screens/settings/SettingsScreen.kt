@@ -18,7 +18,7 @@ import com.around_team.todolist.R
 import com.around_team.todolist.ui.common.views.CustomIconButton
 import com.around_team.todolist.ui.common.views.custom_toolbar.CustomToolbar
 import com.around_team.todolist.ui.common.views.custom_toolbar.rememberToolbarScrollBehavior
-import com.around_team.todolist.ui.screens.edit.views.CustomTabRow
+import com.around_team.todolist.ui.common.views.CustomTabRow
 import com.around_team.todolist.ui.screens.settings.models.SettingsEvent
 import com.around_team.todolist.ui.screens.settings.models.ThemeTabs
 import com.around_team.todolist.ui.theme.JetTodoListTheme

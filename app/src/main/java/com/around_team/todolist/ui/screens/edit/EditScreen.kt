@@ -47,7 +47,7 @@ import com.around_team.todolist.ui.screens.edit.models.EditEvent
 import com.around_team.todolist.ui.screens.edit.views.CustomClickableText
 import com.around_team.todolist.ui.screens.edit.views.CustomDatePicker
 import com.around_team.todolist.ui.screens.edit.views.CustomSwitch
-import com.around_team.todolist.ui.screens.edit.views.CustomTabRow
+import com.around_team.todolist.ui.common.views.CustomTabRow
 import com.around_team.todolist.ui.screens.todos.testDao
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.ui.theme.TodoListTheme
