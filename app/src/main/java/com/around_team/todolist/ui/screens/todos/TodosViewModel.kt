@@ -1,6 +1,5 @@
 package com.around_team.todolist.ui.screens.todos
 
-import androidx.compose.material3.SnackbarResult
 import androidx.lifecycle.viewModelScope
 import com.around_team.todolist.R
 import com.around_team.todolist.data.network.repositories.Repository
@@ -13,7 +12,6 @@ import com.around_team.todolist.utils.PreferencesHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -45,10 +43,11 @@ class TodosViewModel @Inject constructor(
             TodosEvent.ClickShowCompletedTodos -> clickShowCompletedTodos()
             is TodosEvent.DeleteTodo -> deleteTodo(viewEvent.id)
             TodosEvent.CancelJobs -> viewModelScope.cancel()
-            is TodosEvent.HandleSnackbarResult -> handleSnackbarResult(viewEvent.result)
+            is TodosEvent.HandleSnackbarActionClick -> handleSnackbarActionClick()
             TodosEvent.RefreshTodos -> refreshTodos()
             is TodosEvent.HandleNetworkState -> handleNetworkState(viewEvent.networkConnectionState)
             TodosEvent.StartCollecting -> startCollecting()
+            TodosEvent.HideSnackbar -> viewState.update { it.copy(snackBarVisible = false) }
         }
     }
 
@@ -68,7 +67,13 @@ class TodosViewModel @Inject constructor(
                 repository
                     .getMessages()
                     .onEach { errorId ->
-                        viewState.update { it.copy(messageId = errorId, refreshing = false) }
+                        viewState.update {
+                            it.copy(
+                                messageId = errorId,
+                                snackBarVisible = errorId != R.string.success_sync,
+                                refreshing = false
+                            )
+                        }
                     }
                     .collect()
             }
@@ -82,7 +87,11 @@ class TodosViewModel @Inject constructor(
             NetworkConnectionState.Available -> {
                 viewState.update { it.copy(messageId = null, connectionState = connectionState) }
                 repository.sendAllTodos(todos) {
-                    viewState.update { it.copy(messageId = R.string.success_sync) }
+                    viewState.update {
+                        it.copy(
+                            messageId = R.string.success_sync, snackBarVisible = false
+                        )
+                    }
                 }
             }
 
@@ -98,27 +107,28 @@ class TodosViewModel @Inject constructor(
 
     private fun refreshTodos() {
         repository.sendAllTodos(todos) {
-            viewState.update { it.copy(refreshing = false, messageId = R.string.success_sync) }
+            viewState.update {
+                it.copy(
+                    refreshing = false, messageId = R.string.success_sync, snackBarVisible = false
+                )
+            }
         }
         viewState.update { it.copy(refreshing = true, messageId = null) }
     }
 
-    private fun handleSnackbarResult(result: SnackbarResult) {
-        when (result) {
-            SnackbarResult.Dismissed -> {
-                val t = 5
-            }
-            SnackbarResult.ActionPerformed -> {
-                if (viewState.value.messageId == R.string.todo_deleted) {
-                    repository.saveTodo()
-                } else {
-                    repository.sendAllTodos(todos) {
-                        viewState.update { it.copy(messageId = R.string.success_sync) }
-                    }
-                    viewState.update { it.copy(messageId = null) }
+    private fun handleSnackbarActionClick() {
+        if (viewState.value.messageId == R.string.todo_deleted) {
+            repository.saveTodo()
+        } else {
+            repository.sendAllTodos(todos) {
+                viewState.update {
+                    it.copy(
+                        messageId = R.string.success_sync, snackBarVisible = false
+                    )
                 }
             }
         }
+        viewState.update { it.copy(snackBarVisible = false) }
     }
 
     private fun updateTodos() {
@@ -127,7 +137,7 @@ class TodosViewModel @Inject constructor(
 
         viewState.update {
             it.copy(
-                todos = showedTodos, completeCnt = completeCnt, messageId = null, refreshing = false
+                todos = showedTodos, completeCnt = completeCnt, refreshing = false
             )
         }
     }

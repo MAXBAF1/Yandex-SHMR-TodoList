@@ -20,6 +20,7 @@ data class TodosViewState(
     val completedShowed: Boolean = false,
     val exception: Boolean = true,
     val messageId: Int? = null,
+    val snackBarVisible: Boolean = false,
     val refreshing: Boolean = false,
     val connectionState: NetworkConnectionState = NetworkConnectionState.Available
 )

@@ -3,6 +3,9 @@ package com.around_team.todolist.ui.screens.todos
 import android.content.Context
 import android.content.res.Configuration
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,7 +25,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -35,7 +37,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -95,8 +99,6 @@ class TodosScreen(
 
         LaunchedEffect(Unit) { viewModel.obtainEvent(TodosEvent.StartCollecting) }
 
-        val snackbarHostState = remember { SnackbarHostState() }
-        MessagesLogic(viewState.messageId, snackbarHostState)
 
         val pullState = rememberPullToRefreshState()
         PullToRefreshLogic(pullState, viewState.refreshing, scrollBehavior)
@@ -128,7 +130,7 @@ class TodosScreen(
                     onClick = { toEditScreen(null) },
                 )
             },
-            snackbarHost = { CustomSnackbar(hostState = snackbarHostState) },
+            snackbarHost = { MessagesLogic(viewState.messageId, viewState.snackBarVisible) },
             containerColor = JetTodoListTheme.colors.back.primary,
         ) { paddingValues ->
             Box(
@@ -189,38 +191,41 @@ class TodosScreen(
     @Composable
     private fun MessagesLogic(
         messageId: Int?,
-        snackbarHostState: SnackbarHostState,
+        snackBarVisible: Boolean,
     ) {
         if (messageId == null) return
         val notActionMessages = listOf(R.string.network_unavailable, R.string.success_sync)
         val messageStr = stringResource(messageId)
-        var countdownTime = 5
-        val actionStr = stringResource(
-            when (messageId) {
-                R.string.todo_deleted -> R.string.cancel
-                else -> R.string.repeat
-            }
-        )
+        var countdownTime by remember { mutableIntStateOf(5) }
+        val actionStr = when (messageId) {
+            R.string.todo_deleted -> "${stringResource(R.string.cancel)} $countdownTime"
+            else -> stringResource(R.string.repeat)
+        }
 
-        val context = LocalContext.current
-
-        LaunchedEffect(key1 = messageStr) {
-            if (notActionMessages.contains(messageId)) {
-                Toast
-                    .makeText(context, messageStr, Toast.LENGTH_LONG)
-                    .show()
-                return@LaunchedEffect
-            } else if (messageId == R.string.todo_deleted) {
+        if (notActionMessages.contains(messageId)) {
+            Toast
+                .makeText(LocalContext.current, messageStr, Toast.LENGTH_LONG)
+                .show()
+        } else if (messageId == R.string.todo_deleted && snackBarVisible) {
+            LaunchedEffect(Unit) {
+                countdownTime = 5
                 launch(Dispatchers.IO) {
                     while (countdownTime > 0) {
                         delay(1000)
                         countdownTime--
                     }
-                    snackbarHostState.currentSnackbarData?.dismiss()
+                    viewModel.obtainEvent(TodosEvent.HideSnackbar)
                 }
             }
-            val result = snackbarHostState.showSnackbar(messageStr, actionStr)
-            viewModel.obtainEvent(TodosEvent.HandleSnackbarResult(result))
+        }
+        AnimatedVisibility(
+            visible = snackBarVisible,
+            enter = slideInVertically(initialOffsetY = { 2 * it }),
+            exit = slideOutVertically(targetOffsetY = { 2 * it }),
+        ) {
+            CustomSnackbar(message = messageStr, action = actionStr, onActionClick = {
+                viewModel.obtainEvent(TodosEvent.HandleSnackbarActionClick)
+            })
         }
     }
 

@@ -27,7 +27,6 @@ import kotlinx.coroutines.withContext
 import java.net.UnknownHostException
 import java.text.DateFormat
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * A manager for handling HTTP requests using the Ktor HTTP client with OkHttp and JSON content negotiation.
@@ -70,13 +69,15 @@ class RequestManager @Inject constructor(private val preferencesHelper: Preferen
                 }
                 Log.d("MyLog", "Receive body: ${response.bodyAsText()}")
 
-                if (response.status == HttpStatusCode.OK) {
+                if (response.status.value == HttpStatusCode.OK.value) {
                     val dto = response.castOrNull<T>()
                     lastKnownRevision = dto?.revision ?: 0
                     dto
                 } else {
                     Log.e("MyLog", response.toString())
-                    throw MyErrorIdException(R.string.sync_error)
+                    if (response.status.value == HttpStatusCode.BadRequest.value) {
+                        null
+                    } else throw MyErrorIdException(R.string.sync_error)
                 }
             } catch (e: UnknownHostException) {
                 null
