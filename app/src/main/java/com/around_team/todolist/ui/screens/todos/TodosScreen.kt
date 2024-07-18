@@ -3,6 +3,7 @@ package com.around_team.todolist.ui.screens.todos
 import android.content.Context
 import android.content.res.Configuration
 import android.widget.Toast
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -98,7 +99,6 @@ class TodosScreen(
         val scrollBehavior = rememberToolbarScrollBehavior()
 
         LaunchedEffect(Unit) { viewModel.obtainEvent(TodosEvent.StartCollecting) }
-
 
         val pullState = rememberPullToRefreshState()
         PullToRefreshLogic(pullState, viewState.refreshing, scrollBehavior)
@@ -201,11 +201,13 @@ class TodosScreen(
             R.string.todo_deleted -> "${stringResource(R.string.cancel)} $countdownTime"
             else -> stringResource(R.string.repeat)
         }
-
+        val context = LocalContext.current
         if (notActionMessages.contains(messageId)) {
-            Toast
-                .makeText(LocalContext.current, messageStr, Toast.LENGTH_LONG)
-                .show()
+            LaunchedEffect(messageId) {
+                Toast
+                    .makeText(context, messageStr, Toast.LENGTH_LONG)
+                    .show()
+            }
         } else if (messageId == R.string.todo_deleted && snackBarVisible) {
             LaunchedEffect(Unit) {
                 countdownTime = 5
@@ -302,17 +304,19 @@ class TodosScreen(
                 style = JetTodoListTheme.typography.subhead,
                 color = JetTodoListTheme.colors.label.tertiary
             )
-            Text(
-                modifier = Modifier.clickable(
-                    onClick = onShowClick,
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                ),
-                text = stringResource(id = if (showed) R.string.hide else R.string.show),
-                style = JetTodoListTheme.typography.subhead,
-                fontWeight = FontWeight.Bold,
-                color = JetTodoListTheme.colors.colors.blue
-            )
+            AnimatedContent(showed, label = "") { targetState ->
+                Text(
+                    modifier = Modifier.clickable(
+                        onClick = onShowClick,
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ),
+                    text = stringResource(id = if (targetState) R.string.hide else R.string.show),
+                    style = JetTodoListTheme.typography.subhead,
+                    fontWeight = FontWeight.Bold,
+                    color = JetTodoListTheme.colors.colors.blue
+                )
+            }
         }
     }
 

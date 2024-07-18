@@ -1,5 +1,7 @@
 package com.around_team.todolist.ui.screens.todos.views
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -37,12 +39,13 @@ fun CircleCheckbox(
     highPriority: Boolean = false,
 ) {
     val colors = JetTodoListTheme.colors
-    val iconId = if (checked) R.drawable.ic_complete else R.drawable.ic_circle
-    val tint = when {
-        checked -> colors.colors.green
-        highPriority -> colors.colors.red
-        else -> colors.support.separator
-    }
+    val tint = animateColorAsState(
+        when {
+            checked -> colors.colors.green
+            highPriority -> colors.colors.red
+            else -> colors.support.separator
+        }, label = ""
+    )
     val bgColor = if (highPriority && !checked) colors.colors.red.copy(0.1F) else Color.Transparent
 
     Box(
@@ -55,12 +58,14 @@ fun CircleCheckbox(
                 interactionSource = remember { MutableInteractionSource() },
             ), contentAlignment = Alignment.Center
     ) {
-        Icon(
-            modifier = Modifier.size(24.dp),
-            painter = painterResource(id = iconId),
-            contentDescription = stringResource(id = R.string.complete_icon),
-            tint = tint
-        )
+        Crossfade(checked, label = "") { targetState ->
+            Icon(
+                modifier = Modifier.size(24.dp),
+                painter = painterResource(id = if (targetState) R.drawable.ic_complete else R.drawable.ic_circle),
+                contentDescription = stringResource(id = R.string.complete_icon),
+                tint = tint.value
+            )
+        }
     }
 }
 

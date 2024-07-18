@@ -75,9 +75,7 @@ class RequestManager @Inject constructor(private val preferencesHelper: Preferen
                     dto
                 } else {
                     Log.e("MyLog", response.toString())
-                    if (response.status.value == HttpStatusCode.BadRequest.value) {
-                        null
-                    } else throw MyErrorIdException(R.string.sync_error)
+                    throw MyErrorIdException(R.string.sync_error)
                 }
             } catch (e: UnknownHostException) {
                 null

@@ -252,7 +252,7 @@ class EditScreen(
                     style = JetTodoListTheme.typography.body,
                     color = JetTodoListTheme.colors.label.primary
                 )
-                if (checked && selectedDate != null) {
+                AnimatedVisibility(visible = checked && selectedDate != null) {
                     CustomClickableText(
                         text = FormatTimeInMillis.format(selectedDate),
                         onClick = onSelectedDateClick,

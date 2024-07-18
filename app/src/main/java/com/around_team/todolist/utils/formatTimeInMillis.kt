@@ -18,7 +18,9 @@ object FormatTimeInMillis {
      * @param format The format pattern to apply. Defaults to "d MMMM yyyy".
      * @return A formatted string representing the time in the specified format.
      */
-    fun format(timeInMillis: Long, format: String = "d MMMM yyyy"): String {
+    fun format(timeInMillis: Long?, format: String = "d MMMM yyyy"): String {
+        if (timeInMillis == null) return ""
+
         dateFormat.applyPattern(format)
         val date = Date(timeInMillis)
         return dateFormat.format(date)
