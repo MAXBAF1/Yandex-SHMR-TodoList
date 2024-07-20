@@ -25,6 +25,7 @@
     <string name="settings">Настройки</string>
     <string name="theme">Тема</string>
     <string name="auto">авто</string>
+    <string name="about_app">О приложении</string>
 
     <!--Icons strings-->
     <string name="calendar_icon">Иконка календаря</string>

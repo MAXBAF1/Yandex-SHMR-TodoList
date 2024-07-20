@@ -21,11 +21,15 @@ playServicesAuth = "21.2.0"
 room = "2.6.1"
 workRuntimeKtx = "2.9.0"
 ksp = "2.0.0-1.0.21"
-appcompat = "1.7.0"
-materialVersion = "1.12.0"
 coroutines = "1.7.3"
+divKitVersion = "30.9.0"
 
 [libraries]
+div = { group = "com.yandex.div", name = "div", version.ref = "divKitVersion"}
+div-core = { group = "com.yandex.div", name = "div-core", version.ref = "divKitVersion"}
+div-json = { group = "com.yandex.div", name = "div-json", version.ref = "divKitVersion"}
+div-picasso = { group = "com.yandex.div", name = "picasso", version.ref = "divKitVersion"}
+
 agp = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version = "1.9.0" }
 kotlin-ksp-gradle = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }

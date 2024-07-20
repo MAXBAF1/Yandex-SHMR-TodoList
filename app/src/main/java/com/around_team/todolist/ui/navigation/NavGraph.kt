@@ -13,6 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.around_team.todolist.di.SharedPreferencesModule
+import com.around_team.todolist.ui.screens.about.AboutAppScreen
 import com.around_team.todolist.ui.screens.edit.EditScreen
 import com.around_team.todolist.ui.screens.edit.EditViewModel
 import com.around_team.todolist.ui.screens.registration.RegistrationScreen
@@ -22,7 +23,6 @@ import com.around_team.todolist.ui.screens.settings.SettingsViewModel
 import com.around_team.todolist.ui.screens.todos.TodosScreen
 import com.around_team.todolist.ui.screens.todos.TodosViewModel
 import com.around_team.todolist.utils.PreferencesHelper
-import com.around_team.todolist.utils.SetCompositionTheme
 
 /**
  * NavGraph manages the navigation within the application using Jetpack Compose Navigation.
@@ -61,8 +61,16 @@ class NavGraph(
                     },
                 )
             ) { CreateEditScreen(editViewModel) }
-            composable(Screens.Settings.name) { CreateSettingsScreen(settingsViewModel) }
+            composable(Screens.SettingsScreen.name) { CreateSettingsScreen(settingsViewModel) }
+            composable(Screens.AboutAppScreen.name) { CreateAboutAppScreen() }
         }
+    }
+
+    @Composable
+    private fun CreateAboutAppScreen() {
+        AboutAppScreen(
+            onBackPressed = { navController.navigate(Screens.SettingsScreen.name) { popUpTo(0) } },
+        ).Create()
     }
 
     @Composable
@@ -70,6 +78,7 @@ class NavGraph(
         SettingsScreen(
             viewModel = settingsViewModel,
             onBackPressed = { navController.navigate(Screens.TodosScreen.name) { popUpTo(0) } },
+            toAboutScreen = { navController.navigate(Screens.AboutAppScreen.name) }
         ).Create()
     }
 
@@ -99,7 +108,7 @@ class NavGraph(
             if (it == null) {
                 navController.navigate(Screens.EditScreen.name)
             } else navController.navigate("${Screens.EditScreen.name}?$TO_EDIT_TODO_ID_KEY=$it")
-        }, toSettingsScreen = { navController.navigate(Screens.Settings.name) }).Create()
+        }, toSettingsScreen = { navController.navigate(Screens.SettingsScreen.name) }).Create()
     }
 
     @Composable

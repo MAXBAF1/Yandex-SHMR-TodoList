@@ -1,7 +1,6 @@
 package com.around_team.todolist.ui.common.views.custom_toolbar
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -100,7 +99,8 @@ fun CustomToolbar(
                 content = {
                     if (collapsingTitle != null) {
                         Text(
-                            modifier = Modifier.layoutId(ExpandedTitleId)
+                            modifier = Modifier
+                                .layoutId(ExpandedTitleId)
                                 .wrapContentHeight(align = Alignment.Top)
                                 .graphicsLayer(
                                     scaleX = collapsingTitleScale,
@@ -112,7 +112,9 @@ fun CustomToolbar(
                             color = JetTodoListTheme.colors.label.primary
                         )
                         Text(
-                            modifier = Modifier.layoutId(CollapsedTitleId).graphicsLayer(
+                            modifier = Modifier
+                                .layoutId(CollapsedTitleId)
+                                .graphicsLayer(
                                     scaleX = collapsingTitleScale,
                                     scaleY = collapsingTitleScale,
                                     transformOrigin = TransformOrigin(0f, 0f)
@@ -127,17 +129,26 @@ fun CustomToolbar(
 
                     if (navigationIcon != null) {
                         Box(
-                            modifier = Modifier.wrapContentSize().layoutId(NavigationIconId)
+                            modifier = Modifier
+                                .wrapContentSize()
+                                .layoutId(NavigationIconId)
                         ) { navigationIcon() }
                     }
 
                     if (actions != null) {
                         Row(
-                            modifier = Modifier.wrapContentSize().layoutId(ActionsId)
+                            modifier = Modifier
+                                .wrapContentSize()
+                                .layoutId(ActionsId)
                         ) { actions() }
                     }
-                }, modifier = modifier.then(Modifier.heightIn(min = MinCollapsedHeight)).padding(
-                        WindowInsets.systemBars.only(WindowInsetsSides.Top).asPaddingValues()
+                },
+                modifier = modifier
+                    .then(Modifier.heightIn(min = MinCollapsedHeight))
+                    .padding(
+                        WindowInsets.systemBars
+                            .only(WindowInsetsSides.Top)
+                            .asPaddingValues()
                     )
             ) { measurables, constraints ->
                 val horizontalPaddingPx = HorizontalPadding.toPx()
@@ -145,15 +156,17 @@ fun CustomToolbar(
 
                 // Measuring widgets inside toolbar:
 
-                val navigationIconPlaceable =
-                    measurables.firstOrNull { it.layoutId == NavigationIconId }
-                        ?.measure(constraints.copy(minWidth = 0))
-
-                val actionsPlaceable = measurables.firstOrNull { it.layoutId == ActionsId }
+                val navigationIconPlaceable = measurables
+                    .firstOrNull { it.layoutId == NavigationIconId }
                     ?.measure(constraints.copy(minWidth = 0))
 
-                val expandedTitlePlaceable =
-                    measurables.firstOrNull { it.layoutId == ExpandedTitleId }?.measure(
+                val actionsPlaceable = measurables
+                    .firstOrNull { it.layoutId == ActionsId }
+                    ?.measure(constraints.copy(minWidth = 0))
+
+                val expandedTitlePlaceable = measurables
+                    .firstOrNull { it.layoutId == ExpandedTitleId }
+                    ?.measure(
                         constraints.copy(
                             maxWidth = (constraints.maxWidth - 2 * horizontalPaddingPx).roundToInt(),
                             minWidth = 0,
@@ -174,8 +187,9 @@ fun CustomToolbar(
                 val collapsedTitleMaxWidthPx =
                     (constraints.maxWidth - navigationIconOffset - actionsOffset) / fullyCollapsedTitleScale
 
-                val collapsedTitlePlaceable =
-                    measurables.firstOrNull { it.layoutId == CollapsedTitleId }?.measure(
+                val collapsedTitlePlaceable = measurables
+                    .firstOrNull { it.layoutId == CollapsedTitleId }
+                    ?.measure(
                         constraints.copy(
                             maxWidth = collapsedTitleMaxWidthPx.roundToInt(),
                             minWidth = 0,
@@ -222,8 +236,9 @@ fun CustomToolbar(
                     // Coordinates of fully collapsed title
                     val fullyCollapsedTitleX =
                         constraints.maxWidth / 2F - (textSize?.width ?: 0) / 2
-                    val fullyCollapsedTitleY =
-                        collapsedHeightPx / 2 - CollapsedTitleLineHeight.toPx().roundToInt() / 2
+                    val fullyCollapsedTitleY = collapsedHeightPx / 2 - CollapsedTitleLineHeight
+                        .toPx()
+                        .roundToInt() / 2
 
                     // Current height of toolbar
                     layoutHeightPx =
@@ -271,8 +286,7 @@ fun CustomToolbar(
                 }
             }
             HorizontalDivider(
-                thickness = 0.5.dp,
-                color = borderColor.value
+                thickness = 0.5.dp, color = borderColor.value
             )
         }
     }

@@ -46,6 +46,12 @@ android {
 }
 
 dependencies {
+    // DivKit
+    implementation(libs.div)
+    implementation(libs.div.core)
+    implementation(libs.div.json)
+    implementation(libs.div.picasso)
+
     // Yandex Oauth
     implementation(libs.android.authsdk)
 

@@ -69,7 +69,7 @@ class RequestManager @Inject constructor(private val preferencesHelper: Preferen
                 }
                 Log.d("MyLog", "Receive body: ${response.bodyAsText()}")
 
-                if (response.status.value == HttpStatusCode.OK.value) {
+                if (response.status == HttpStatusCode.OK) {
                     val dto = response.castOrNull<T>()
                     lastKnownRevision = dto?.revision ?: 0
                     dto

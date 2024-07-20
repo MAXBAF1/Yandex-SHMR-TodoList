@@ -9,9 +9,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.around_team.todolist.R
 import com.around_team.todolist.ui.theme.JetTodoListTheme
+import com.around_team.todolist.ui.theme.TodoListTheme
 
 @Composable
 fun CustomIconButton(
@@ -30,5 +32,13 @@ fun CustomIconButton(
             painter = painterResource(iconId),
             contentDescription = stringResource(R.string.icon_btn)
         )
+    }
+}
+
+@Preview
+@Composable
+private fun CustomIconButtonPreview() {
+    TodoListTheme {
+        CustomIconButton(iconId = R.drawable.ic_settings, onClick = {})
     }
 }
