@@ -17,7 +17,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.around_team.todolist.di.SharedPreferencesModule
 import com.around_team.todolist.ui.navigation.NavGraph
-import com.around_team.todolist.ui.screens.settings.models.ThemeTabs
+import com.around_team.todolist.ui.screens.settings.models.Theme
 import com.around_team.todolist.ui.theme.LocalSettingsEventBus
 import com.around_team.todolist.ui.theme.SettingsEventBus
 import com.around_team.todolist.ui.theme.TodoListTheme
@@ -70,9 +70,9 @@ class MainActivity : ComponentActivity() {
             )
         )
         return when (prefHelper.getSelectedTheme()) {
-            ThemeTabs.Sun -> false
-            ThemeTabs.Auto -> isSystemInDarkTheme()
-            ThemeTabs.Moon -> true
+            Theme.Sun -> false
+            Theme.Auto -> isSystemInDarkTheme()
+            Theme.Moon -> true
             null -> isSystemInDarkTheme()
         }
     }

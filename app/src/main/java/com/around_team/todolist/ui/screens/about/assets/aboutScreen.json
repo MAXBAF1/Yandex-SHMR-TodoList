@@ -162,30 +162,24 @@
                   "items": [
                     {
                       "type": "text",
-                      "text": "О приложении",
+                      "text": "TodoList - это ваш надежный помощник в управлении задачами. Наше приложение разработано, чтобы помочь вам оставаться организованными и продуктивными каждый день.",
                       "font_size": 17,
                       "margins": {
                         "bottom": 8
                       },
                       "text_alignment_horizontal": "left",
                       "line_height": 22,
+                      "text_color": "@{getColorFromDict(local_palette, 'color1', app_theme)}",
                       "width": {
                         "type": "match_parent"
                       },
-                      "font_weight": "bold"
-                    },
-                    {
-                      "type": "text",
-                      "text": "ToDoList - это ваш надежный помощник в управлении задачами. Наше приложение разработано, чтобы помочь вам оставаться организованными и продуктивными каждый день.",
-                      "font_size": 17,
-                      "margins": {
-                        "bottom": 8
-                      },
-                      "text_alignment_horizontal": "left",
-                      "line_height": 22,
-                      "width": {
-                        "type": "match_parent"
-                      }
+                      "ranges": [
+                        {
+                          "start": 0,
+                          "end": 8,
+                          "font_weight": "bold"
+                        }
+                      ]
                     },
                     {
                       "type": "state",
@@ -204,8 +198,7 @@
                               }
                             ],
                             "height": {
-                              "type": "fixed",
-                              "value": 23
+                              "type": "wrap_content"
                             },
                             "line_height": 22,
                             "text_color": "@{getColorFromDict(local_palette, 'color3', app_theme)}",
@@ -227,11 +220,14 @@
                                   "bottom": 8
                                 },
                                 "line_height": 22,
-                                "font_weight": "bold"
+                                "text_color": "@{getColorFromDict(local_palette, 'color1', app_theme)}",
+                                "font_weight": "bold",
+                                "text_alignment_horizontal": "center"
                               },
                               {
                                 "type": "text",
                                 "text": "Если у вас есть предложения или вопросы, пожалуйста, свяжитесь с нами:",
+                                "text_color": "@{getColorFromDict(local_palette, 'color1', app_theme)}",
                                 "font_size": 17,
                                 "margins": {
                                   "bottom": 8
@@ -258,7 +254,15 @@
                                   "top": 8,
                                   "bottom": 8
                                 },
-                                "line_height": 22
+                                "line_height": 22,
+                                "text_color": "@{getColorFromDict(local_palette, 'color1', app_theme)}",
+                                "ranges": [
+                                  {
+                                    "start": 21,
+                                    "end": 29,
+                                    "font_weight": "bold"
+                                  }
+                                ]
                               },
                               {
                                 "type": "text",
@@ -272,7 +276,8 @@
                                 ],
                                 "line_height": 22,
                                 "font_weight": "medium",
-                                "text_color": "@{getColorFromDict(local_palette, 'color3', app_theme)}"
+                                "text_color": "@{getColorFromDict(local_palette, 'color3', app_theme)}",
+                                "text_alignment_horizontal": "right"
                               }
                             ]
                           }
@@ -402,7 +407,7 @@
           "url": "div-screen://close"
         }
       ],
-      "image_url": "https://yastatic.net/s3/home/div/div_fullscreens/cross2.3.png",
+      "image_url": "https://i.postimg.cc/KvK5TvSZ/ep-back.png",
       "tint_color": "#73000000",
       "type": "image",
       "preload_required": true,
@@ -413,31 +418,22 @@
       "orientation": "horizontal",
       "items": [
         {
-          "type": "image",
-          "image_url": "https://yastatic.net/s3/home/div/div_fullscreens/hyphen.4.png",
-          "$tint_color": "list_color",
+          "type": "text",
+          "text": "- ",
+          "font_size": 17,
+          "line_height": 22,
+          "text_color": "@{getColorFromDict(local_palette, 'color1', app_theme)}",
           "width": {
-            "type": "fixed",
-            "value": 28,
-            "unit": "sp"
-          },
-          "height": {
-            "type": "fixed",
-            "value": 28,
-            "unit": "sp"
-          },
-          "margins": {
-            "top": 2,
-            "right": 12,
-            "bottom": 2
+            "type": "wrap_content",
+            "constrained": true
           }
         },
         {
           "type": "text",
           "$text": "list_text",
-          "$text_color": "list_color",
-          "$font_size": "list_text_size",
-          "line_height": 32,
+          "text_color": "@{getColorFromDict(local_palette, 'color1', app_theme)}",
+          "font_size": 17,
+          "line_height": 22,
           "$font_weight": "list_font_weight",
           "width": {
             "type": "wrap_content",

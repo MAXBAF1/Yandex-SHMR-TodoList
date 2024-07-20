@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.ContextThemeWrapper
 import android.view.View
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
@@ -16,7 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
+import com.around_team.todolist.di.SharedPreferencesModule
+import com.around_team.todolist.ui.screens.settings.models.Theme
 import com.around_team.todolist.ui.theme.JetTodoListTheme
+import com.around_team.todolist.utils.PreferencesHelper
 import com.yandex.div.DivDataTag
 import com.yandex.div.core.Div2Context
 import com.yandex.div.core.DivConfiguration
@@ -25,6 +29,8 @@ import com.yandex.div.data.DivParsingEnvironment
 import com.yandex.div.json.ParsingErrorLogger
 import com.yandex.div.picasso.PicassoDivImageLoader
 import com.yandex.div2.DivData
+import com.yandex.div2.DivVariable
+import com.yandex.div2.StrVariable
 import org.json.JSONObject
 
 class AboutAppScreen(private val onBackPressed: () -> Unit) {
@@ -39,12 +45,27 @@ class AboutAppScreen(private val onBackPressed: () -> Unit) {
             .bufferedReader()
             .use { it.readText() }
         val data = JSONObject(json).asDiv2DataWithTemplates()
+        val theme = getCurrentTheme()
+        val editedVariables = data.variables
+            ?.toMutableList()
+            ?.map {
+                if (it.value() is StrVariable) {
+                    val strVariable = it.value() as StrVariable
+                    val newStrVariable = if (strVariable.name == "app_theme") {
+                        strVariable.copy(value = if (theme == Theme.Sun) "light" else "dark")
+                    } else strVariable
 
-        DivView(data = data, tag = DivDataTag("div2"))
+                    DivVariable.Str(newStrVariable)
+                } else it
+
+            }
+        val editedData = data.copy(variables = editedVariables)
+
+        DivView(data = editedData, tag = DivDataTag("div2"))
     }
 
     @Composable
-    fun DivView(
+    private fun DivView(
         data: DivData,
         tag: DivDataTag,
         modifier: Modifier = Modifier,
@@ -76,6 +97,16 @@ class AboutAppScreen(private val onBackPressed: () -> Unit) {
                 view.cleanup()
             },
         )
+    }
+
+    @Composable
+    private fun getCurrentTheme(): Theme {
+        val sharedPreferences = LocalContext.current.getSharedPreferences(
+            SharedPreferencesModule.KEY, Context.MODE_PRIVATE
+        )
+        val preferencesHelper = PreferencesHelper(sharedPreferences)
+        return preferencesHelper.getSelectedTheme()
+            ?: if (isSystemInDarkTheme()) Theme.Moon else Theme.Sun
     }
 
     private fun createDivConfiguration(context: Context): DivConfiguration {

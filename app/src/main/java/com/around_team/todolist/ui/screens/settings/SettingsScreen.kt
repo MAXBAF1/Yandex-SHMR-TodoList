@@ -24,7 +24,7 @@ import com.around_team.todolist.ui.common.views.CustomTabRow
 import com.around_team.todolist.ui.common.views.custom_toolbar.CustomToolbar
 import com.around_team.todolist.ui.common.views.custom_toolbar.rememberToolbarScrollBehavior
 import com.around_team.todolist.ui.screens.settings.models.SettingsEvent
-import com.around_team.todolist.ui.screens.settings.models.ThemeTabs
+import com.around_team.todolist.ui.screens.settings.models.Theme
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.utils.SetCompositionTheme
 
@@ -73,11 +73,11 @@ class SettingsScreen(
 
     @Composable
     private fun ThemeRow(
-        selected: ThemeTabs,
-        onChanged: (ThemeTabs) -> Unit,
+        selected: Theme,
+        onChanged: (Theme) -> Unit,
         modifier: Modifier = Modifier,
     ) {
-        val tabList = ThemeTabs.entries
+        val tabList = Theme.entries
 
         Row(
             modifier = modifier
@@ -95,7 +95,7 @@ class SettingsScreen(
                 modifier = Modifier.weight(1F),
                 selectedTab = selected.ordinal,
                 tabList = tabList,
-                onTabChanged = { onChanged(ThemeTabs.getFromOrdinal(it)) },
+                onTabChanged = { onChanged(Theme.getFromOrdinal(it)) },
                 highlightSelectedTab = true
             ).Create()
         }
