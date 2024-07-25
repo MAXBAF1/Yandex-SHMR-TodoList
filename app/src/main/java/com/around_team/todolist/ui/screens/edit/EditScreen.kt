@@ -30,6 +30,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,6 +45,7 @@ import com.around_team.todolist.data.network.RequestManager
 import com.around_team.todolist.data.network.repositories.Repository
 import com.around_team.todolist.ui.common.enums.TodoImportance
 import com.around_team.todolist.ui.common.views.CustomButton
+import com.around_team.todolist.ui.common.views.CustomTabRow
 import com.around_team.todolist.ui.common.views.MyDivider
 import com.around_team.todolist.ui.common.views.custom_toolbar.CustomToolbar
 import com.around_team.todolist.ui.common.views.custom_toolbar.rememberToolbarScrollBehavior
@@ -47,7 +53,6 @@ import com.around_team.todolist.ui.screens.edit.models.EditEvent
 import com.around_team.todolist.ui.screens.edit.views.CustomClickableText
 import com.around_team.todolist.ui.screens.edit.views.CustomDatePicker
 import com.around_team.todolist.ui.screens.edit.views.CustomSwitch
-import com.around_team.todolist.ui.common.views.CustomTabRow
 import com.around_team.todolist.ui.screens.todos.testDao
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.ui.theme.TodoListTheme
@@ -102,7 +107,8 @@ class EditScreen(
                             onClick = {
                                 viewModel.obtainEvent(EditEvent.SaveTodo)
                             },
-                            fontWeight = FontWeight.Bold, enable = viewState.saveEnable,
+                            fontWeight = FontWeight.Bold,
+                            enable = viewState.saveEnable,
                         )
                     },
                     expandedTitleStyle = JetTodoListTheme.typography.headline,
@@ -216,10 +222,13 @@ class EditScreen(
         val tabList = TodoImportance.entries
 
         Row(
-            modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
+            modifier = modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                modifier = Modifier.weight(1F),
+                modifier = Modifier
+                    .weight(1F)
+                    .semantics { heading() },
                 text = stringResource(id = R.string.priority),
                 style = JetTodoListTheme.typography.body,
                 color = JetTodoListTheme.colors.label.primary
@@ -241,19 +250,32 @@ class EditScreen(
         onSelectedDateClick: () -> Unit,
         modifier: Modifier = Modifier,
     ) {
+        val dateDesc = stringResource(R.string.change_date_semantics)
+        val showDate = checked && selectedDate != null
         Row(
             modifier = modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Column(modifier = Modifier.semantics(true) {
+                if (showDate) {
+                    this[SemanticsActions.CustomActions] = listOf(
+                        CustomAccessibilityAction(label = dateDesc) {
+                            onSelectedDateClick()
+                            true
+                        },
+                    )
+                }
+            }) {
                 Text(
+                    modifier = Modifier.semantics { heading() },
                     text = stringResource(id = R.string.deadline),
                     style = JetTodoListTheme.typography.body,
                     color = JetTodoListTheme.colors.label.primary
                 )
-                AnimatedVisibility(visible = checked && selectedDate != null) {
+                AnimatedVisibility(visible = showDate) {
                     CustomClickableText(
+                        modifier = Modifier.clearAndSetSemantics {  },
                         text = FormatTimeInMillis.format(selectedDate),
                         onClick = onSelectedDateClick,
                         style = JetTodoListTheme.typography.footnote
@@ -279,7 +301,9 @@ class EditScreen(
         modifier: Modifier = Modifier,
     ) {
         TextField(
-            modifier = modifier.fillMaxWidth(),
+            modifier = modifier
+                .fillMaxWidth()
+                .semantics { heading() },
             value = text,
             onValueChange = onTextChange,
             shape = RoundedCornerShape(16.dp),

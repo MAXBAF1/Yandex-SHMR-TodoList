@@ -35,9 +35,7 @@ class SettingsScreen(
 ) {
     @Composable
     fun Create() {
-        val viewState by viewModel
-            .getViewState()
-            .collectAsStateWithLifecycle()
+        val viewState by viewModel.getViewState().collectAsStateWithLifecycle()
 
         SetCompositionTheme(viewState.selectedTheme)
 
@@ -46,7 +44,11 @@ class SettingsScreen(
             topBar = {
                 CustomToolbar(
                     navigationIcon = {
-                        CustomIconButton(iconId = R.drawable.ic_back, onClick = onBackPressed)
+                        CustomIconButton(
+                            iconId = R.drawable.ic_back,
+                            stringResource(R.string.back_semantics),
+                            onClick = onBackPressed
+                        )
                     },
                     collapsingTitle = stringResource(id = R.string.settings),
                     expandedTitleStyle = JetTodoListTheme.typography.headline,
@@ -80,9 +82,7 @@ class SettingsScreen(
         val tabList = Theme.entries
 
         Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+            modifier = modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -106,14 +106,11 @@ class SettingsScreen(
         modifier: Modifier = Modifier,
     ) {
         Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .clickable(
+            modifier = modifier.fillMaxWidth().clickable(
                     onClick = toAboutScreen,
                     interactionSource = remember { MutableInteractionSource() },
                     indication = rememberRipple()
-                )
-                .padding(vertical = 16.dp),
+                ).padding(vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(

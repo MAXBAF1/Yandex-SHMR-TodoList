@@ -27,6 +27,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -72,12 +77,10 @@ class CustomTabRow(
                 divider = {},
             ) {
                 tabList.forEachIndexed { index, tab ->
-                    val tabsTextColor = if (highlightSelectedTab && index == selectedTab) {
-                        JetTodoListTheme.colors.label.primary
-                    } else JetTodoListTheme.colors.colors.gray
-
                     CustomTab(
-                        tab = tab, onClick = { onTabChanged(index) }, color = tabsTextColor
+                        tab = tab,
+                        onClick = { onTabChanged(index) },
+                        selected = highlightSelectedTab && index == selectedTab
                     )
                 }
             }
@@ -122,24 +125,34 @@ class CustomTabRow(
     private fun CustomTab(
         tab: ITabs,
         onClick: () -> Unit,
-        color: Color,
+        selected: Boolean,
+        modifier: Modifier = Modifier
     ) {
+        val color = if (selected) {
+            JetTodoListTheme.colors.label.primary
+        } else JetTodoListTheme.colors.colors.gray
+        val tabDesc = "${stringResource(tab.descriptionId)} ${stringResource(R.string.priority)}"
         Box(
-            modifier = Modifier
+            modifier = modifier
+                .semantics(true) {
+                    role = Role.RadioButton
+                    contentDescription = tabDesc
+                    this.selected = selected
+                }
                 .clip(RoundedCornerShape(7.dp))
                 .size(48.dp, 32.dp)
                 .zIndex(1f)
                 .clickable(
                     onClick = onClick,
                     interactionSource = remember { MutableInteractionSource() },
-                    indication = null
+                    indication = null,
                 ),
             contentAlignment = Alignment.Center,
         ) {
             if (tab.iconId != null) {
                 Icon(
                     painter = painterResource(id = tab.iconId ?: R.drawable.ic_error),
-                    contentDescription = stringResource(id = R.string.priority_icon),
+                    contentDescription = null,
                     tint = if (tab is TodoImportance) tab.getIconColor() else color
                 )
             } else if (tab.text != null) {

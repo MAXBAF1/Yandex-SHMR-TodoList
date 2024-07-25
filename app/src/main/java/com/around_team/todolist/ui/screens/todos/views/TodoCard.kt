@@ -17,14 +17,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.around_team.todolist.R
-import com.around_team.todolist.ui.common.models.TodoItem
 import com.around_team.todolist.ui.common.enums.TodoImportance
 import com.around_team.todolist.ui.common.enums.getIconColor
+import com.around_team.todolist.ui.common.models.TodoItem
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.ui.theme.TodoListTheme
 import com.around_team.todolist.utils.FormatTimeInMillis
@@ -40,48 +47,67 @@ import java.util.UUID
  */
 @Composable
 fun TodoCard(todo: TodoItem, onClick: () -> Unit, onCompleteClick: () -> Unit) {
+    val completedDescription =
+        stringResource(if (todo.done) R.string.completed_semantics else R.string.not_completed_semantics)
+    val action =
+        stringResource(if (todo.done) R.string.do_not_complete_semantics else R.string.complete_semantics)
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
             .clickable(
                 onClick = onClick,
                 interactionSource = remember { MutableInteractionSource() },
                 indication = rememberRipple(),
+                onClickLabel = stringResource(R.string.to_todo_semantics),
             )
             .background(JetTodoListTheme.colors.back.secondary)
-            .padding(16.dp),
+            .padding(16.dp)
+            .semantics {
+                stateDescription = completedDescription
+                this[SemanticsActions.CustomActions] = listOf(
+                    CustomAccessibilityAction(label = action) {
+                        onCompleteClick()
+                        true
+                    },
+                )
+                isTraversalGroup = true
+            },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         CircleCheckbox(
-            modifier = Modifier.padding(end = 12.dp),
+            modifier = Modifier.padding(end = 12.dp)
+                .clearAndSetSemantics { },
             checked = todo.done,
             onChecked = onCompleteClick,
             highPriority = todo.importance == TodoImportance.Important,
         )
         NameAndDateColumn(
-            modifier = Modifier
-                .padding(end = 16.dp)
-                .weight(1F),
+            modifier = Modifier.padding(end = 16.dp)
+                .weight(1F)
+                .semantics { },
             todo = todo,
         )
         Icon(
             painter = painterResource(id = R.drawable.ic_arrow),
-            contentDescription = stringResource(id = R.string.arrow_icon),
+            contentDescription = null,
             tint = JetTodoListTheme.colors.colors.gray
         )
     }
 }
 
-
 @Composable
 private fun NameAndDateColumn(todo: TodoItem, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier, verticalAlignment = Alignment.CenterVertically
+        ) {
             if (todo.importance != TodoImportance.Basic && todo.importance.iconId != null) {
+                val importanceDesc =
+                    "${stringResource(todo.importance.descriptionId)} ${stringResource(R.string.priority)}"
                 Icon(
-                    modifier = Modifier.padding(end = 2.dp),
+                    modifier = Modifier.padding(end = 2.dp)
+                        .semantics { contentDescription = importanceDesc },
                     painter = painterResource(id = todo.importance.iconId ?: R.drawable.ic_error),
-                    contentDescription = stringResource(id = R.string.priority_icon),
+                    contentDescription = null,
                     tint = todo.importance.getIconColor()
                 )
             }
@@ -96,15 +122,20 @@ private fun NameAndDateColumn(todo: TodoItem, modifier: Modifier = Modifier) {
         }
 
         if (todo.deadline != null) {
-            Row(horizontalArrangement = Arrangement.Center) {
+            val deadline = FormatTimeInMillis.format(todo.deadline, "d MMMM")
+            val deadlineDesc = stringResource(R.string.complete_before_semantics, deadline)
+            Row(
+                modifier = Modifier.semantics { contentDescription = deadlineDesc },
+                horizontalArrangement = Arrangement.Center,
+            ) {
                 Icon(
                     modifier = Modifier.padding(end = 2.dp),
                     painter = painterResource(id = R.drawable.ic_calendar),
-                    contentDescription = stringResource(id = R.string.calendar_icon),
+                    contentDescription = null,
                     tint = JetTodoListTheme.colors.label.tertiary
                 )
                 Text(
-                    text = FormatTimeInMillis.format(todo.deadline, "d MMMM"),
+                    text = deadline,
                     style = JetTodoListTheme.typography.subhead,
                     color = JetTodoListTheme.colors.label.tertiary
                 )
@@ -117,9 +148,9 @@ private fun NameAndDateColumn(todo: TodoItem, modifier: Modifier = Modifier) {
 @Composable
 private fun TodoCardPreview() {
     TodoListTheme {
-        TodoCard(
-            TodoItem(
-            id = UUID.randomUUID().toString(),
+        TodoCard(TodoItem(
+            id = UUID.randomUUID()
+                .toString(),
             text = stringResource(id = R.string.what_todo),
             importance = TodoImportance.Important,
             done = false,

@@ -16,7 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.around_team.todolist.R
@@ -49,20 +51,20 @@ fun CircleCheckbox(
     val bgColor = if (highPriority && !checked) colors.colors.red.copy(0.1F) else Color.Transparent
 
     Box(
-        modifier = modifier
-            .clip(CircleShape)
+        modifier = modifier.clip(CircleShape)
             .background(bgColor)
             .clickable(
                 onClick = onChecked,
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() },
-            ), contentAlignment = Alignment.Center
+            ),
+        contentAlignment = Alignment.Center,
     ) {
         Crossfade(checked, label = "") { targetState ->
             Icon(
                 modifier = Modifier.size(24.dp),
                 painter = painterResource(id = if (targetState) R.drawable.ic_complete else R.drawable.ic_circle),
-                contentDescription = stringResource(id = R.string.complete_icon),
+                contentDescription = null,
                 tint = tint.value
             )
         }

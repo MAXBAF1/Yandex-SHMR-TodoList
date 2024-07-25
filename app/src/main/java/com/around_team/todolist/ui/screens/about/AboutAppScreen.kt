@@ -45,14 +45,19 @@ class AboutAppScreen(private val onBackPressed: () -> Unit) {
             .bufferedReader()
             .use { it.readText() }
         val data = JSONObject(json).asDiv2DataWithTemplates()
-        val theme = getCurrentTheme()
+        val theme = when (getCurrentTheme()) {
+            Theme.Sun -> "light"
+            Theme.Auto -> if (isSystemInDarkTheme()) "dark" else "light"
+            Theme.Moon -> "dark"
+        }
+
         val editedVariables = data.variables
             ?.toMutableList()
             ?.map {
                 if (it.value() is StrVariable) {
                     val strVariable = it.value() as StrVariable
                     val newStrVariable = if (strVariable.name == "app_theme") {
-                        strVariable.copy(value = if (theme == Theme.Sun) "light" else "dark")
+                        strVariable.copy(value = theme)
                     } else strVariable
 
                     DivVariable.Str(newStrVariable)

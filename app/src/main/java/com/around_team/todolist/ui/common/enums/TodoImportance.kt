@@ -1,7 +1,5 @@
 package com.around_team.todolist.ui.common.enums
 
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.around_team.todolist.R
@@ -15,11 +13,12 @@ import com.around_team.todolist.ui.theme.JetTodoListTheme
  */
 enum class TodoImportance(
     override val text: Int? = null,
-    override val iconId: Int? = null
+    override val iconId: Int? = null,
+    override val descriptionId: Int
 ): ITabs {
-    Low(iconId = R.drawable.ic_low_priority),
-    Basic(text = R.string.no),
-    Important(iconId = R.drawable.ic_high_priority);
+    Low(iconId = R.drawable.ic_low_priority, descriptionId = R.string.low_semantics),
+    Basic(text = R.string.no, descriptionId = R.string.basic_semantics),
+    Important(iconId = R.drawable.ic_high_priority, descriptionId = R.string.importance_semantics);
 
     companion object {
         fun getFromOrdinal(ordinal: Int): TodoImportance {

@@ -18,6 +18,7 @@ import com.around_team.todolist.ui.theme.TodoListTheme
 @Composable
 fun CustomIconButton(
     iconId: Int,
+    contentDescription: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     color: Color = JetTodoListTheme.colors.label.primary,
@@ -30,7 +31,7 @@ fun CustomIconButton(
         Icon(
             modifier = Modifier.size(24.dp),
             painter = painterResource(iconId),
-            contentDescription = stringResource(R.string.icon_btn)
+            contentDescription = contentDescription
         )
     }
 }
@@ -39,6 +40,6 @@ fun CustomIconButton(
 @Composable
 private fun CustomIconButtonPreview() {
     TodoListTheme {
-        CustomIconButton(iconId = R.drawable.ic_settings, onClick = {})
+        CustomIconButton(iconId = R.drawable.ic_settings, "", onClick = {})
     }
 }

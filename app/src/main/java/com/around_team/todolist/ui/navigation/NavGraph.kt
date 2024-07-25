@@ -89,7 +89,6 @@ class NavGraph(
         val sharedPreferences =
             context.getSharedPreferences(SharedPreferencesModule.KEY, Context.MODE_PRIVATE)
         val helper = PreferencesHelper(sharedPreferences)
-
         return if (helper.getToken() == null) Screens.RegistrationScreen.name else Screens.TodosScreen.name
     }
 
