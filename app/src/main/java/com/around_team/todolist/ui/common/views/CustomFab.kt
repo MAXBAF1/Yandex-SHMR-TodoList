@@ -57,7 +57,7 @@ fun CustomFab(onClick: () -> Unit, modifier: Modifier = Modifier) {
  */
 @Preview
 @Composable
-private fun CustomButtonPreview() {
+private fun CustomFabPreview() {
     TodoListTheme {
         CustomFab(onClick = {})
     }

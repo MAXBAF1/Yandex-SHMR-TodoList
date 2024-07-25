@@ -1,6 +1,7 @@
 package com.around_team.todolist.data.network.repositories
 
 import android.util.Log
+import com.around_team.todolist.R
 import com.around_team.todolist.data.db.DatabaseRepository
 import com.around_team.todolist.data.network.RequestManager
 import com.around_team.todolist.data.network.TodoListConfig
@@ -29,7 +30,7 @@ import javax.inject.Singleton
  *
  * @property databaseRepository The repository for interacting with the local database.
  * @property todos Mutable state flow holding the current list of Todo items.
- * @property errors Mutable shared flow used for emitting error codes.
+ * @property messages Mutable shared flow used for emitting error codes.
  */
 @Singleton
 class Repository @Inject constructor(
@@ -37,11 +38,12 @@ class Repository @Inject constructor(
     private val databaseRepository: DatabaseRepository
 ) {
     private val todos = MutableStateFlow(listOf<TodoItem>())
-    private val errors = MutableSharedFlow<Int>(replay = 2)
+    private val messages = MutableSharedFlow<Int>(replay = 2)
+    private var lastRemovedTodo: TodoItem? = null
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         when (throwable) {
-            is MyErrorIdException -> errors.tryEmit(throwable.errorId)
+            is MyErrorIdException -> messages.tryEmit(throwable.errorId)
             else -> Log.e("MyLog", throwable.stackTraceToString())
         }
     }
@@ -50,7 +52,7 @@ class Repository @Inject constructor(
     private val repositoryScope = CoroutineScope(Dispatchers.IO + job + exceptionHandler)
 
     fun getTodos(): StateFlow<List<TodoItem>> = todos
-    fun getErrors(): Flow<Int> = errors
+    fun getMessages(): Flow<Int> = messages
 
     fun getAllTodosFromBD() {
         repositoryScope.launch {
@@ -85,7 +87,9 @@ class Repository @Inject constructor(
         }
     }
 
-    fun saveTodo(todoItem: TodoItem) {
+    fun saveTodo(todoItem: TodoItem? = lastRemovedTodo) {
+        if (todoItem == null) return
+
         repositoryScope.launch {
             databaseRepository.insertTodo(todoItem)
             todos.update { list ->
@@ -109,9 +113,11 @@ class Repository @Inject constructor(
             todos.update { list ->
                 val index = list.indexOfFirst { it.id == id }
                 val newList = list.toMutableList()
+                lastRemovedTodo = newList[index]
                 newList.removeAt(index)
                 newList
             }
+            messages.tryEmit(R.string.todo_deleted)
         }
         repositoryScope.launch {
             requestManager.createRequest<GetItemReceive>(

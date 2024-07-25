@@ -11,6 +11,16 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
+    sourceSets {
+        getByName("main") {
+            assets {
+                srcDirs(
+                    "src\\main\\assets",
+                    "src\\main\\java\\com\\around_team\\todolist\\ui\\screens\\about\\assets"
+                )
+            }
+        }
+    }
 }
 
 tgReporter {

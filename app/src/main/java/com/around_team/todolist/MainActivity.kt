@@ -1,16 +1,28 @@
 package com.around_team.todolist
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.rememberNavController
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.around_team.todolist.di.SharedPreferencesModule
 import com.around_team.todolist.ui.navigation.NavGraph
+import com.around_team.todolist.ui.screens.settings.models.Theme
+import com.around_team.todolist.ui.theme.LocalSettingsEventBus
+import com.around_team.todolist.ui.theme.SettingsEventBus
 import com.around_team.todolist.ui.theme.TodoListTheme
 import com.around_team.todolist.utils.DataUpdateWorker
+import com.around_team.todolist.utils.PreferencesHelper
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.TimeUnit
 
@@ -36,13 +48,33 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            TodoListTheme {
-                val navController = rememberNavController()
-                NavGraph(navController = navController).Create()
+            val settingsEventBus = remember { SettingsEventBus() }
+            val currentSettings = settingsEventBus.currentSettings.collectAsState().value
+            val navController = rememberNavController()
+
+            TodoListTheme(darkTheme = currentSettings?.isDarkMode ?: isDarkThemeSaved()) {
+                CompositionLocalProvider(LocalSettingsEventBus provides settingsEventBus) {
+                    NavGraph(navController = navController).Create()
+                }
             }
         }
 
         setupPeriodicWork()
+    }
+
+    @Composable
+    private fun isDarkThemeSaved(): Boolean {
+        val prefHelper = PreferencesHelper(
+            LocalContext.current.getSharedPreferences(
+                SharedPreferencesModule.KEY, Context.MODE_PRIVATE
+            )
+        )
+        return when (prefHelper.getSelectedTheme()) {
+            Theme.Sun -> false
+            Theme.Auto -> isSystemInDarkTheme()
+            Theme.Moon -> true
+            null -> isSystemInDarkTheme()
+        }
     }
 
     /**

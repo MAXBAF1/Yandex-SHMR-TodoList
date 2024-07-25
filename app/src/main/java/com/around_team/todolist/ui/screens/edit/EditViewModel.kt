@@ -24,7 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EditViewModel @Inject constructor(
     private val repository: Repository,
-    private val preferencesHelper: PreferencesHelper
+    private val preferencesHelper: PreferencesHelper,
 ) : BaseViewModel<EditViewState, EditEvent>(initialState = EditViewState()) {
     private var saveEnable: Boolean = false
     private var editedTodo: TodoItem = TodoItem(
@@ -56,7 +56,7 @@ class EditViewModel @Inject constructor(
 
     private fun saveTodo() {
         editedTodo = editedTodo.copy(
-            modifiedDate = Date().time, lastUpdatedBy =  preferencesHelper.getUUID()
+            modifiedDate = Date().time, lastUpdatedBy = preferencesHelper.getUUID()
         )
         if (oldTodo == null) repository.saveTodo(editedTodo) else repository.updateTodo(editedTodo)
         viewState.update { it.copy(toTodosScreen = true) }

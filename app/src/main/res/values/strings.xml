@@ -21,6 +21,12 @@
     <string name="no">нет</string>
     <string name="delete">Удалить</string>
 
+    <!--SettingsScreen-->
+    <string name="settings">Настройки</string>
+    <string name="theme">Тема</string>
+    <string name="auto">авто</string>
+    <string name="about_app">О приложении</string>
+
     <!--Icons strings-->
     <string name="calendar_icon">Иконка календаря</string>
     <string name="priority_icon">Иконка приоритета</string>
@@ -29,12 +35,17 @@
     <string name="add_icon">Иконка добавления</string>
     <string name="delete_icon">Иконка удаления</string>
     <string name="yandex_icon">Иконка Яндекса</string>
+    <string name="icon_btn">Кнопка с иконкой</string>
 
-    <!--Errors-->
+    <!--Animations strings-->
+    <string name="color_animation">Анимация цвета</string>
+
+    <!--Snackbar Messages-->
     <string name="error">Произошла ошибка</string>
     <string name="ok">Ок</string>
     <string name="repeat">Повторить</string>
     <string name="network_unavailable">Подключение к интернету отсутствует</string>
     <string name="sync_error">Не удалось синхронизироваться с сервером</string>
     <string name="success_sync">Успешно синхронизированно</string>
+    <string name="todo_deleted">Дело удалено</string>
 </resources>

@@ -13,10 +13,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.around_team.todolist.di.SharedPreferencesModule
+import com.around_team.todolist.ui.screens.about.AboutAppScreen
 import com.around_team.todolist.ui.screens.edit.EditScreen
 import com.around_team.todolist.ui.screens.edit.EditViewModel
 import com.around_team.todolist.ui.screens.registration.RegistrationScreen
 import com.around_team.todolist.ui.screens.registration.RegistrationViewModel
+import com.around_team.todolist.ui.screens.settings.SettingsScreen
+import com.around_team.todolist.ui.screens.settings.SettingsViewModel
 import com.around_team.todolist.ui.screens.todos.TodosScreen
 import com.around_team.todolist.ui.screens.todos.TodosViewModel
 import com.around_team.todolist.utils.PreferencesHelper
@@ -38,6 +41,7 @@ class NavGraph(
         val registrationViewModel = hiltViewModel<RegistrationViewModel>()
         val todosViewModel = hiltViewModel<TodosViewModel>()
         val editViewModel = hiltViewModel<EditViewModel>()
+        val settingsViewModel = hiltViewModel<SettingsViewModel>()
 
         NavHost(
             navController = navController,
@@ -57,8 +61,27 @@ class NavGraph(
                     },
                 )
             ) { CreateEditScreen(editViewModel) }
+            composable(Screens.SettingsScreen.name) { CreateSettingsScreen(settingsViewModel) }
+            composable(Screens.AboutAppScreen.name) { CreateAboutAppScreen() }
         }
     }
+
+    @Composable
+    private fun CreateAboutAppScreen() {
+        AboutAppScreen(
+            onBackPressed = { navController.navigate(Screens.SettingsScreen.name) { popUpTo(0) } },
+        ).Create()
+    }
+
+    @Composable
+    private fun CreateSettingsScreen(settingsViewModel: SettingsViewModel) {
+        SettingsScreen(
+            viewModel = settingsViewModel,
+            onBackPressed = { navController.navigate(Screens.TodosScreen.name) { popUpTo(0) } },
+            toAboutScreen = { navController.navigate(Screens.AboutAppScreen.name) }
+        ).Create()
+    }
+
 
     @Composable
     private fun getStartDestination(): String {
@@ -81,14 +104,11 @@ class NavGraph(
 
     @Composable
     private fun CreateTodosScreen(viewModel: TodosViewModel) {
-        TodosScreen(
-            viewModel = viewModel,
-            toEditScreen = {
-                if (it == null) {
-                    navController.navigate(Screens.EditScreen.name)
-                } else navController.navigate("${Screens.EditScreen.name}?$TO_EDIT_TODO_ID_KEY=$it")
-            },
-        ).Create()
+        TodosScreen(viewModel = viewModel, toEditScreen = {
+            if (it == null) {
+                navController.navigate(Screens.EditScreen.name)
+            } else navController.navigate("${Screens.EditScreen.name}?$TO_EDIT_TODO_ID_KEY=$it")
+        }, toSettingsScreen = { navController.navigate(Screens.SettingsScreen.name) }).Create()
     }
 
     @Composable

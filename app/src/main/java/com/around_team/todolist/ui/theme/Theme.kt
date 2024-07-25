@@ -42,7 +42,7 @@ internal fun TodoListTheme(
     }
 
     CompositionLocalProvider(
-        LocalJetAroundColors provides colors,
+        LocalJetTodoListColors provides colors,
         LocalJetTodoListTypography provides typography,
         content = content
     )

@@ -1,6 +1,7 @@
 package com.around_team.todolist.utils
 
 import android.content.SharedPreferences
+import com.around_team.todolist.ui.screens.settings.models.Theme
 import java.util.UUID
 
 /**
@@ -13,6 +14,18 @@ class PreferencesHelper(private val preferences: SharedPreferences) {
     companion object {
         private const val KEY_UUID = "uuid"
         private const val KEY_TOKEN = "KEY_TOKEN"
+        private const val KEY_THEME = "KEY_THEME"
+    }
+
+    fun saveSelectedTheme(theme: Theme) {
+        preferences.edit()
+            .putString(KEY_THEME, theme.name)
+            .apply()
+    }
+
+    fun getSelectedTheme(): Theme? {
+        val strTheme = preferences.getString(KEY_THEME, null)
+        return strTheme?.let { Theme.valueOf(it) }
     }
 
     fun getUUID(): String {

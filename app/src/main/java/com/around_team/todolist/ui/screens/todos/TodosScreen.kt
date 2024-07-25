@@ -3,6 +3,10 @@ package com.around_team.todolist.ui.screens.todos
 import android.content.Context
 import android.content.res.Configuration
 import android.widget.Toast
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,7 +26,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -35,7 +38,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,19 +61,22 @@ import com.around_team.todolist.data.network.repositories.Repository
 import com.around_team.todolist.ui.common.enums.NetworkConnectionState
 import com.around_team.todolist.ui.common.models.TodoItem
 import com.around_team.todolist.ui.common.views.CustomFab
+import com.around_team.todolist.ui.common.views.CustomIconButton
 import com.around_team.todolist.ui.common.views.CustomSnackbar
 import com.around_team.todolist.ui.common.views.MyDivider
 import com.around_team.todolist.ui.common.views.custom_toolbar.CustomToolbar
 import com.around_team.todolist.ui.common.views.custom_toolbar.CustomToolbarScrollBehavior
 import com.around_team.todolist.ui.common.views.custom_toolbar.rememberToolbarScrollBehavior
 import com.around_team.todolist.ui.screens.todos.models.TodosEvent
-import com.around_team.todolist.ui.screens.todos.models.TodosViewState
 import com.around_team.todolist.ui.screens.todos.views.CreateNewCard
 import com.around_team.todolist.ui.screens.todos.views.TodoCard
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.ui.theme.TodoListTheme
 import com.around_team.todolist.utils.PreferencesHelper
 import com.around_team.todolist.utils.observeConnectivityAsFlow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * Screen component displaying a list of todo items.
@@ -79,6 +87,7 @@ import com.around_team.todolist.utils.observeConnectivityAsFlow
 class TodosScreen(
     private val viewModel: TodosViewModel,
     private val toEditScreen: (id: String?) -> Unit,
+    private val toSettingsScreen: () -> Unit,
 ) {
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -91,11 +100,8 @@ class TodosScreen(
 
         LaunchedEffect(Unit) { viewModel.obtainEvent(TodosEvent.StartCollecting) }
 
-        val snackbarHostState = remember { SnackbarHostState() }
-        ErrorMessageLogic(viewState, snackbarHostState)
-
         val pullState = rememberPullToRefreshState()
-        PullToRefreshLogic(pullState, viewState, scrollBehavior)
+        PullToRefreshLogic(pullState, viewState.refreshing, scrollBehavior)
 
         NetworkLogic(viewState.connectionState)
 
@@ -109,10 +115,13 @@ class TodosScreen(
                     } else it
                 },
             topBar = {
-                CustomToolbar(
-                    collapsingTitle = stringResource(id = R.string.title),
-                    scrollBehavior = scrollBehavior
-                )
+                CustomToolbar(collapsingTitle = stringResource(id = R.string.title),
+                    scrollBehavior = scrollBehavior,
+                    actions = {
+                        CustomIconButton(
+                            iconId = R.drawable.ic_settings, onClick = toSettingsScreen
+                        )
+                    })
             },
             floatingActionButtonPosition = FabPosition.Center,
             floatingActionButton = {
@@ -121,7 +130,7 @@ class TodosScreen(
                     onClick = { toEditScreen(null) },
                 )
             },
-            snackbarHost = { CustomSnackbar(hostState = snackbarHostState) },
+            snackbarHost = { MessagesLogic(viewState.messageId, viewState.snackBarVisible) },
             containerColor = JetTodoListTheme.colors.back.primary,
         ) { paddingValues ->
             Box(
@@ -165,40 +174,61 @@ class TodosScreen(
     @Composable
     private fun PullToRefreshLogic(
         pullState: PullToRefreshState,
-        viewState: TodosViewState,
+        refreshing: Boolean,
         scrollBehavior: CustomToolbarScrollBehavior,
     ) {
         LaunchedEffect(pullState.isRefreshing) {
             if (pullState.isRefreshing) viewModel.obtainEvent(TodosEvent.RefreshTodos)
         }
 
-        LaunchedEffect(key1 = viewState.refreshing) {
-            if (!viewState.refreshing) pullState.endRefresh()
+        LaunchedEffect(key1 = refreshing) {
+            if (!refreshing) pullState.endRefresh()
         }
 
         if (scrollBehavior.state.collapsedFraction != 0f) pullState.endRefresh()
     }
 
     @Composable
-    private fun ErrorMessageLogic(
-        viewState: TodosViewState,
-        snackbarHostState: SnackbarHostState,
+    private fun MessagesLogic(
+        messageId: Int?,
+        snackBarVisible: Boolean,
     ) {
-        if (viewState.messageId == null) return
+        if (messageId == null) return
         val notActionMessages = listOf(R.string.network_unavailable, R.string.success_sync)
-        val messageStr = stringResource(viewState.messageId)
-        val actionStr = stringResource(id = R.string.repeat)
+        val messageStr = stringResource(messageId)
+        var countdownTime by remember { mutableIntStateOf(5) }
+        val actionStr = when (messageId) {
+            R.string.todo_deleted -> "${stringResource(R.string.cancel)} $countdownTime"
+            else -> stringResource(R.string.repeat)
+        }
         val context = LocalContext.current
-
-        LaunchedEffect(key1 = viewState.messageId) {
-            if (notActionMessages.contains(viewState.messageId)) {
+        if (notActionMessages.contains(messageId)) {
+            LaunchedEffect(messageId) {
                 Toast
                     .makeText(context, messageStr, Toast.LENGTH_LONG)
                     .show()
-            } else {
-                val result = snackbarHostState.showSnackbar(messageStr, actionStr)
-                viewModel.obtainEvent(TodosEvent.HandleSnackbarResult(result))
+                viewModel.obtainEvent(TodosEvent.ClearMessage)
             }
+        } else if (messageId == R.string.todo_deleted && snackBarVisible) {
+            LaunchedEffect(Unit) {
+                countdownTime = 5
+                launch(Dispatchers.IO) {
+                    while (countdownTime > 0) {
+                        delay(1000)
+                        countdownTime--
+                    }
+                    viewModel.obtainEvent(TodosEvent.HideSnackbar)
+                }
+            }
+        }
+        AnimatedVisibility(
+            visible = snackBarVisible,
+            enter = slideInVertically(initialOffsetY = { 2 * it }),
+            exit = slideOutVertically(targetOffsetY = { 2 * it }),
+        ) {
+            CustomSnackbar(message = messageStr, action = actionStr, onActionClick = {
+                viewModel.obtainEvent(TodosEvent.HandleSnackbarActionClick)
+            })
         }
     }
 
@@ -275,17 +305,19 @@ class TodosScreen(
                 style = JetTodoListTheme.typography.subhead,
                 color = JetTodoListTheme.colors.label.tertiary
             )
-            Text(
-                modifier = Modifier.clickable(
-                    onClick = onShowClick,
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                ),
-                text = stringResource(id = if (showed) R.string.hide else R.string.show),
-                style = JetTodoListTheme.typography.subhead,
-                fontWeight = FontWeight.Bold,
-                color = JetTodoListTheme.colors.colors.blue
-            )
+            AnimatedContent(showed, label = "") { targetState ->
+                Text(
+                    modifier = Modifier.clickable(
+                        onClick = onShowClick,
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ),
+                    text = stringResource(id = if (targetState) R.string.hide else R.string.show),
+                    style = JetTodoListTheme.typography.subhead,
+                    fontWeight = FontWeight.Bold,
+                    color = JetTodoListTheme.colors.colors.blue
+                )
+            }
         }
     }
 
@@ -379,6 +411,7 @@ private fun TodosScreenPreviewLight() {
                 Repository(RequestManager(prefHelper), DatabaseRepository(testDao)), prefHelper
             ),
             toEditScreen = {},
+            toSettingsScreen = {},
         )
     }
 }
@@ -394,6 +427,7 @@ private fun TodosScreenPreviewNight() {
                 Repository(RequestManager(prefHelper), DatabaseRepository(testDao)), prefHelper
             ),
             toEditScreen = {},
+            toSettingsScreen = {},
         )
     }
 }

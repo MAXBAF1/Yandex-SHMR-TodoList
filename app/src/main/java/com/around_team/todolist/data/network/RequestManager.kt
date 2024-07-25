@@ -27,7 +27,6 @@ import kotlinx.coroutines.withContext
 import java.net.UnknownHostException
 import java.text.DateFormat
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * A manager for handling HTTP requests using the Ktor HTTP client with OkHttp and JSON content negotiation.
@@ -42,7 +41,7 @@ class RequestManager @Inject constructor(private val preferencesHelper: Preferen
         }
         install(DefaultRequest) {
             header(HttpHeaders.Authorization, "OAuth ${preferencesHelper.getToken()}")
-            header(ERRORS_HEADER, 20)
+            header(ERRORS_HEADER, 0)
             header(REVISION_HEADER, lastKnownRevision.toString())
             header(HttpHeaders.ContentType, ContentType.Application.Json)
             header(HttpHeaders.Accept, ContentType.Application.Json)

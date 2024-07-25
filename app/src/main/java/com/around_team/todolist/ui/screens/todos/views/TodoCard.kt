@@ -58,7 +58,6 @@ fun TodoCard(todo: TodoItem, onClick: () -> Unit, onCompleteClick: () -> Unit) {
             onChecked = onCompleteClick,
             highPriority = todo.importance == TodoImportance.Important,
         )
-
         NameAndDateColumn(
             modifier = Modifier
                 .padding(end = 16.dp)
@@ -81,7 +80,7 @@ private fun NameAndDateColumn(todo: TodoItem, modifier: Modifier = Modifier) {
             if (todo.importance != TodoImportance.Basic && todo.importance.iconId != null) {
                 Icon(
                     modifier = Modifier.padding(end = 2.dp),
-                    painter = painterResource(id = todo.importance.iconId),
+                    painter = painterResource(id = todo.importance.iconId ?: R.drawable.ic_error),
                     contentDescription = stringResource(id = R.string.priority_icon),
                     tint = todo.importance.getIconColor()
                 )

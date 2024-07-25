@@ -47,7 +47,7 @@ import com.around_team.todolist.ui.screens.edit.models.EditEvent
 import com.around_team.todolist.ui.screens.edit.views.CustomClickableText
 import com.around_team.todolist.ui.screens.edit.views.CustomDatePicker
 import com.around_team.todolist.ui.screens.edit.views.CustomSwitch
-import com.around_team.todolist.ui.screens.edit.views.CustomTabRow
+import com.around_team.todolist.ui.common.views.CustomTabRow
 import com.around_team.todolist.ui.screens.todos.testDao
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.ui.theme.TodoListTheme
@@ -213,7 +213,7 @@ class EditScreen(
         onPriorityChanged: (TodoImportance) -> Unit,
         modifier: Modifier = Modifier,
     ) {
-        val tabList = TodoImportance.entries.toTypedArray()
+        val tabList = TodoImportance.entries
 
         Row(
             modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
@@ -252,7 +252,7 @@ class EditScreen(
                     style = JetTodoListTheme.typography.body,
                     color = JetTodoListTheme.colors.label.primary
                 )
-                if (checked && selectedDate != null) {
+                AnimatedVisibility(visible = checked && selectedDate != null) {
                     CustomClickableText(
                         text = FormatTimeInMillis.format(selectedDate),
                         onClick = onSelectedDateClick,

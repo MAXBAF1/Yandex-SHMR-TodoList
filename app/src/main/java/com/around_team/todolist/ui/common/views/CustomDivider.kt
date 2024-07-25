@@ -31,7 +31,7 @@ fun MyDivider(modifier: Modifier = Modifier) {
  */
 @Preview
 @Composable
-private fun CustomButtonPreview() {
+private fun MyDividerPreview() {
     TodoListTheme {
         Box(modifier = Modifier.background(JetTodoListTheme.colors.back.primary).padding(10.dp)) {
             MyDivider()
