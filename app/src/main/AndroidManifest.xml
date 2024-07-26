@@ -26,6 +26,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:theme="@style/Theme.TodoList"
+            android:name=".HiltTestActivity"
+            android:exported="true">
+        </activity>
     </application>
 
 </manifest>

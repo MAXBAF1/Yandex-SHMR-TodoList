@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.AccessibilityAction
 import androidx.compose.ui.semantics.CustomAccessibilityAction
@@ -60,6 +61,8 @@ import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.ui.theme.TodoListTheme
 import com.around_team.todolist.utils.FormatTimeInMillis
 import com.around_team.todolist.utils.PreferencesHelper
+import com.around_team.todolist.utils.TestTags
+import io.ktor.client.HttpClient
 
 /**
  * Represents the Edit screen for editing or creating a new todo item.
@@ -208,8 +211,7 @@ class EditScreen(
                     modifier = Modifier
                         .offset(y = (-124).dp)
                         .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally)
-                        .clearAndSetSemantics { },
+                        .align(Alignment.CenterHorizontally),
                     state = state,
                 )
             }
@@ -318,7 +320,8 @@ class EditScreen(
         TextField(
             modifier = modifier
                 .fillMaxWidth()
-                .semantics { heading() },
+                .semantics { heading() }
+                .testTag(TestTags.TEXT_FIELD_TAG),
             value = text,
             onValueChange = onTextChange,
             shape = RoundedCornerShape(16.dp),
@@ -352,7 +355,7 @@ private fun EditScreenPreviewLight() {
     TodoListTheme {
         EditScreen(
             viewModel = EditViewModel(
-                Repository(RequestManager(prefHelper), DatabaseRepository(testDao)), prefHelper
+                Repository(RequestManager(HttpClient()), DatabaseRepository(testDao)), prefHelper
             ),
             onCancelClick = {},
             toTodosScreen = {},
@@ -368,7 +371,7 @@ private fun EditScreenPreviewNight() {
     TodoListTheme {
         EditScreen(
             viewModel = EditViewModel(
-                Repository(RequestManager(prefHelper), DatabaseRepository(testDao)), prefHelper
+                Repository(RequestManager(HttpClient()), DatabaseRepository(testDao)), prefHelper
             ),
             onCancelClick = {},
             toTodosScreen = {},

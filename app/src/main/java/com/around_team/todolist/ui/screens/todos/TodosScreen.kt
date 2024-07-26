@@ -46,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
@@ -81,7 +82,9 @@ import com.around_team.todolist.ui.screens.todos.views.TodoCard
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.ui.theme.TodoListTheme
 import com.around_team.todolist.utils.PreferencesHelper
+import com.around_team.todolist.utils.TestTags
 import com.around_team.todolist.utils.observeConnectivityAsFlow
+import io.ktor.client.HttpClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -136,7 +139,7 @@ class TodosScreen(
             floatingActionButtonPosition = FabPosition.Center,
             floatingActionButton = {
                 CustomFab(
-                    modifier = Modifier.padding(bottom = 20.dp),
+                    modifier = Modifier.padding(bottom = 20.dp).testTag(TestTags.FAB_TAG),
                     onClick = { toEditScreen(null) },
                 )
             },
@@ -454,7 +457,7 @@ private fun TodosScreenPreviewLight() {
     TodoListTheme {
         TodosScreen(
             viewModel = TodosViewModel(
-                Repository(RequestManager(prefHelper), DatabaseRepository(testDao)), prefHelper
+                Repository(RequestManager(HttpClient()), DatabaseRepository(testDao)), prefHelper
             ),
             toEditScreen = {},
             toSettingsScreen = {},
@@ -470,7 +473,7 @@ private fun TodosScreenPreviewNight() {
     TodoListTheme {
         TodosScreen(
             viewModel = TodosViewModel(
-                Repository(RequestManager(prefHelper), DatabaseRepository(testDao)), prefHelper
+                Repository(RequestManager(HttpClient()), DatabaseRepository(testDao)), prefHelper
             ),
             toEditScreen = {},
             toSettingsScreen = {},
