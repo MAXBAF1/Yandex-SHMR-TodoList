@@ -45,7 +45,7 @@ fun SignInWithYandexIdButton(onClick: () -> Unit, modifier: Modifier = Modifier)
             Image(
                 modifier = Modifier.size(24.dp),
                 painter = painterResource(R.drawable.ic_yandex),
-                contentDescription = stringResource(R.string.yandex_icon)
+                contentDescription = null
             )
             Spacer(Modifier.width(10.dp))
             Text(

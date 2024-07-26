@@ -23,8 +23,14 @@ workRuntimeKtx = "2.9.0"
 ksp = "2.0.0-1.0.21"
 coroutines = "1.7.3"
 divKitVersion = "30.9.0"
+mockwebserver = "4.9.1"
+ktorClientMock = "2.3.12"
 
 [libraries]
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktorClientMock" }
+mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "mockwebserver" }
+hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltVersion" }
+
 div = { group = "com.yandex.div", name = "div", version.ref = "divKitVersion"}
 div-core = { group = "com.yandex.div", name = "div-core", version.ref = "divKitVersion"}
 div-json = { group = "com.yandex.div", name = "div-json", version.ref = "divKitVersion"}

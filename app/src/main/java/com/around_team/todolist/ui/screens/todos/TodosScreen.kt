@@ -46,8 +46,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -73,7 +82,9 @@ import com.around_team.todolist.ui.screens.todos.views.TodoCard
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.ui.theme.TodoListTheme
 import com.around_team.todolist.utils.PreferencesHelper
+import com.around_team.todolist.utils.TestTags
 import com.around_team.todolist.utils.observeConnectivityAsFlow
+import io.ktor.client.HttpClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -119,14 +130,16 @@ class TodosScreen(
                     scrollBehavior = scrollBehavior,
                     actions = {
                         CustomIconButton(
-                            iconId = R.drawable.ic_settings, onClick = toSettingsScreen
+                            iconId = R.drawable.ic_settings,
+                            contentDescription = stringResource(R.string.settings),
+                            onClick = toSettingsScreen
                         )
                     })
             },
             floatingActionButtonPosition = FabPosition.Center,
             floatingActionButton = {
                 CustomFab(
-                    modifier = Modifier.padding(bottom = 20.dp),
+                    modifier = Modifier.padding(bottom = 20.dp).testTag(TestTags.FAB_TAG),
                     onClick = { toEditScreen(null) },
                 )
             },
@@ -244,6 +257,7 @@ class TodosScreen(
         onTodoClick: (id: String) -> Unit,
         modifier: Modifier = Modifier,
     ) {
+        val deleteAction = stringResource(R.string.delete)
         LazyColumn(
             modifier = modifier.fillMaxWidth(),
         ) {
@@ -253,17 +267,36 @@ class TodosScreen(
                     completeCnt = completeCnt,
                     onShowClick = onShowClick,
                     modifier = Modifier
-                        .padding(start = 32.dp, top = 8.dp, end = 32.dp, bottom = 12.dp)
+                        .padding(
+                            start = 32.dp, top = 8.dp, end = 32.dp, bottom = 12.dp
+                        )
                         .background(JetTodoListTheme.colors.back.primary),
                 )
             }
             itemsIndexed(items = todos, key = { _, todo -> todo.id }) { i, todo ->
+                val todoModifier = if (i == 0) {
+                    Modifier.clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                } else Modifier
+                    .animateItemPlacement()
+                    .background(JetTodoListTheme.colors.back.secondary)
+                val completedDescription =
+                    stringResource(if (todo.done) R.string.completed_semantics else R.string.not_completed_semantics)
+                val completeAction =
+                    stringResource(if (todo.done) R.string.do_not_complete_semantics else R.string.complete_semantics)
                 TodoRow(
-                    modifier = if (i == 0) {
-                        Modifier.clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-                    } else Modifier
-                        .animateItemPlacement()
-                        .background(JetTodoListTheme.colors.back.secondary),
+                    modifier = todoModifier.semantics {
+                        stateDescription = completedDescription
+                        this[SemanticsActions.CustomActions] = listOf(
+                            CustomAccessibilityAction(label = completeAction) {
+                                onCompleteClick(todo.id)
+                                true
+                            },
+                            CustomAccessibilityAction(label = deleteAction) {
+                                onDelete(todo.id)
+                                true
+                            },
+                        )
+                    },
                     todo = todo,
                     onClick = { onTodoClick(todo.id) },
                     onCompleteClick = { onCompleteClick(todo.id) },
@@ -300,23 +333,39 @@ class TodosScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top
         ) {
+            val completeDescription = "$completeCnt ${stringResource(R.string.completed_semantics)}"
             Text(
-                text = stringResource(R.string.complete, completeCnt),
+                modifier = Modifier.semantics {
+                    heading()
+                    contentDescription = completeDescription
+                },
+                text = stringResource(R.string.completed, completeCnt),
                 style = JetTodoListTheme.typography.subhead,
                 color = JetTodoListTheme.colors.label.tertiary
             )
-            AnimatedContent(showed, label = "") { targetState ->
-                Text(
-                    modifier = Modifier.clickable(
+            AnimatedContent(
+                targetState = showed, label = ""
+            ) { targetState ->
+                Box(modifier = Modifier
+                    .clickable(
                         onClick = onShowClick,
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                    ),
-                    text = stringResource(id = if (targetState) R.string.hide else R.string.show),
-                    style = JetTodoListTheme.typography.subhead,
-                    fontWeight = FontWeight.Bold,
-                    color = JetTodoListTheme.colors.colors.blue
-                )
+                        onClickLabel = stringResource(
+                            if (targetState) R.string.hide_completed_semantics else R.string.show_completed_semantics
+                        )
+                    )
+                    .semantics(true) {
+                        role = Role.Button
+                    }) {
+                    Text(
+                        modifier = Modifier,
+                        text = stringResource(id = if (targetState) R.string.hide else R.string.show),
+                        style = JetTodoListTheme.typography.subhead,
+                        fontWeight = FontWeight.Bold,
+                        color = JetTodoListTheme.colors.colors.blue
+                    )
+                }
             }
         }
     }
@@ -369,7 +418,7 @@ class TodosScreen(
                         .padding(start = 20.dp),
                     contentAlignment = Alignment.CenterStart,
                 ) {
-                    SwipeIcon(R.drawable.ic_complete, R.string.complete_icon)
+                    SwipeIcon(R.drawable.ic_complete, R.string.complete_semantics)
                 }
             }
 
@@ -381,7 +430,7 @@ class TodosScreen(
                         .padding(end = 20.dp),
                     contentAlignment = Alignment.CenterEnd,
                 ) {
-                    SwipeIcon(R.drawable.ic_delete, R.string.delete_icon)
+                    SwipeIcon(R.drawable.ic_delete, R.string.delete)
                 }
             }
 
@@ -408,7 +457,7 @@ private fun TodosScreenPreviewLight() {
     TodoListTheme {
         TodosScreen(
             viewModel = TodosViewModel(
-                Repository(RequestManager(prefHelper), DatabaseRepository(testDao)), prefHelper
+                Repository(RequestManager(HttpClient()), DatabaseRepository(testDao)), prefHelper
             ),
             toEditScreen = {},
             toSettingsScreen = {},
@@ -424,7 +473,7 @@ private fun TodosScreenPreviewNight() {
     TodoListTheme {
         TodosScreen(
             viewModel = TodosViewModel(
-                Repository(RequestManager(prefHelper), DatabaseRepository(testDao)), prefHelper
+                Repository(RequestManager(HttpClient()), DatabaseRepository(testDao)), prefHelper
             ),
             toEditScreen = {},
             toSettingsScreen = {},

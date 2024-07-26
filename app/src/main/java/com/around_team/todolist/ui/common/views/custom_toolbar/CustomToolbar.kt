@@ -25,6 +25,8 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
@@ -106,7 +108,7 @@ fun CustomToolbar(
                                     scaleX = collapsingTitleScale,
                                     scaleY = collapsingTitleScale,
                                     transformOrigin = TransformOrigin(0f, 0f)
-                                ),
+                                ).semantics { heading() },
                             text = collapsingTitle,
                             style = expandedTitleStyle,
                             color = JetTodoListTheme.colors.label.primary
@@ -118,7 +120,7 @@ fun CustomToolbar(
                                     scaleX = collapsingTitleScale,
                                     scaleY = collapsingTitleScale,
                                     transformOrigin = TransformOrigin(0f, 0f)
-                                ),
+                                ).semantics { heading() },
                             text = collapsingTitle,
                             style = collapsedTitleStyle,
                             maxLines = 1,

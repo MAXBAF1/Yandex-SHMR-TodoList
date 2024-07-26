@@ -4,7 +4,7 @@ import android.util.Log
 import com.around_team.todolist.R
 import com.around_team.todolist.data.db.DatabaseRepository
 import com.around_team.todolist.data.network.RequestManager
-import com.around_team.todolist.data.network.TodoListConfig
+import com.around_team.todolist.data.network.NetworkConfig
 import com.around_team.todolist.data.network.model.receive.GetAllItemsReceive
 import com.around_team.todolist.data.network.model.receive.GetItemReceive
 import com.around_team.todolist.data.network.model.request.PostItemRequest
@@ -64,7 +64,7 @@ class Repository @Inject constructor(
         repositoryScope.launch {
             val todosDTO = requestManager.createRequest<GetAllItemsReceive>(
                 methodType = HttpMethod.Get,
-                address = TodoListConfig.LIST_ADDRESS.toString(),
+                address = NetworkConfig.LIST_ADDRESS.toString(),
             )?.list ?: return@launch
             val todoItems = todosDTO.map { it.toTodoItem() }
             databaseRepository.replaceTodos(todoItems)
@@ -76,7 +76,7 @@ class Repository @Inject constructor(
         repositoryScope.launch {
             val todosDTO = requestManager.createRequest<GetAllItemsReceive>(
                 methodType = HttpMethod.Patch,
-                address = TodoListConfig.LIST_ADDRESS.toString(),
+                address = NetworkConfig.LIST_ADDRESS.toString(),
                 body = SendAllItemsRequest(list.map { it.toDTO() })
             )?.list ?: return@launch
 
@@ -101,7 +101,7 @@ class Repository @Inject constructor(
         repositoryScope.launch {
             requestManager.createRequest<GetItemReceive>(
                 methodType = HttpMethod.Post,
-                address = TodoListConfig.LIST_ADDRESS.toString(),
+                address = NetworkConfig.LIST_ADDRESS.toString(),
                 body = PostItemRequest(todo = todoItem.toDTO()),
             )
         }
@@ -122,7 +122,7 @@ class Repository @Inject constructor(
         repositoryScope.launch {
             requestManager.createRequest<GetItemReceive>(
                 methodType = HttpMethod.Delete,
-                address = TodoListConfig.getElementListAddress(id),
+                address = NetworkConfig.getElementListAddress(id),
             )
         }
     }
@@ -140,7 +140,7 @@ class Repository @Inject constructor(
         repositoryScope.launch {
             requestManager.createRequest<GetItemReceive>(
                 methodType = HttpMethod.Put,
-                address = TodoListConfig.getElementListAddress(todo.id),
+                address = NetworkConfig.getElementListAddress(todo.id),
                 body = PostItemRequest(todo = todo.toDTO())
             )
         }

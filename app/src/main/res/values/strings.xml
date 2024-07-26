@@ -6,7 +6,7 @@
 
     <!--TodosScreen-->
     <string name="title">Мои дела</string>
-    <string name="complete">Выполнено — %d</string>
+    <string name="completed">Выполнено — %d</string>
     <string name="show">Показать</string>
     <string name="hide">Скрыть</string>
     <string name="new_todo">Новое</string>
@@ -27,15 +27,25 @@
     <string name="auto">авто</string>
     <string name="about_app">О приложении</string>
 
-    <!--Icons strings-->
-    <string name="calendar_icon">Иконка календаря</string>
-    <string name="priority_icon">Иконка приоритета</string>
-    <string name="arrow_icon">Иконка стрелочки</string>
-    <string name="complete_icon">Иконка выполнения</string>
-    <string name="add_icon">Иконка добавления</string>
-    <string name="delete_icon">Иконка удаления</string>
-    <string name="yandex_icon">Иконка Яндекса</string>
-    <string name="icon_btn">Кнопка с иконкой</string>
+    <!--Semantics strings-->
+    <string name="back_semantics">Назад</string>
+    <string name="complete_semantics">Выполнить</string>
+    <string name="do_not_complete_semantics">Сделать невыполненным</string>
+    <string name="low_semantics">Низкая</string>
+    <string name="basic_semantics">Обычная</string>
+    <string name="importance_semantics">Повышенная</string>
+    <string name="add_todo_semantics">Добавить дело</string>
+    <string name="completed_semantics">Выполнено</string>
+    <string name="not_completed_semantics">Не выполнено</string>
+    <string name="to_todo_semantics">Перейти к делу</string>
+    <string name="complete_before_semantics">Выполнить до — %s</string>
+    <string name="show_completed_semantics">Увидеть выполненные дела</string>
+    <string name="hide_completed_semantics">Скрыть выполненные дела</string>
+    <string name="light_semantics">Светлая</string>
+    <string name="night_semantics">Тёмная</string>
+    <string name="system_semantics">Системная</string>
+    <string name="change_date_semantics">Изменить дату</string>
+    <string name="choice_date_semantics">Выбрать дату</string>
 
     <!--Animations strings-->
     <string name="color_animation">Анимация цвета</string>

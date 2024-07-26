@@ -2,6 +2,7 @@ package com.around_team.todolist.ui.screens.edit.views
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -11,6 +12,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,16 +43,16 @@ fun CustomClickableText(
     fontWeight: FontWeight? = null,
 ) {
     var isClicked by remember { mutableStateOf(false) }
-    val clickableModifier = if (enable) {
-        modifier.clickable(
-            onClick = {
-                isClicked = true
-                onClick()
-            },
-            interactionSource = remember { MutableInteractionSource() },
-            indication = null,
-        )
-    } else modifier
+    val clickableModifier = modifier.clickable(
+        onClick = {
+            isClicked = true
+            onClick()
+        },
+        interactionSource = remember { MutableInteractionSource() },
+        indication = null,
+        enabled = enable
+    )
+
     val color = when {
         !enable -> JetTodoListTheme.colors.label.tertiary
         isClicked -> JetTodoListTheme.colors.colors.gray
@@ -61,13 +65,11 @@ fun CustomClickableText(
         }
     }
 
-    Text(
-        modifier = clickableModifier,
-        text = text,
-        style = style,
-        fontWeight = fontWeight,
-        color = color
-    )
+    Box(modifier = clickableModifier.semantics { role = Role.Button }) {
+        Text(
+            text = text, style = style, fontWeight = fontWeight, color = color
+        )
+    }
 }
 
 @Preview

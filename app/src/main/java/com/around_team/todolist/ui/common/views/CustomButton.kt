@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.around_team.todolist.R
@@ -36,7 +38,8 @@ fun CustomButton(
     Button(
         modifier = modifier
             .fillMaxWidth()
-            .shadow(2.dp, shape),
+            .shadow(2.dp, shape)
+            .semantics { heading() },
         onClick = onClick,
         shape = shape,
         contentPadding = PaddingValues(vertical = 17.dp),

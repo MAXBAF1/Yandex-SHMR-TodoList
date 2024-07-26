@@ -31,6 +31,7 @@ import com.around_team.todolist.utils.PreferencesHelper
  */
 class NavGraph(
     private val navController: NavHostController,
+    private val needAuthenticate: Boolean = true,
 ) {
     /**
      * Composable function to create and define the navigation graph.
@@ -82,15 +83,15 @@ class NavGraph(
         ).Create()
     }
 
-
     @Composable
     private fun getStartDestination(): String {
         val context = LocalContext.current
         val sharedPreferences =
             context.getSharedPreferences(SharedPreferencesModule.KEY, Context.MODE_PRIVATE)
         val helper = PreferencesHelper(sharedPreferences)
-
-        return if (helper.getToken() == null) Screens.RegistrationScreen.name else Screens.TodosScreen.name
+        return if (helper.getToken() == null && needAuthenticate) {
+            Screens.RegistrationScreen.name
+        } else Screens.TodosScreen.name
     }
 
     @Composable
@@ -100,7 +101,6 @@ class NavGraph(
             toNextScreen = { navController.navigate(Screens.TodosScreen.name) { popUpTo(0) } },
         ).Create()
     }
-
 
     @Composable
     private fun CreateTodosScreen(viewModel: TodosViewModel) {
