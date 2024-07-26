@@ -80,7 +80,7 @@ class CustomTabRow(
                     CustomTab(
                         tab = tab,
                         onClick = { onTabChanged(index) },
-                        selected = highlightSelectedTab && index == selectedTab
+                        selected = index == selectedTab
                     )
                 }
             }
@@ -128,10 +128,10 @@ class CustomTabRow(
         selected: Boolean,
         modifier: Modifier = Modifier
     ) {
-        val color = if (selected) {
+        val color = if (selected && highlightSelectedTab) {
             JetTodoListTheme.colors.label.primary
         } else JetTodoListTheme.colors.colors.gray
-        val tabDesc = "${stringResource(tab.descriptionId)} ${stringResource(R.string.priority)}"
+        val tabDesc = stringResource(tab.descriptionId)
         Box(
             modifier = modifier
                 .semantics(true) {

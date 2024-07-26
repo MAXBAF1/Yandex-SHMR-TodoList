@@ -48,11 +48,14 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -251,6 +254,7 @@ class TodosScreen(
         onTodoClick: (id: String) -> Unit,
         modifier: Modifier = Modifier,
     ) {
+        val deleteAction = stringResource(R.string.delete)
         LazyColumn(
             modifier = modifier.fillMaxWidth(),
         ) {
@@ -267,12 +271,29 @@ class TodosScreen(
                 )
             }
             itemsIndexed(items = todos, key = { _, todo -> todo.id }) { i, todo ->
+                val todoModifier = if (i == 0) {
+                    Modifier.clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                } else Modifier
+                    .animateItemPlacement()
+                    .background(JetTodoListTheme.colors.back.secondary)
+                val completedDescription =
+                    stringResource(if (todo.done) R.string.completed_semantics else R.string.not_completed_semantics)
+                val completeAction =
+                    stringResource(if (todo.done) R.string.do_not_complete_semantics else R.string.complete_semantics)
                 TodoRow(
-                    modifier = if (i == 0) {
-                        Modifier.clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-                    } else Modifier
-                        .animateItemPlacement()
-                        .background(JetTodoListTheme.colors.back.secondary),
+                    modifier = todoModifier.semantics {
+                        stateDescription = completedDescription
+                        this[SemanticsActions.CustomActions] = listOf(
+                            CustomAccessibilityAction(label = completeAction) {
+                                onCompleteClick(todo.id)
+                                true
+                            },
+                            CustomAccessibilityAction(label = deleteAction) {
+                                onDelete(todo.id)
+                                true
+                            },
+                        )
+                    },
                     todo = todo,
                     onClick = { onTodoClick(todo.id) },
                     onCompleteClick = { onCompleteClick(todo.id) },

@@ -39,12 +39,13 @@
     <string name="not_completed_semantics">Не выполнено</string>
     <string name="to_todo_semantics">Перейти к делу</string>
     <string name="complete_before_semantics">Выполнить до — %s</string>
-    <string name="show_completed_semantics">Показать выполненные дела</string>
+    <string name="show_completed_semantics">Увидеть выполненные дела</string>
     <string name="hide_completed_semantics">Скрыть выполненные дела</string>
     <string name="light_semantics">Светлая</string>
     <string name="night_semantics">Тёмная</string>
     <string name="system_semantics">Системная</string>
     <string name="change_date_semantics">Изменить дату</string>
+    <string name="choice_date_semantics">Выбрать дату</string>
 
     <!--Animations strings-->
     <string name="color_animation">Анимация цвета</string>

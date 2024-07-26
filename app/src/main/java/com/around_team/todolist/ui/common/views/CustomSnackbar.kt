@@ -12,6 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.AccessibilityAction
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.around_team.todolist.R
@@ -28,6 +32,7 @@ fun CustomSnackbar(
     onActionClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val cancelAction = stringResource(R.string.cancel)
     Card(
         modifier = modifier.padding(16.dp),
         shape = RoundedCornerShape(16.dp),
@@ -35,18 +40,32 @@ fun CustomSnackbar(
         elevation = CardDefaults.elevatedCardElevation(4.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(start = 16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp)
+                .semantics(true) {
+                    this[SemanticsActions.OnClick] = AccessibilityAction(cancelAction) {
+                        onActionClick()
+                        true
+                    }
+                },
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                modifier = Modifier.padding(vertical = 16.dp).weight(1F),
+                modifier = Modifier
+                    .padding(vertical = 16.dp)
+                    .weight(1F),
                 text = message,
                 style = JetTodoListTheme.typography.subhead,
                 color = JetTodoListTheme.colors.label.primary
             )
             CustomTextButton(
-                text = action, onClick = onActionClick, modifier = Modifier.padding(end = 4.dp)
+                text = action,
+                onClick = onActionClick,
+                modifier = Modifier
+                    .padding(end = 4.dp)
+                    .clearAndSetSemantics { },
             )
         }
     }

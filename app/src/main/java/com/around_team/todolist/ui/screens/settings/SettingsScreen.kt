@@ -16,6 +16,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.around_team.todolist.R
@@ -35,7 +39,9 @@ class SettingsScreen(
 ) {
     @Composable
     fun Create() {
-        val viewState by viewModel.getViewState().collectAsStateWithLifecycle()
+        val viewState by viewModel
+            .getViewState()
+            .collectAsStateWithLifecycle()
 
         SetCompositionTheme(viewState.selectedTheme)
 
@@ -82,7 +88,10 @@ class SettingsScreen(
         val tabList = Theme.entries
 
         Row(
-            modifier = modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
+                .semantics(true) { heading() },
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -106,11 +115,18 @@ class SettingsScreen(
         modifier: Modifier = Modifier,
     ) {
         Row(
-            modifier = modifier.fillMaxWidth().clickable(
+            modifier = modifier
+                .fillMaxWidth()
+                .clickable(
                     onClick = toAboutScreen,
                     interactionSource = remember { MutableInteractionSource() },
                     indication = rememberRipple()
-                ).padding(vertical = 16.dp),
+                )
+                .padding(vertical = 16.dp)
+                .semantics {
+                    heading()
+                    role = Role.Button
+                },
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(

@@ -30,9 +30,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.AccessibilityAction
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -206,7 +208,8 @@ class EditScreen(
                     modifier = Modifier
                         .offset(y = (-124).dp)
                         .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally),
+                        .align(Alignment.CenterHorizontally)
+                        .clearAndSetSemantics { },
                     state = state,
                 )
             }
@@ -222,13 +225,13 @@ class EditScreen(
         val tabList = TodoImportance.entries
 
         Row(
-            modifier = modifier.fillMaxWidth(),
+            modifier = modifier
+                .fillMaxWidth()
+                .semantics(true) { heading() },
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                modifier = Modifier
-                    .weight(1F)
-                    .semantics { heading() },
+                modifier = Modifier.weight(1F),
                 text = stringResource(id = R.string.priority),
                 style = JetTodoListTheme.typography.body,
                 color = JetTodoListTheme.colors.label.primary
@@ -250,33 +253,43 @@ class EditScreen(
         onSelectedDateClick: () -> Unit,
         modifier: Modifier = Modifier,
     ) {
-        val dateDesc = stringResource(R.string.change_date_semantics)
+        val changeDateDesc = stringResource(R.string.change_date_semantics)
+        val choiceDateDesc = stringResource(R.string.choice_date_semantics)
         val showDate = checked && selectedDate != null
+        val date = FormatTimeInMillis.format(selectedDate)
         Row(
-            modifier = modifier.fillMaxWidth(),
+            modifier = modifier
+                .fillMaxWidth()
+                .semantics(true) {
+                    contentDescription = date
+                    heading()
+                    if (showDate) {
+                        this[SemanticsActions.CustomActions] = listOf(
+                            CustomAccessibilityAction(label = changeDateDesc) {
+                                onSelectedDateClick()
+                                true
+                            },
+                        )
+                    }
+                    this[SemanticsActions.OnClick] = AccessibilityAction(choiceDateDesc) {
+                        onCheckedChange()
+                        true
+                    }
+                },
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.semantics(true) {
-                if (showDate) {
-                    this[SemanticsActions.CustomActions] = listOf(
-                        CustomAccessibilityAction(label = dateDesc) {
-                            onSelectedDateClick()
-                            true
-                        },
-                    )
-                }
-            }) {
+            Column(modifier = Modifier) {
                 Text(
-                    modifier = Modifier.semantics { heading() },
+                    modifier = Modifier,
                     text = stringResource(id = R.string.deadline),
                     style = JetTodoListTheme.typography.body,
                     color = JetTodoListTheme.colors.label.primary
                 )
                 AnimatedVisibility(visible = showDate) {
                     CustomClickableText(
-                        modifier = Modifier.clearAndSetSemantics {  },
-                        text = FormatTimeInMillis.format(selectedDate),
+                        modifier = Modifier.clearAndSetSemantics { },
+                        text = date,
                         onClick = onSelectedDateClick,
                         style = JetTodoListTheme.typography.footnote
                     )
@@ -284,7 +297,9 @@ class EditScreen(
             }
 
             CustomSwitch(
-                modifier = Modifier.align(Alignment.Top),
+                modifier = Modifier
+                    .align(Alignment.Top)
+                    .clearAndSetSemantics { },
                 checked = checked,
                 onCheckedChange = onCheckedChange,
                 thumbColor = JetTodoListTheme.colors.colors.white,
