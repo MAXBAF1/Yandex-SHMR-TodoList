@@ -5,7 +5,7 @@ package com.around_team.todolist.data.network
  *
  * @property value The string value representing the endpoint or address.
  */
-enum class TodoListConfig(private val value: String) {
+enum class NetworkConfig(private val value: String) {
     HOST_ADDRESS("https://hive.mrdekk.ru/todo"),
     LIST_ADDRESS("$HOST_ADDRESS/list");
 
