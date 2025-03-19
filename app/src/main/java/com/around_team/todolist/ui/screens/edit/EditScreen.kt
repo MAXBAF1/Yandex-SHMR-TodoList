@@ -1,5 +1,6 @@
 package com.around_team.todolist.ui.screens.edit
 
+import ColorPicker
 import android.content.Context
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
@@ -184,6 +185,8 @@ class EditScreen(
                 ),
                 onPriorityChanged = onPriorityChanged,
             )
+            MyDivider(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp))
+            ColorPicker(onColorChange = {})
             MyDivider(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp))
             DatePickerRow(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
