@@ -1,3 +1,5 @@
+package com.around_team.todolist.ui.screens.edit.views.color_picker
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
@@ -27,17 +29,19 @@ import androidx.compose.ui.unit.dp
 fun ColorPicker(
     modifier: Modifier = Modifier,
     onColorChange: (Color) -> Unit,
+    brightness: Float = 1F,
     boxWidth: Dp = 1000.dp,
     boxHeight: Dp = 300.dp
 ) {
-    var brightness by remember { mutableFloatStateOf(1f) }
-    var selectorPosition by remember { mutableStateOf(Offset(0f, 0f)) }
+    val density = LocalDensity.current.density
+    var selectorPosition by remember {
+        mutableStateOf(Offset(boxWidth.value, boxHeight.value * density))
+    }
     val horizontalColors = listOf(
         Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta, Color.Red
     )
-    val density = LocalDensity.current.density
 
-    val currentColor = remember(selectorPosition, brightness) {
+    remember(selectorPosition, brightness) {
         val proportionX = selectorPosition.x / (boxWidth.value)
         val proportionY = selectorPosition.y / (boxHeight.value * density)
 
@@ -57,13 +61,6 @@ fun ColorPicker(
     Column(modifier = modifier.padding(16.dp)) {
         Box(
             modifier = Modifier
-                .size(50.dp)
-                .background(currentColor, shape = CircleShape)
-        )
-
-        Slider(value = brightness, onValueChange = { brightness = it })
-
-        Box(modifier = Modifier
             .height(boxHeight)
             .width(boxWidth)
             .background(

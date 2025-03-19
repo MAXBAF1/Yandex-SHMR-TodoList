@@ -1,5 +1,6 @@
 package com.around_team.todolist.ui.screens.edit.models
 
+import androidx.compose.ui.graphics.Color
 import com.around_team.todolist.ui.common.models.TodoItem
 import com.around_team.todolist.ui.common.enums.TodoImportance
 import java.util.Date
@@ -27,4 +28,5 @@ data class EditViewState(
     val showCalendar: Boolean = true,
     val toTodosScreen: Boolean = false,
     val exception: Boolean = true,
+    val selectedColor: Color = Color.Red
 )

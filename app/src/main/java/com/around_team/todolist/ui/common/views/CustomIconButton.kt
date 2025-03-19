@@ -3,6 +3,7 @@ package com.around_team.todolist.ui.common.views
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,21 +18,23 @@ import com.around_team.todolist.ui.theme.TodoListTheme
 
 @Composable
 fun CustomIconButton(
-    iconId: Int,
-    onClick: () -> Unit,
+    iconId: Int?,
     modifier: Modifier = Modifier,
-    color: Color = JetTodoListTheme.colors.label.primary,
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(contentColor = JetTodoListTheme.colors.label.primary),
+    onClick: () -> Unit,
 ) {
     IconButton(
         modifier = modifier,
         onClick = onClick,
-        colors = IconButtonDefaults.iconButtonColors(contentColor = color)
+        colors = colors,
     ) {
-        Icon(
-            modifier = Modifier.size(24.dp),
-            painter = painterResource(iconId),
-            contentDescription = stringResource(R.string.icon_btn)
-        )
+        if (iconId != null) {
+            Icon(
+                modifier = Modifier.size(24.dp),
+                painter = painterResource(iconId),
+                contentDescription = stringResource(R.string.icon_btn)
+            )
+        }
     }
 }
 

@@ -1,6 +1,5 @@
 package com.around_team.todolist.ui.screens.edit
 
-import ColorPicker
 import android.content.Context
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
@@ -49,6 +48,7 @@ import com.around_team.todolist.ui.screens.edit.views.CustomClickableText
 import com.around_team.todolist.ui.screens.edit.views.CustomDatePicker
 import com.around_team.todolist.ui.screens.edit.views.CustomSwitch
 import com.around_team.todolist.ui.common.views.CustomTabRow
+import com.around_team.todolist.ui.screens.edit.views.color_picker.ColorSelection
 import com.around_team.todolist.ui.screens.todos.testDao
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 import com.around_team.todolist.ui.theme.TodoListTheme
@@ -135,6 +135,8 @@ class EditScreen(
                     onDateChange = { viewModel.obtainEvent(EditEvent.ChangeDeadline(it)) },
                     showCalendar = viewState.showCalendar,
                     setCalendarState = { viewModel.obtainEvent(EditEvent.SetCalendarShowState(it)) },
+                    selectedColor = viewState.selectedColor,
+                    onColorSelected = { viewModel.obtainEvent(EditEvent.ChangeColor(it)) },
                 )
                 AnimatedVisibility(visible = editedTodoId != null) {
                     CustomButton(
@@ -157,6 +159,8 @@ class EditScreen(
         onCheckedChange: () -> Unit,
         selectedDate: Long?,
         onDateChange: (Long) -> Unit,
+        selectedColor: Color,
+        onColorSelected: (Color) -> Unit,
         showCalendar: Boolean,
         setCalendarState: (state: Boolean) -> Unit,
         modifier: Modifier = Modifier,
@@ -185,8 +189,13 @@ class EditScreen(
                 ),
                 onPriorityChanged = onPriorityChanged,
             )
-            MyDivider(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp))
-            ColorPicker(onColorChange = {})
+            MyDivider(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp))
+            ColorSelection(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                colors = listOf(Color.Yellow, Color.Red, Color.Green, Color.Cyan),
+                selectedColor = selectedColor,
+                onColorSelected = onColorSelected,
+            )
             MyDivider(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp))
             DatePickerRow(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),

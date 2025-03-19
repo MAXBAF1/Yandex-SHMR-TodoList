@@ -19,7 +19,9 @@
     <string name="priority">Важность</string>
     <string name="deadline">Сделать до</string>
     <string name="no">нет</string>
+    <string name="color">Цвет</string>
     <string name="delete">Удалить</string>
+    <string name="brightness">Яркость</string>
 
     <!--SettingsScreen-->
     <string name="settings">Настройки</string>

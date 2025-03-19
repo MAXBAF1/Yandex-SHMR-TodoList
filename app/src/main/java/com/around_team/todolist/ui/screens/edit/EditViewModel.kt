@@ -1,5 +1,6 @@
 package com.around_team.todolist.ui.screens.edit
 
+import androidx.compose.ui.graphics.Color
 import com.around_team.todolist.data.network.repositories.Repository
 import com.around_team.todolist.ui.common.enums.TodoImportance
 import com.around_team.todolist.ui.common.models.BaseViewModel
@@ -51,7 +52,12 @@ class EditViewModel @Inject constructor(
             EditEvent.SaveTodo -> saveTodo()
             EditEvent.DeleteTodo -> deleteTodo()
             EditEvent.ClearViewState -> clearViewState()
+            is EditEvent.ChangeColor -> changeColor(viewEvent.color)
         }
+    }
+
+    private fun changeColor(color: Color) {
+        viewState.update { it.copy(selectedColor = color) }
     }
 
     private fun saveTodo() {
