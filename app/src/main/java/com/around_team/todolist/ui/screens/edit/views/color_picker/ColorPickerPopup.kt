@@ -1,17 +1,14 @@
 package com.around_team.todolist.ui.screens.edit.views.color_picker
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.around_team.todolist.R
-import com.around_team.todolist.ui.common.views.CustomButton
 import com.around_team.todolist.ui.theme.JetTodoListTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,20 +61,14 @@ fun ColorPickerPopup(
                 )
                 Slider(value = brightness, onValueChange = { brightness = it })
             }
-            Button(
+            OutlinedButton(
                 onClick = { onSave(selectedColor) },
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
+                border = BorderStroke(2.dp, selectedColor)
             ) {
                 Text(
-                    modifier = Modifier.padding(end = 8.dp),
                     text = stringResource(id = R.string.save),
                     style = JetTodoListTheme.typography.body,
                     color = JetTodoListTheme.colors.label.primary
-                )
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(selectedColor, shape = CircleShape)
                 )
             }
         }

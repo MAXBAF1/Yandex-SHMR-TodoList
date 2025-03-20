@@ -191,7 +191,7 @@ class EditScreen(
             )
             MyDivider(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp))
             ColorSelection(
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
                 colors = listOf(Color.Yellow, Color.Red, Color.Green, Color.Cyan),
                 selectedColor = selectedColor,
                 onColorSelected = onColorSelected,

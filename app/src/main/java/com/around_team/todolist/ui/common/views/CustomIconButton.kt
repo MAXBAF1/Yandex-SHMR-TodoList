@@ -7,10 +7,10 @@ import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.around_team.todolist.R
 import com.around_team.todolist.ui.theme.JetTodoListTheme
@@ -21,6 +21,7 @@ fun CustomIconButton(
     iconId: Int?,
     modifier: Modifier = Modifier,
     colors: IconButtonColors = IconButtonDefaults.iconButtonColors(contentColor = JetTodoListTheme.colors.label.primary),
+    iconSize: Dp = 24.dp,
     onClick: () -> Unit,
 ) {
     IconButton(
@@ -30,7 +31,7 @@ fun CustomIconButton(
     ) {
         if (iconId != null) {
             Icon(
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(iconSize),
                 painter = painterResource(iconId),
                 contentDescription = stringResource(R.string.icon_btn)
             )
