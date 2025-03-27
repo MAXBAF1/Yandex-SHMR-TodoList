@@ -1,6 +1,10 @@
 package com.around_team.todolist.ui.navigation
 
 import android.content.Context
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -49,7 +53,19 @@ class NavGraph(
                         type = NavType.StringType
                         defaultValue = ""
                     },
-                )
+                ),
+                enterTransition = {
+                    slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }) + fadeIn()
+                },
+                exitTransition = {
+                    slideOutHorizontally(targetOffsetX = { fullWidth -> -fullWidth }) + fadeOut()
+                },
+                popEnterTransition = {
+                    slideInHorizontally(initialOffsetX = { fullWidth -> -fullWidth }) + fadeIn()
+                },
+                popExitTransition = {
+                    slideOutHorizontally(targetOffsetX = { fullWidth -> fullWidth }) + fadeOut()
+                },
             ) { CreateEditScreen() }
             composable(Screens.SettingsScreen.name) { CreateSettingsScreen() }
             composable(Screens.AboutAppScreen.name) { CreateAboutAppScreen() }
