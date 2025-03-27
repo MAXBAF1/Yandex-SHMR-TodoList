@@ -37,22 +37,7 @@ class TodosViewModel @Inject constructor(
     private var completedShowed = false
     private var networkState: NetworkConnectionState = NetworkConnectionState.Available
 
-    override fun obtainEvent(viewEvent: TodosEvent) {
-        when (viewEvent) {
-            is TodosEvent.CompleteTodo -> onCompleteTodo(viewEvent.id)
-            TodosEvent.ClickShowCompletedTodos -> clickShowCompletedTodos()
-            is TodosEvent.DeleteTodo -> deleteTodo(viewEvent.id)
-            TodosEvent.CancelJobs -> viewModelScope.cancel()
-            is TodosEvent.HandleSnackbarActionClick -> handleSnackbarActionClick()
-            TodosEvent.RefreshTodos -> refreshTodos()
-            is TodosEvent.HandleNetworkState -> handleNetworkState(viewEvent.networkConnectionState)
-            TodosEvent.StartCollecting -> startCollecting()
-            TodosEvent.HideSnackbar -> viewState.update { it.copy(snackBarVisible = false) }
-            TodosEvent.ClearMessage -> viewState.update { it.copy(messageId = null) }
-        }
-    }
-
-    private fun startCollecting() {
+    init {
         if (!collectingStarted) {
             viewModelScope.launch {
                 repository.getAllTodosFromBD()
@@ -80,6 +65,20 @@ class TodosViewModel @Inject constructor(
             }
         }
         collectingStarted = true
+    }
+
+    override fun obtainEvent(viewEvent: TodosEvent) {
+        when (viewEvent) {
+            is TodosEvent.CompleteTodo -> onCompleteTodo(viewEvent.id)
+            TodosEvent.ClickShowCompletedTodos -> clickShowCompletedTodos()
+            is TodosEvent.DeleteTodo -> deleteTodo(viewEvent.id)
+            TodosEvent.CancelJobs -> viewModelScope.cancel()
+            is TodosEvent.HandleSnackbarActionClick -> handleSnackbarActionClick()
+            TodosEvent.RefreshTodos -> refreshTodos()
+            is TodosEvent.HandleNetworkState -> handleNetworkState(viewEvent.networkConnectionState)
+            TodosEvent.HideSnackbar -> viewState.update { it.copy(snackBarVisible = false) }
+            TodosEvent.ClearMessage -> viewState.update { it.copy(messageId = null) }
+        }
     }
 
     private fun handleNetworkState(connectionState: NetworkConnectionState) {

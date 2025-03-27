@@ -96,17 +96,22 @@ private fun NameAndDateColumn(todo: TodoItem, modifier: Modifier = Modifier) {
         }
 
         if (todo.deadline != null) {
+            val color = if (todo.deadline < System.currentTimeMillis()) {
+                JetTodoListTheme.colors.colors.red
+            } else {
+                JetTodoListTheme.colors.label.tertiary
+            }
             Row(horizontalArrangement = Arrangement.Center) {
                 Icon(
                     modifier = Modifier.padding(end = 2.dp),
                     painter = painterResource(id = R.drawable.ic_calendar),
                     contentDescription = stringResource(id = R.string.calendar_icon),
-                    tint = JetTodoListTheme.colors.label.tertiary
+                    tint = color
                 )
                 Text(
-                    text = FormatTimeInMillis.format(todo.deadline, "d MMMM"),
+                    text = FormatTimeInMillis.format(todo.deadline, "d MMMM y"),
                     style = JetTodoListTheme.typography.subhead,
-                    color = JetTodoListTheme.colors.label.tertiary
+                    color = color
                 )
             }
         }

@@ -97,8 +97,6 @@ fun TodosScreen(
     val viewState by viewModel.getViewState().collectAsStateWithLifecycle()
     val scrollBehavior = rememberToolbarScrollBehavior()
 
-    LaunchedEffect(Unit) { viewModel.obtainEvent(TodosEvent.StartCollecting) }
-
     val pullState = rememberPullToRefreshState()
     PullToRefreshLogic(
         pullState = pullState,
