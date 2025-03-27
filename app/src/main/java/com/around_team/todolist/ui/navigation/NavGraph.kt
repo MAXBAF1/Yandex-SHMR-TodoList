@@ -5,7 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -15,13 +14,9 @@ import androidx.navigation.navArgument
 import com.around_team.todolist.di.SharedPreferencesModule
 import com.around_team.todolist.ui.screens.about.AboutAppScreen
 import com.around_team.todolist.ui.screens.edit.EditScreen
-import com.around_team.todolist.ui.screens.edit.EditViewModel
 import com.around_team.todolist.ui.screens.registration.RegistrationScreen
-import com.around_team.todolist.ui.screens.registration.RegistrationViewModel
 import com.around_team.todolist.ui.screens.settings.SettingsScreen
-import com.around_team.todolist.ui.screens.settings.SettingsViewModel
 import com.around_team.todolist.ui.screens.todos.TodosScreen
-import com.around_team.todolist.ui.screens.todos.TodosViewModel
 import com.around_team.todolist.utils.PreferencesHelper
 
 /**
@@ -38,20 +33,15 @@ class NavGraph(
      */
     @Composable
     fun Create() {
-        val registrationViewModel = hiltViewModel<RegistrationViewModel>()
-        val todosViewModel = hiltViewModel<TodosViewModel>()
-        val editViewModel = hiltViewModel<EditViewModel>()
-        val settingsViewModel = hiltViewModel<SettingsViewModel>()
-
         NavHost(
             navController = navController,
             startDestination = getStartDestination(),
             contentAlignment = Alignment.TopStart,
         ) {
             composable(Screens.RegistrationScreen.name) {
-                CreateRegistrationScreen(registrationViewModel)
+                CreateRegistrationScreen()
             }
-            composable(Screens.TodosScreen.name) { CreateTodosScreen(todosViewModel) }
+            composable(Screens.TodosScreen.name) { CreateTodosScreen() }
             composable(
                 route = "${Screens.EditScreen.name}?$TO_EDIT_TODO_ID_KEY={$TO_EDIT_TODO_ID_KEY}",
                 arguments = listOf(
@@ -60,8 +50,8 @@ class NavGraph(
                         defaultValue = ""
                     },
                 )
-            ) { CreateEditScreen(editViewModel) }
-            composable(Screens.SettingsScreen.name) { CreateSettingsScreen(settingsViewModel) }
+            ) { CreateEditScreen() }
+            composable(Screens.SettingsScreen.name) { CreateSettingsScreen() }
             composable(Screens.AboutAppScreen.name) { CreateAboutAppScreen() }
         }
     }
@@ -70,16 +60,15 @@ class NavGraph(
     private fun CreateAboutAppScreen() {
         AboutAppScreen(
             onBackPressed = { navController.navigate(Screens.SettingsScreen.name) { popUpTo(0) } },
-        ).Create()
+        )
     }
 
     @Composable
-    private fun CreateSettingsScreen(settingsViewModel: SettingsViewModel) {
+    private fun CreateSettingsScreen() {
         SettingsScreen(
-            viewModel = settingsViewModel,
             onBackPressed = { navController.navigate(Screens.TodosScreen.name) { popUpTo(0) } },
-            toAboutScreen = { navController.navigate(Screens.AboutAppScreen.name) }
-        ).Create()
+            toAboutScreen = { navController.navigate(Screens.AboutAppScreen.name) },
+        )
     }
 
 
@@ -94,35 +83,36 @@ class NavGraph(
     }
 
     @Composable
-    private fun CreateRegistrationScreen(registrationViewModel: RegistrationViewModel) {
+    private fun CreateRegistrationScreen() {
         RegistrationScreen(
-            viewModel = registrationViewModel,
             toNextScreen = { navController.navigate(Screens.TodosScreen.name) { popUpTo(0) } },
-        ).Create()
+        )
     }
 
 
     @Composable
-    private fun CreateTodosScreen(viewModel: TodosViewModel) {
-        TodosScreen(viewModel = viewModel, toEditScreen = {
-            if (it == null) {
-                navController.navigate(Screens.EditScreen.name)
-            } else navController.navigate("${Screens.EditScreen.name}?$TO_EDIT_TODO_ID_KEY=$it")
-        }, toSettingsScreen = { navController.navigate(Screens.SettingsScreen.name) }).Create()
+    private fun CreateTodosScreen() {
+        TodosScreen(
+            toEditScreen = {
+                if (it == null) {
+                    navController.navigate(Screens.EditScreen.name)
+                } else navController.navigate("${Screens.EditScreen.name}?$TO_EDIT_TODO_ID_KEY=$it")
+            },
+            toSettingsScreen = { navController.navigate(Screens.SettingsScreen.name) },
+        )
     }
 
     @Composable
-    private fun CreateEditScreen(viewModel: EditViewModel) {
+    private fun CreateEditScreen() {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val arguments = navBackStackEntry?.arguments
         val editedTodoId = arguments?.getString(TO_EDIT_TODO_ID_KEY, null)
 
         EditScreen(
-            viewModel = viewModel,
             onCancelClick = { navController.popBackStack() },
             toTodosScreen = { navController.navigate(Screens.TodosScreen.name) { popUpTo(0) } },
-            editedTodoId = if (editedTodoId.isNullOrBlank()) null else editedTodoId
-        ).Create()
+            editedTodoId = if (editedTodoId.isNullOrBlank()) null else editedTodoId,
+        )
     }
 
     companion object {

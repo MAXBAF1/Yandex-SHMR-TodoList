@@ -2,7 +2,6 @@ package com.around_team.todolist.ui.screens.about
 
 import android.content.Context
 import android.view.ContextThemeWrapper
-import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.WindowInsets
@@ -33,95 +32,91 @@ import com.yandex.div2.DivVariable
 import com.yandex.div2.StrVariable
 import org.json.JSONObject
 
-class AboutAppScreen(private val onBackPressed: () -> Unit) {
-    private val noopReset: (View) -> Unit = {}
 
-    @Composable
-    fun Create() {
-        val context = LocalContext.current
+@Composable
+fun AboutAppScreen(onBackPressed: () -> Unit, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
 
-        val inputStream = context.assets.open("aboutScreen.json")
-        val json = inputStream
-            .bufferedReader()
-            .use { it.readText() }
-        val data = JSONObject(json).asDiv2DataWithTemplates()
-        val theme = getCurrentTheme()
-        val editedVariables = data.variables
-            ?.toMutableList()
-            ?.map {
-                if (it.value() is StrVariable) {
-                    val strVariable = it.value() as StrVariable
-                    val newStrVariable = if (strVariable.name == "app_theme") {
-                        strVariable.copy(value = if (theme == Theme.Sun) "light" else "dark")
-                    } else strVariable
+    val inputStream = context.assets.open("aboutScreen.json")
+    val json = inputStream.bufferedReader().use { it.readText() }
+    val data = JSONObject(json).asDiv2DataWithTemplates()
+    val theme = getCurrentTheme()
+    val editedVariables = data.variables?.toMutableList()?.map {
+        if (it.value() is StrVariable) {
+            val strVariable = it.value() as StrVariable
+            val newStrVariable = if (strVariable.name == "app_theme") {
+                strVariable.copy(value = if (theme == Theme.Sun) "light" else "dark")
+            } else strVariable
 
-                    DivVariable.Str(newStrVariable)
-                } else it
+            DivVariable.Str(newStrVariable)
+        } else it
 
-            }
-        val editedData = data.copy(variables = editedVariables)
-
-        DivView(data = editedData, tag = DivDataTag("div2"))
     }
+    val editedData = data.copy(variables = editedVariables)
 
-    @Composable
-    private fun DivView(
-        data: DivData,
-        tag: DivDataTag,
-        modifier: Modifier = Modifier,
-    ) {
-        val context = LocalContext.current
-        val divContext = Div2Context(
-            baseContext = ContextThemeWrapper(context, context.theme),
-            configuration = createDivConfiguration(context),
-            lifecycleOwner = LocalLifecycleOwner.current
-        )
+    DivView(
+        data = editedData,
+        tag = DivDataTag("div2"),
+        onBackPressed = onBackPressed,
+        modifier = modifier,
+    )
+}
 
-        AndroidView(
-            modifier = modifier
-                .fillMaxSize()
-                .background(JetTodoListTheme.colors.back.primary)
-                .padding(
-                    WindowInsets.systemBars
-                        .only(WindowInsetsSides.Top)
-                        .asPaddingValues()
-                ),
-            factory = {
-                Div2View(divContext)
-            },
-            update = { view ->
-                view.setData(data, tag)
-            },
-            onReset = noopReset,
-            onRelease = { view ->
-                view.cleanup()
-            },
-        )
-    }
+@Composable
+private fun DivView(
+    data: DivData,
+    tag: DivDataTag,
+    onBackPressed: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    val divContext = Div2Context(
+        baseContext = ContextThemeWrapper(context, context.theme),
+        configuration = createDivConfiguration(context, onBackPressed),
+        lifecycleOwner = LocalLifecycleOwner.current
+    )
 
-    @Composable
-    private fun getCurrentTheme(): Theme {
-        val sharedPreferences = LocalContext.current.getSharedPreferences(
-            SharedPreferencesModule.KEY, Context.MODE_PRIVATE
-        )
-        val preferencesHelper = PreferencesHelper(sharedPreferences)
-        return preferencesHelper.getSelectedTheme()
-            ?: if (isSystemInDarkTheme()) Theme.Moon else Theme.Sun
-    }
+    AndroidView(
+        modifier = modifier
+            .fillMaxSize()
+            .background(JetTodoListTheme.colors.back.primary)
+            .padding(
+                WindowInsets.systemBars.only(WindowInsetsSides.Top).asPaddingValues()
+            ),
+        factory = {
+            Div2View(divContext)
+        },
+        update = { view ->
+            view.setData(data, tag)
+        },
+        onReset = {},
+        onRelease = { view ->
+            view.cleanup()
+        },
+    )
+}
 
-    private fun createDivConfiguration(context: Context): DivConfiguration {
-        return DivConfiguration
-            .Builder(PicassoDivImageLoader(context))
-            .actionHandler(SampleDivActionHandler(onBackPressed))
-            .visualErrorsEnabled(true)
-            .build()
-    }
+@Composable
+private fun getCurrentTheme(): Theme {
+    val sharedPreferences = LocalContext.current.getSharedPreferences(
+        SharedPreferencesModule.KEY, Context.MODE_PRIVATE
+    )
+    val preferencesHelper = PreferencesHelper(sharedPreferences)
+    return preferencesHelper.getSelectedTheme()
+        ?: if (isSystemInDarkTheme()) Theme.Moon else Theme.Sun
+}
 
-    private fun JSONObject.asDiv2DataWithTemplates(): DivData {
-        val templates = getJSONObject("templates")
-        val card = getJSONObject("card")
-        val environment = DivParsingEnvironment(ParsingErrorLogger.ASSERT)
-        environment.parseTemplates(templates)
-        return DivData(environment, card)
-    }
+private fun createDivConfiguration(context: Context, onBackPressed: () -> Unit): DivConfiguration {
+    return DivConfiguration.Builder(PicassoDivImageLoader(context))
+        .actionHandler(SampleDivActionHandler(onBackPressed))
+        .visualErrorsEnabled(true)
+        .build()
+}
+
+private fun JSONObject.asDiv2DataWithTemplates(): DivData {
+    val templates = getJSONObject("templates")
+    val card = getJSONObject("card")
+    val environment = DivParsingEnvironment(ParsingErrorLogger.ASSERT)
+    environment.parseTemplates(templates)
+    return DivData(environment, card)
 }

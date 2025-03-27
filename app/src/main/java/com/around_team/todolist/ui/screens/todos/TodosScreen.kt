@@ -51,6 +51,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.around_team.todolist.R
 import com.around_team.todolist.data.db.Dao
@@ -84,320 +85,342 @@ import kotlinx.coroutines.launch
  * @param viewModel View model managing the state and logic for todos.
  * @param toEditScreen Callback function to navigate to the edit screen with optional todo item ID.
  */
-class TodosScreen(
-    private val viewModel: TodosViewModel,
-    private val toEditScreen: (id: String?) -> Unit,
-    private val toSettingsScreen: () -> Unit,
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TodosScreen(
+    toEditScreen: (id: String?) -> Unit,
+    toSettingsScreen: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: TodosViewModel = hiltViewModel(),
 ) {
+    val viewState by viewModel.getViewState().collectAsStateWithLifecycle()
+    val scrollBehavior = rememberToolbarScrollBehavior()
 
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun Create() {
-        val viewState by viewModel
-            .getViewState()
-            .collectAsStateWithLifecycle()
-        val scrollBehavior = rememberToolbarScrollBehavior()
+    LaunchedEffect(Unit) { viewModel.obtainEvent(TodosEvent.StartCollecting) }
 
-        LaunchedEffect(Unit) { viewModel.obtainEvent(TodosEvent.StartCollecting) }
+    val pullState = rememberPullToRefreshState()
+    PullToRefreshLogic(
+        pullState = pullState,
+        refreshing = viewState.refreshing,
+        scrollBehavior = scrollBehavior,
+        onRefreshing = { viewModel.obtainEvent(TodosEvent.RefreshTodos) },
+    )
 
-        val pullState = rememberPullToRefreshState()
-        PullToRefreshLogic(pullState, viewState.refreshing, scrollBehavior)
+    NetworkLogic(
+        connectionViewState = viewState.connectionState,
+        onNetworkStateChange = { viewModel.obtainEvent(TodosEvent.HandleNetworkState(it)) },
+    )
 
-        NetworkLogic(viewState.connectionState)
-
-        Scaffold(
-            modifier = Modifier
-                .fillMaxSize()
-                .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .let {
-                    if (scrollBehavior.state.collapsedFraction == 0f) {
-                        it.nestedScroll(pullState.nestedScrollConnection)
-                    } else it
-                },
-            topBar = {
-                CustomToolbar(collapsingTitle = stringResource(id = R.string.title),
-                    scrollBehavior = scrollBehavior,
-                    actions = {
-                        CustomIconButton(
-                            iconId = R.drawable.ic_settings, onClick = toSettingsScreen
-                        )
-                    })
+    Scaffold(
+        modifier = modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
+            .let {
+                if (scrollBehavior.state.collapsedFraction == 0f) {
+                    it.nestedScroll(pullState.nestedScrollConnection)
+                } else it
             },
-            floatingActionButtonPosition = FabPosition.Center,
-            floatingActionButton = {
-                CustomFab(
-                    modifier = Modifier.padding(bottom = 20.dp),
-                    onClick = { toEditScreen(null) },
-                )
-            },
-            snackbarHost = { MessagesLogic(viewState.messageId, viewState.snackBarVisible) },
-            containerColor = JetTodoListTheme.colors.back.primary,
-        ) { paddingValues ->
-            Box(
-                modifier = Modifier.padding(paddingValues)
-            ) {
-                TodoList(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .fillMaxSize(),
-                    completedTodosShowed = viewState.completedShowed,
-                    todos = viewState.todos,
-                    completeCnt = viewState.completeCnt,
-                    onShowClick = { viewModel.obtainEvent(TodosEvent.ClickShowCompletedTodos) },
-                    onCompleteClick = { viewModel.obtainEvent(TodosEvent.CompleteTodo(it)) },
-                    onDelete = { viewModel.obtainEvent(TodosEvent.DeleteTodo(it)) },
-                    onTodoClick = { toEditScreen(it) },
-                )
-                PullToRefreshContainer(
-                    state = pullState,
-                    modifier = Modifier.align(Alignment.TopCenter),
-                    containerColor = JetTodoListTheme.colors.back.primary,
-                    contentColor = JetTodoListTheme.colors.label.primary
-                )
-            }
-        }
-    }
-
-    @Composable
-    private fun NetworkLogic(connectionViewState: NetworkConnectionState) {
-        val networkState = LocalContext.current
-            .observeConnectivityAsFlow()
-            .collectAsState(NetworkConnectionState.Available)
-        LaunchedEffect(networkState.value) {
-            if (networkState.value != connectionViewState) {
-                viewModel.obtainEvent(TodosEvent.HandleNetworkState(networkState.value))
-            }
-        }
-    }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    private fun PullToRefreshLogic(
-        pullState: PullToRefreshState,
-        refreshing: Boolean,
-        scrollBehavior: CustomToolbarScrollBehavior,
-    ) {
-        LaunchedEffect(pullState.isRefreshing) {
-            if (pullState.isRefreshing) viewModel.obtainEvent(TodosEvent.RefreshTodos)
-        }
-
-        LaunchedEffect(key1 = refreshing) {
-            if (!refreshing) pullState.endRefresh()
-        }
-
-        if (scrollBehavior.state.collapsedFraction != 0f) pullState.endRefresh()
-    }
-
-    @Composable
-    private fun MessagesLogic(
-        messageId: Int?,
-        snackBarVisible: Boolean,
-    ) {
-        if (messageId == null) return
-        val notActionMessages = listOf(R.string.network_unavailable, R.string.success_sync)
-        val messageStr = stringResource(messageId)
-        var countdownTime by remember { mutableIntStateOf(5) }
-        val actionStr = when (messageId) {
-            R.string.todo_deleted -> "${stringResource(R.string.cancel)} $countdownTime"
-            else -> stringResource(R.string.repeat)
-        }
-        val context = LocalContext.current
-        if (notActionMessages.contains(messageId)) {
-            LaunchedEffect(messageId) {
-                Toast
-                    .makeText(context, messageStr, Toast.LENGTH_LONG)
-                    .show()
-                viewModel.obtainEvent(TodosEvent.ClearMessage)
-            }
-        } else if (messageId == R.string.todo_deleted && snackBarVisible) {
-            LaunchedEffect(Unit) {
-                countdownTime = 5
-                launch(Dispatchers.IO) {
-                    while (countdownTime > 0) {
-                        delay(1000)
-                        countdownTime--
-                    }
-                    viewModel.obtainEvent(TodosEvent.HideSnackbar)
-                }
-            }
-        }
-        AnimatedVisibility(
-            visible = snackBarVisible,
-            enter = slideInVertically(initialOffsetY = { 2 * it }),
-            exit = slideOutVertically(targetOffsetY = { 2 * it }),
-        ) {
-            CustomSnackbar(message = messageStr, action = actionStr, onActionClick = {
-                viewModel.obtainEvent(TodosEvent.HandleSnackbarActionClick)
-            })
-        }
-    }
-
-    @OptIn(ExperimentalFoundationApi::class)
-    @Composable
-    private fun TodoList(
-        completedTodosShowed: Boolean,
-        todos: List<TodoItem>,
-        completeCnt: Int,
-        onShowClick: () -> Unit,
-        onCompleteClick: (id: String) -> Unit,
-        onDelete: (id: String) -> Unit,
-        onTodoClick: (id: String) -> Unit,
-        modifier: Modifier = Modifier,
-    ) {
-        LazyColumn(
-            modifier = modifier.fillMaxWidth(),
-        ) {
-            item {
-                CompleteRow(
-                    showed = completedTodosShowed,
-                    completeCnt = completeCnt,
-                    onShowClick = onShowClick,
-                    modifier = Modifier
-                        .padding(start = 32.dp, top = 8.dp, end = 32.dp, bottom = 12.dp)
-                        .background(JetTodoListTheme.colors.back.primary),
-                )
-            }
-            itemsIndexed(items = todos, key = { _, todo -> todo.id }) { i, todo ->
-                TodoRow(
-                    modifier = if (i == 0) {
-                        Modifier.clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-                    } else Modifier
-                        .animateItemPlacement()
-                        .background(JetTodoListTheme.colors.back.secondary),
-                    todo = todo,
-                    onClick = { onTodoClick(todo.id) },
-                    onCompleteClick = { onCompleteClick(todo.id) },
-                    onDelete = { onDelete(todo.id) },
-                )
-            }
-            item {
-                CreateNewCard(
-                    modifier = Modifier
-                        .padding(bottom = 100.dp)
-                        .clip(
-                            RoundedCornerShape(
-                                topStart = if (todos.isEmpty()) 16.dp else 0.dp,
-                                topEnd = if (todos.isEmpty()) 16.dp else 0.dp,
-                                bottomStart = 16.dp,
-                                bottomEnd = 16.dp
-                            )
-                        ),
-                    onClick = { toEditScreen(null) },
-                )
-            }
-        }
-    }
-
-    @Composable
-    private fun CompleteRow(
-        showed: Boolean,
-        completeCnt: Int,
-        onShowClick: () -> Unit,
-        modifier: Modifier = Modifier,
-    ) {
-        Row(
-            modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top
-        ) {
-            Text(
-                text = stringResource(R.string.complete, completeCnt),
-                style = JetTodoListTheme.typography.subhead,
-                color = JetTodoListTheme.colors.label.tertiary
+        topBar = {
+            CustomToolbar(
+                collapsingTitle = stringResource(id = R.string.title),
+                scrollBehavior = scrollBehavior,
+                actions = {
+                    CustomIconButton(
+                        iconId = R.drawable.ic_settings, onClick = toSettingsScreen
+                    )
+                })
+        },
+        floatingActionButtonPosition = FabPosition.Center,
+        floatingActionButton = {
+            CustomFab(
+                modifier = Modifier.padding(bottom = 20.dp),
+                onClick = { toEditScreen(null) },
             )
-            AnimatedContent(showed, label = "") { targetState ->
-                Text(
-                    modifier = Modifier.clickable(
-                        onClick = onShowClick,
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                    ),
-                    text = stringResource(id = if (targetState) R.string.hide else R.string.show),
-                    style = JetTodoListTheme.typography.subhead,
-                    fontWeight = FontWeight.Bold,
-                    color = JetTodoListTheme.colors.colors.blue
-                )
+        },
+        snackbarHost = {
+            MessagesLogic(
+                viewState.messageId,
+                viewState.snackBarVisible,
+                onMessageShowed = { viewModel.obtainEvent(TodosEvent.ClearMessage) },
+                onSnackBarShowed = { viewModel.obtainEvent(TodosEvent.HideSnackbar) },
+                onActionClick = { viewModel.obtainEvent(TodosEvent.HandleSnackbarActionClick) },
+            )
+        },
+        containerColor = JetTodoListTheme.colors.back.primary,
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier.padding(paddingValues)
+        ) {
+            TodoList(
+                modifier = Modifier
+                    .padding(horizontal = 12.dp)
+                    .fillMaxSize(),
+                completedTodosShowed = viewState.completedShowed,
+                todos = viewState.todos,
+                completeCnt = viewState.completeCnt,
+                onShowClick = { viewModel.obtainEvent(TodosEvent.ClickShowCompletedTodos) },
+                onCompleteClick = { viewModel.obtainEvent(TodosEvent.CompleteTodo(it)) },
+                onDelete = { viewModel.obtainEvent(TodosEvent.DeleteTodo(it)) },
+                onTodoClick = { toEditScreen(it) },
+                toEditScreen = { toEditScreen(null) }
+            )
+            PullToRefreshContainer(
+                state = pullState,
+                modifier = Modifier.align(Alignment.TopCenter),
+                containerColor = JetTodoListTheme.colors.back.primary,
+                contentColor = JetTodoListTheme.colors.label.primary
+            )
+        }
+    }
+}
+
+@Composable
+private fun NetworkLogic(
+    connectionViewState: NetworkConnectionState,
+    onNetworkStateChange: (NetworkConnectionState) -> Unit,
+) {
+    val networkState = LocalContext.current.observeConnectivityAsFlow()
+        .collectAsState(NetworkConnectionState.Available)
+    LaunchedEffect(networkState.value) {
+        if (networkState.value != connectionViewState) onNetworkStateChange(networkState.value)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PullToRefreshLogic(
+    pullState: PullToRefreshState,
+    refreshing: Boolean,
+    scrollBehavior: CustomToolbarScrollBehavior,
+    onRefreshing: () -> Unit,
+) {
+    LaunchedEffect(pullState.isRefreshing) {
+        if (pullState.isRefreshing) onRefreshing()
+    }
+
+    LaunchedEffect(key1 = refreshing) {
+        if (!refreshing) pullState.endRefresh()
+    }
+
+    if (scrollBehavior.state.collapsedFraction != 0f) pullState.endRefresh()
+}
+
+@Composable
+private fun MessagesLogic(
+    messageId: Int?,
+    snackBarVisible: Boolean,
+    onMessageShowed: () -> Unit,
+    onSnackBarShowed: () -> Unit,
+    onActionClick: () -> Unit,
+) {
+    if (messageId == null) return
+    val notActionMessages = listOf(R.string.network_unavailable, R.string.success_sync)
+    val messageStr = stringResource(messageId)
+    var countdownTime by remember { mutableIntStateOf(5) }
+    val actionStr = when (messageId) {
+        R.string.todo_deleted -> "${stringResource(R.string.cancel)} $countdownTime"
+        else -> stringResource(R.string.repeat)
+    }
+    val context = LocalContext.current
+    if (notActionMessages.contains(messageId)) {
+        LaunchedEffect(messageId) {
+            Toast.makeText(context, messageStr, Toast.LENGTH_LONG).show()
+            onMessageShowed()
+        }
+    } else if (messageId == R.string.todo_deleted && snackBarVisible) {
+        LaunchedEffect(Unit) {
+            countdownTime = 5
+            launch(Dispatchers.IO) {
+                while (countdownTime > 0) {
+                    delay(1000)
+                    countdownTime--
+                }
+                onSnackBarShowed()
             }
         }
     }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun TodoRow(
-        todo: TodoItem,
-        onClick: () -> Unit,
-        onCompleteClick: () -> Unit,
-        onDelete: () -> Unit,
-        modifier: Modifier = Modifier,
+    AnimatedVisibility(
+        visible = snackBarVisible,
+        enter = slideInVertically(initialOffsetY = { 2 * it }),
+        exit = slideOutVertically(targetOffsetY = { 2 * it }),
     ) {
-        val dismissState = rememberSwipeToDismissBoxState(
-            confirmValueChange = {
-                when (it) {
-                    SwipeToDismissBoxValue.StartToEnd -> onCompleteClick()
-                    SwipeToDismissBoxValue.EndToStart -> onDelete()
-                    SwipeToDismissBoxValue.Settled -> {}
-                }
-
-                return@rememberSwipeToDismissBoxState false
-            },
-            positionalThreshold = { it * 0.25F },
-        )
-        SwipeToDismissBox(
-            state = dismissState,
-            modifier = modifier,
-            backgroundContent = {
-                SwipeBackgroundContent(dismissState)
-            },
-            content = {
-                Column {
-                    TodoCard(todo = todo, onClick = onClick, onCompleteClick = onCompleteClick)
-                    MyDivider()
-                }
-            },
+        CustomSnackbar(
+            message = messageStr,
+            action = actionStr,
+            onActionClick = onActionClick,
         )
     }
+}
 
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    private fun SwipeBackgroundContent(dismissState: SwipeToDismissBoxState) {
-        when (dismissState.dismissDirection) {
-            SwipeToDismissBoxValue.StartToEnd -> {
-                Box(
-                    modifier = Modifier
-                        .background(JetTodoListTheme.colors.colors.green)
-                        .fillMaxSize()
-                        .padding(start = 20.dp),
-                    contentAlignment = Alignment.CenterStart,
-                ) {
-                    SwipeIcon(R.drawable.ic_complete, R.string.complete_icon)
-                }
-            }
-
-            SwipeToDismissBoxValue.EndToStart -> {
-                Box(
-                    modifier = Modifier
-                        .background(JetTodoListTheme.colors.colors.red)
-                        .fillMaxSize()
-                        .padding(end = 20.dp),
-                    contentAlignment = Alignment.CenterEnd,
-                ) {
-                    SwipeIcon(R.drawable.ic_delete, R.string.delete_icon)
-                }
-            }
-
-            SwipeToDismissBoxValue.Settled -> {}
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun TodoList(
+    completedTodosShowed: Boolean,
+    todos: List<TodoItem>,
+    completeCnt: Int,
+    onShowClick: () -> Unit,
+    onCompleteClick: (id: String) -> Unit,
+    onDelete: (id: String) -> Unit,
+    onTodoClick: (id: String) -> Unit,
+    toEditScreen: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        item {
+            CompleteRow(
+                showed = completedTodosShowed,
+                completeCnt = completeCnt,
+                onShowClick = onShowClick,
+                modifier = Modifier
+                    .padding(
+                        start = 32.dp, top = 8.dp, end = 32.dp, bottom = 12.dp
+                    )
+                    .background(JetTodoListTheme.colors.back.primary),
+            )
+        }
+        itemsIndexed(items = todos, key = { _, todo -> todo.id }) { i, todo ->
+            TodoRow(
+                modifier = if (i == 0) {
+                    Modifier.clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                } else Modifier
+                    .animateItemPlacement()
+                    .background(JetTodoListTheme.colors.back.secondary),
+                todo = todo,
+                onClick = { onTodoClick(todo.id) },
+                onCompleteClick = { onCompleteClick(todo.id) },
+                onDelete = { onDelete(todo.id) },
+            )
+        }
+        item {
+            CreateNewCard(
+                modifier = Modifier
+                    .padding(bottom = 100.dp)
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = if (todos.isEmpty()) 16.dp else 0.dp,
+                            topEnd = if (todos.isEmpty()) 16.dp else 0.dp,
+                            bottomStart = 16.dp,
+                            bottomEnd = 16.dp
+                        )
+                    ),
+                onClick = toEditScreen,
+            )
         }
     }
+}
 
-    @Composable
-    private fun SwipeIcon(iconId: Int, descriptionId: Int) {
-        Icon(
-            modifier = Modifier.size(24.dp),
-            painter = painterResource(id = iconId),
-            contentDescription = stringResource(descriptionId),
-            tint = JetTodoListTheme.colors.colors.white
+@Composable
+private fun CompleteRow(
+    showed: Boolean,
+    completeCnt: Int,
+    onShowClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top
+    ) {
+        Text(
+            text = stringResource(R.string.complete, completeCnt),
+            style = JetTodoListTheme.typography.subhead,
+            color = JetTodoListTheme.colors.label.tertiary
         )
+        AnimatedContent(showed, label = "") { targetState ->
+            Text(
+                modifier = Modifier.clickable(
+                    onClick = onShowClick,
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                ),
+                text = stringResource(id = if (targetState) R.string.hide else R.string.show),
+                style = JetTodoListTheme.typography.subhead,
+                fontWeight = FontWeight.Bold,
+                color = JetTodoListTheme.colors.colors.blue
+            )
+        }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TodoRow(
+    todo: TodoItem,
+    onClick: () -> Unit,
+    onCompleteClick: () -> Unit,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = {
+            when (it) {
+                SwipeToDismissBoxValue.StartToEnd -> onCompleteClick()
+                SwipeToDismissBoxValue.EndToStart -> onDelete()
+                SwipeToDismissBoxValue.Settled -> {}
+            }
+
+            return@rememberSwipeToDismissBoxState false
+        },
+        positionalThreshold = { it * 0.25F },
+    )
+    SwipeToDismissBox(
+        state = dismissState,
+        modifier = modifier,
+        backgroundContent = {
+            SwipeBackgroundContent(dismissState)
+        },
+        content = {
+            Column {
+                TodoCard(todo = todo, onClick = onClick, onCompleteClick = onCompleteClick)
+                MyDivider()
+            }
+        },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SwipeBackgroundContent(dismissState: SwipeToDismissBoxState) {
+    when (dismissState.dismissDirection) {
+        SwipeToDismissBoxValue.StartToEnd -> {
+            Box(
+                modifier = Modifier
+                    .background(JetTodoListTheme.colors.colors.green)
+                    .fillMaxSize()
+                    .padding(start = 20.dp),
+                contentAlignment = Alignment.CenterStart,
+            ) {
+                SwipeIcon(R.drawable.ic_complete, R.string.complete_icon)
+            }
+        }
+
+        SwipeToDismissBoxValue.EndToStart -> {
+            Box(
+                modifier = Modifier
+                    .background(JetTodoListTheme.colors.colors.red)
+                    .fillMaxSize()
+                    .padding(end = 20.dp),
+                contentAlignment = Alignment.CenterEnd,
+            ) {
+                SwipeIcon(R.drawable.ic_delete, R.string.delete_icon)
+            }
+        }
+
+        SwipeToDismissBoxValue.Settled -> {}
+    }
+}
+
+@Composable
+private fun SwipeIcon(iconId: Int, descriptionId: Int) {
+    Icon(
+        modifier = Modifier.size(24.dp),
+        painter = painterResource(id = iconId),
+        contentDescription = stringResource(descriptionId),
+        tint = JetTodoListTheme.colors.colors.white
+    )
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
