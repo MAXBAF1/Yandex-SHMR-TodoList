@@ -28,9 +28,7 @@ import com.around_team.todolist.utils.PreferencesHelper
  *
  * @param navController The NavHostController responsible for managing navigation within the graph.
  */
-class NavGraph(
-    private val navController: NavHostController,
-) {
+class NavGraph(private val navController: NavHostController) {
     /**
      * Composable function to create and define the navigation graph.
      * This function sets up the NavHost with specified start destination and screens.

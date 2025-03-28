@@ -17,6 +17,5 @@ fun ColorMark(color: Color, modifier: Modifier = Modifier) {
             .clip(CircleShape)
             .size(4.dp, 20.dp)
             .background(color)
-
     ) {}
 }
