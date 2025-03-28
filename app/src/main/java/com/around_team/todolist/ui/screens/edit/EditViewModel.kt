@@ -57,7 +57,8 @@ class EditViewModel @Inject constructor(
     }
 
     private fun changeColor(color: Color) {
-        viewState.update { it.copy(selectedColor = color) }
+        editedTodo = editedTodo.copy(color = color)
+        viewState.update { it.copy(editedTodo = editedTodo) }
     }
 
     private fun saveTodo() {

@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
@@ -49,11 +50,12 @@ fun TodoCard(todo: TodoItem, onClick: () -> Unit, onCompleteClick: () -> Unit) {
                 indication = rememberRipple(),
             )
             .background(JetTodoListTheme.colors.back.secondary)
-            .padding(16.dp),
+            .padding(top = 16.dp, end = 16.dp, bottom = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        todo.color?.let { ColorMark(color = it) }
         CircleCheckbox(
-            modifier = Modifier.padding(end = 12.dp),
+            modifier = Modifier.padding(start = 16.dp, end = 12.dp),
             checked = todo.done,
             onChecked = onCompleteClick,
             highPriority = todo.importance == TodoImportance.Important,
@@ -124,12 +126,16 @@ private fun TodoCardPreview() {
     TodoListTheme {
         TodoCard(
             TodoItem(
-            id = UUID.randomUUID().toString(),
-            text = stringResource(id = R.string.what_todo),
-            importance = TodoImportance.Important,
-            done = false,
-            creationDate = Date().time,
-            deadline = Date().time
-        ), onClick = {}, onCompleteClick = {})
+                id = UUID.randomUUID().toString(),
+                text = stringResource(id = R.string.what_todo),
+                importance = TodoImportance.Important,
+                done = false,
+                creationDate = Date().time,
+                deadline = Date().time,
+                color = Color.Red
+            ),
+            onClick = {},
+            onCompleteClick = {},
+        )
     }
 }

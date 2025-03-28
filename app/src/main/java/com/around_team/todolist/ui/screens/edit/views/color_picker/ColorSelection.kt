@@ -21,7 +21,7 @@ import com.around_team.todolist.ui.theme.JetTodoListTheme
 @Composable
 fun ColorSelection(
     colors: List<Color>,
-    selectedColor: Color,
+    selectedColor: Color?,
     onColorSelected: (Color) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -47,7 +47,7 @@ fun ColorSelection(
                 if (i == colors.size - 1) {
                     val selected = !(colors + Color.Transparent).contains(selectedColor)
                     ColorRadioButton(
-                        color = if (selected) selectedColor else Color.Transparent,
+                        color = if (selected && selectedColor != null) selectedColor else Color.Transparent,
                         selected = selected,
                         pencilIcon = true,
                     ) {

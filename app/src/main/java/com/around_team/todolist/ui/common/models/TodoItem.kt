@@ -1,8 +1,10 @@
 package com.around_team.todolist.ui.common.models
 
+import androidx.compose.ui.graphics.Color
 import com.around_team.todolist.data.db.entities.TodoItemEntity
 import com.around_team.todolist.data.network.model.TodoItemDTO
 import com.around_team.todolist.ui.common.enums.TodoImportance
+import com.around_team.todolist.utils.toHex
 import java.util.Date
 
 /**
@@ -17,7 +19,7 @@ data class TodoItem(
     val creationDate: Long,
     val modifiedDate: Long = Date().time,
     val lastUpdatedBy: String = "1",
-    val color: String? = null,
+    val color: Color? = null,
     val files: List<String>? = null,
 ) {
     /**
@@ -35,7 +37,7 @@ data class TodoItem(
             creationDate,
             modifiedDate,
             lastUpdatedBy,
-            color,
+            color?.toHex(),
             files
         )
     }
@@ -55,7 +57,7 @@ data class TodoItem(
             creationDate,
             modifiedDate,
             lastUpdatedBy,
-            color,
+            color?.toHex(),
             files,
         )
     }

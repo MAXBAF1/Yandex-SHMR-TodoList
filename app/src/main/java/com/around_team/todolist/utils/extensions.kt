@@ -14,6 +14,7 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlin.math.roundToInt
 
 /**
  * Modifier extension function to set a background color drawn behind the content.
@@ -61,4 +62,29 @@ fun Context.observeConnectivityAsFlow(): Flow<NetworkConnectionState> = callback
     awaitClose {
         connectivityManager.unregisterNetworkCallback(callback)
     }
+}
+
+fun Color.toHex(): String {
+    val alpha = (alpha * 255).roundToInt()
+    val red = (red * 255).roundToInt()
+    val green = (green * 255).roundToInt()
+    val blue = (blue * 255).roundToInt()
+
+    return String.format("#%02X%02X%02X%02X", alpha, red, green, blue)
+}
+
+fun String.toColor(): Color {
+    val color = this.removePrefix("#")
+    val argb = when (color.length) {
+        8 -> color.toLong(16)
+        6 -> (0xFF000000 or color.toLong(16))
+        else -> throw IllegalArgumentException("Invalid color format")
+    }
+
+    return Color(
+        alpha = ((argb shr 24) and 0xFF) / 255f,
+        red = ((argb shr 16) and 0xFF) / 255f,
+        green = ((argb shr 8) and 0xFF) / 255f,
+        blue = (argb and 0xFF) / 255f
+    )
 }

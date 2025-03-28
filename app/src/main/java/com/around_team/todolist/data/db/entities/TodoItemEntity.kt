@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.around_team.todolist.ui.common.enums.TodoImportance
 import com.around_team.todolist.ui.common.models.TodoItem
+import com.around_team.todolist.utils.toColor
 import java.util.Locale
 
 /**
@@ -34,7 +35,7 @@ data class TodoItemEntity(
             creationDate,
             modifiedDate,
             lastUpdatedBy,
-            color,
+            color?.toColor(),
             files
         )
     }

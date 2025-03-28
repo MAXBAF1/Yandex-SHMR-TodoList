@@ -2,6 +2,7 @@ package com.around_team.todolist.data.network.model
 
 import com.around_team.todolist.ui.common.enums.TodoImportance
 import com.around_team.todolist.ui.common.models.TodoItem
+import com.around_team.todolist.utils.toColor
 import com.google.gson.annotations.SerializedName
 import java.util.Date
 import java.util.Locale
@@ -45,7 +46,7 @@ data class TodoItemDTO(
             creationDate,
             modifiedDate,
             lastUpdatedBy,
-            color,
+            color?.toColor(),
             files
         )
     }

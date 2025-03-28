@@ -135,7 +135,7 @@ fun EditScreen(
                 onDateChange = { viewModel.obtainEvent(EditEvent.ChangeDeadline(it)) },
                 showCalendar = viewState.showCalendar,
                 setCalendarState = { viewModel.obtainEvent(EditEvent.SetCalendarShowState(it)) },
-                selectedColor = viewState.selectedColor,
+                selectedColor = viewState.editedTodo.color,
                 onColorSelected = { viewModel.obtainEvent(EditEvent.ChangeColor(it)) },
             )
             AnimatedVisibility(visible = editedTodoId != null) {
@@ -159,7 +159,7 @@ private fun PriorityAndDatePicker(
     onCheckedChange: () -> Unit,
     selectedDate: Long?,
     onDateChange: (Long) -> Unit,
-    selectedColor: Color,
+    selectedColor: Color?,
     onColorSelected: (Color) -> Unit,
     showCalendar: Boolean,
     setCalendarState: (state: Boolean) -> Unit,

@@ -264,18 +264,14 @@ private fun TodoList(
     toEditScreen: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    LazyColumn(
-        modifier = modifier.fillMaxWidth(),
-    ) {
+    LazyColumn(modifier = modifier.fillMaxWidth()) {
         item {
             CompleteRow(
                 showed = completedTodosShowed,
                 completeCnt = completeCnt,
                 onShowClick = onShowClick,
                 modifier = Modifier
-                    .padding(
-                        start = 32.dp, top = 8.dp, end = 32.dp, bottom = 12.dp
-                    )
+                    .padding(start = 32.dp, top = 8.dp, end = 32.dp, bottom = 12.dp)
                     .background(JetTodoListTheme.colors.back.primary),
             )
         }
@@ -367,9 +363,7 @@ fun TodoRow(
     SwipeToDismissBox(
         state = dismissState,
         modifier = modifier,
-        backgroundContent = {
-            SwipeBackgroundContent(dismissState)
-        },
+        backgroundContent = { SwipeBackgroundContent(dismissState) },
         content = {
             Column {
                 TodoCard(todo = todo, onClick = onClick, onCompleteClick = onCompleteClick)
