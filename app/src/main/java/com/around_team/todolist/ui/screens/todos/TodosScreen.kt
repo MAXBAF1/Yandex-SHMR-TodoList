@@ -138,8 +138,8 @@ fun TodosScreen(
         },
         snackbarHost = {
             MessagesLogic(
-                viewState.messageId,
-                viewState.snackBarVisible,
+                messageId = viewState.messageId,
+                snackBarVisible = viewState.snackBarVisible,
                 onMessageShowed = { viewModel.obtainEvent(TodosEvent.ClearMessage) },
                 onSnackBarShowed = { viewModel.obtainEvent(TodosEvent.HideSnackbar) },
                 onActionClick = { viewModel.obtainEvent(TodosEvent.HandleSnackbarActionClick) },

@@ -122,9 +122,7 @@ class TodosViewModel @Inject constructor(
         } else {
             repository.sendAllTodos(todos) {
                 viewState.update {
-                    it.copy(
-                        messageId = R.string.success_sync, snackBarVisible = false
-                    )
+                    it.copy(messageId = R.string.success_sync, snackBarVisible = false)
                 }
             }
         }
@@ -136,9 +134,7 @@ class TodosViewModel @Inject constructor(
         completeCnt = todos.count { it.done }
 
         viewState.update {
-            it.copy(
-                todos = showedTodos, completeCnt = completeCnt, refreshing = false
-            )
+            it.copy(todos = showedTodos, completeCnt = completeCnt, refreshing = false)
         }
     }
 
